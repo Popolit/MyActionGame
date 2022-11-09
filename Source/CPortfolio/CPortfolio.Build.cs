@@ -15,7 +15,8 @@ public class CPortfolio : ModuleRules
 				"Core", 
 				"CoreUObject", 
 				"Engine", 
-				"InputCore" 
+				"InputCore",
+				"Niagara",
 			});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

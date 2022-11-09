@@ -1,8 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CWeaponStructure.h"
 #include "GameFramework/Actor.h"
+
 #include "CWeapon.generated.h"
+
 
 
 UCLASS()
@@ -10,25 +13,37 @@ class CPORTFOLIO_API ACWeapon : public AActor
 {
 	GENERATED_BODY()
 	
+//  *********************
+//      기본 세팅
+//  *********************
 public:	
 	ACWeapon();
-protected:
-	UPROPERTY(EditDefaultsOnly, Category="Equip")
-		FName HolsterSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="Equip")
-		FName RightHandSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="Equip")
-		FName LeftHandSocketName;
-
+	EWeaponType GetType();
 protected:
 	UPROPERTY(VisibleDefaultsOnly)
 		class USceneComponent* Root;
-		
+	EWeaponType Type;
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+//  *********************
+//      Equip 세팅
+//  *********************
+protected:
+	UPROPERTY(EditAnywhere, Category="Data")
+		class UCWeaponAsset* WeaponData;
+
+protected:
+	bool bEquipped;
+public:
+	UFUNCTION(Category="Equip")
+		void Equip();
+	UFUNCTION(Category="Equip")
+		virtual void EndEquip();
+	UFUNCTION(Category="Equip")
+		void UnEquip();
+	UFUNCTION(Category="Equip")
+		void EndUnEquip();
 
 
 protected:

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Weapons/CWeaponStructure.h"
 #include "CAnimInstance.generated.h"
 
 UCLASS()
@@ -24,6 +25,9 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
         float AimYaw;
+    
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+        EWeaponType WeaponType;
 
   
 

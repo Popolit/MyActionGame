@@ -1,6 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SceneComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 #define CheckTrue(x) { if(x == true) return;}
 #define CheckTrueResult(x, y) { if(x == true) return y;}
@@ -110,5 +115,44 @@ public:
 			if (!!actor && actor->IsA<T>())
 				OutActors.Add(Cast<T>(actor));
 		}
+	}
+
+	static void PlayEffect(UWorld* InWorld, UFXSystemAsset* InEffect, FTransform& InTransform, USkeletalMeshComponent* InMesh = NULL, FName InSocketName = NAME_None)
+	{
+		UParticleSystem* particle = Cast<UParticleSystem>(InEffect);
+		UNiagaraSystem* niagara = Cast<UNiagaraSystem>(InEffect);
+
+		FVector location = InTransform.GetLocation();
+		FRotator rotation = FRotator(InTransform.GetRotation());
+		FVector scale = InTransform.GetScale3D();
+
+
+		if (!!InMesh)
+		{
+			if (!!particle)
+			{
+				UGameplayStatics::SpawnEmitterAttached(particle, InMesh, InSocketName, location, rotation, scale);
+
+				return;
+			}
+
+			if (!!niagara)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAttached(niagara, InMesh, InSocketName, location, rotation, scale, EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+
+				return;
+			}
+		}
+
+		if (!!particle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(InWorld, particle, InTransform);
+
+			return;
+		}
+
+
+		if (!!niagara)
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(InWorld, niagara, InTransform.GetLocation(), FRotator(InTransform.GetRotation()), InTransform.GetScale3D());
 	}
 };

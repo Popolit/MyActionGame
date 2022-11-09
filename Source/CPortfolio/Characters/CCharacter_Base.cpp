@@ -4,6 +4,7 @@
 
 #include "Attributes/CAttributeSet.h"
 #include "Components/CAbilitySystemComponent.h"
+#include "Components/CWeaponComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,7 +22,7 @@ ACCharacter_Base::ACCharacter_Base()
 	AbilitySystemComponent->SetIsReplicated(true);
 
 	CHelpers::CreateActorComponent<UCAttributeSet>(this, &AttributeSet, "AttributeSet");
-	bAbilitiesInitialized = false;	
+	bAbilitiesInitialized = false;
 }
 
 void ACCharacter_Base::PossessedBy(AController* NewController)
@@ -34,7 +35,10 @@ void ACCharacter_Base::PossessedBy(AController* NewController)
 		AddStartupGameplayAbilities();
 	}
 }
-
+void ACCharacter_Base::UnPossessed()
+{
+	
+}
 
 void ACCharacter_Base::OnRep_Controller()
 {
@@ -128,6 +132,12 @@ void ACCharacter_Base::HandleHPChanged(float InAmount, const struct FGameplayTag
 		OnHPChanged(InAmount, EventTags);
 }
 
+void ACCharacter_Base::HandleMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+		OnMPChanged(InAmount, EventTags);
+}
+
 void ACCharacter_Base::HandleMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags)
 {
 	GetCharacterMovement()->MaxWalkSpeed = GetMoveSpeed();
@@ -163,51 +173,31 @@ void ACCharacter_Base::AddStartupGameplayAbilities()
 	for (TSubclassOf<UCGameplayAbility>& StartupAbility : GameplayAbilities)
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartupAbility, 1, INDEX_NONE, this));
 
-	/* // Now apply passives
-	for (TSubclassOf<UGameplayEffect>& GameplayEffect : PassiveGameplayEffects)
+	 // Now apply passives
+	for (TSubclassOf<UGameplayEffect>& GameplayEffect : StartupEffects)
 	{
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
-		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, GetCharacterLevel(), EffectContext);
+		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
 		if (NewHandle.IsValid())
 		{
 			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
 		}
-	} */
+	} 
 
 	//AddSlottedGameplayAbilities();
 
 	bAbilitiesInitialized = true;
 }
 
-void ACCharacter_Base::AddCharacterAbilities()
-{
-
-	if(!AbilitySystemComponent)
-		return;
-	if(GetLocalRole() != ROLE_Authority)
-		return;
-	if(!AbilitySystemComponent->CharacterAbilitiesGiven)
-		return;
-	for(TSubclassOf<UCGameplayAbility>& Ability : CharacterAbilities)
-	{
-		FGameplayAbilitySpec gameAbilitySpec
-			(Ability
-			, GetAbilityLevel(Ability.GetDefaultObject()->AbilityID)
-			, static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID)
-			, this);
-		//AbilitySystemComponent->GiveAbility(gameAbilitySpec);
-	}
-
-}
 
 void ACCharacter_Base::RemoveStartupGameplayAbilities()
 {
 	CheckNull(AbilitySystemComponent);
 	if(GetLocalRole() != ROLE_Authority)
 		return;
-	if(!AbilitySystemComponent->CharacterAbilitiesGiven)
+	if(!bAbilitiesInitialized)
 		return;
 
 	TArray<FGameplayAbilitySpecHandle> AbilitiesToRemove;
@@ -231,8 +221,12 @@ void ACCharacter_Base::RemoveStartupGameplayAbilities()
 	bAbilitiesInitialized = false;
 }
 
-
-
+//  *********************
+//      Equip 贸府
+//  *********************
+void ACCharacter_Base::Equip(uint8 const& InNumber) {}
+void ACCharacter_Base::EndEquip() {}
+void ACCharacter_Base::UnEquip() {}
 
 //  *********************
 //      荤噶 贸府

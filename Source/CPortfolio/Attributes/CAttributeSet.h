@@ -20,7 +20,7 @@ public:
 	UCAttributeSet();
 
 //  *********************
-//      Attribute 觳橂Μ
+//      Attribute 贸府
 //  *********************
 public:
 	virtual void AdjustAttributeForMaxChange(FGameplayAttributeData& AffectedAttribute, const FGameplayAttributeData& MaxAttribute, float NewMaxValue, const FGameplayAttribute& AffectedAttributeProperty);
@@ -39,15 +39,16 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "MP", ReplicatedUsing = OnRep_MaxMP)
 		FGameplayAttributeData MaxMP;
-		ATTRIBUTE_ACCESOR(UCAttributeSet_Player, MaxMP);
+		ATTRIBUTE_ACCESOR(UCAttributeSet, MaxMP);
 
 	UPROPERTY(BlueprintReadOnly, Category = "MP", ReplicatedUsing = OnRep_CurrMP)
 		FGameplayAttributeData CurrMP;
-		ATTRIBUTE_ACCESOR(UCAttributeSet_Player, CurrMP);
+		ATTRIBUTE_ACCESOR(UCAttributeSet, CurrMP);
 
 	UPROPERTY(BlueprintReadOnly, Category = "MP", ReplicatedUsing = OnRep_TickIncMP)
 		FGameplayAttributeData TickIncMPAmount = 0.01f;
-		ATTRIBUTE_ACCESOR(UCAttributeSet_Player, TickIncMPAmount);
+		ATTRIBUTE_ACCESOR(UCAttributeSet, TickIncMPAmount);
+	
 	UPROPERTY(BlueprintReadOnly, Category = "MoveSpeed", ReplicatedUsing = OnRep_MoveSpeed)
 		FGameplayAttributeData MoveSpeed;
 		ATTRIBUTE_ACCESOR(UCAttributeSet, MoveSpeed);
@@ -57,7 +58,7 @@ public:
 		ATTRIBUTE_ACCESOR(UCAttributeSet, Damage);
 
 //  *********************
-//      霠堩攲毽紑鞚挫厴
+//      府敲府纳捞记
 //  *********************
 public:
 	UFUNCTION()
@@ -72,6 +73,4 @@ public:
 		virtual void OnRep_TickIncMP(const FGameplayAttributeData& OldValue);
 	UFUNCTION()
 		virtual void OnRep_MoveSpeed(const FGameplayAttributeData& OldValue);
-
-
 };

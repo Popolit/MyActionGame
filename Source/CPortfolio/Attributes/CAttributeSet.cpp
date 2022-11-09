@@ -2,7 +2,6 @@
 #include "Global.h"
 
 #include "Characters/CCharacter_Base.h"
-#include "Characters/CPlayer.h"
 
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffect.h"
@@ -142,9 +141,9 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 	{
 		//MP를 0~MAX 사이의 값으로 변경
 		SetCurrMP(FMath::Clamp(GetCurrMP(), 0.0f, GetMaxMP()));
-		ACPlayer* TargetPlayer = Cast<ACPlayer>(TargetCharacter);
-		if (TargetPlayer)
-			TargetPlayer->HandleMPChanged(DeltaValue, SourceTags);
+
+		if (TargetCharacter)
+			TargetCharacter->HandleMPChanged(DeltaValue, SourceTags);
 
 		return;
 	}
@@ -181,7 +180,18 @@ void UCAttributeSet::OnRep_CurrHP(const FGameplayAttributeData& OldValue)
 {
     GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet, CurrHP, OldValue);
 }
-
+void UCAttributeSet::OnRep_MaxMP(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet, MaxMP, OldValue);
+}
+void UCAttributeSet::OnRep_CurrMP(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet, CurrMP, OldValue);
+}
+void UCAttributeSet::OnRep_TickIncMP(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet, TickIncMPAmount, OldValue);
+}
 void UCAttributeSet::OnRep_MoveSpeed(const FGameplayAttributeData& OldValue)
 {
     GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet, MoveSpeed, OldValue);

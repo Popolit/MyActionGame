@@ -3,8 +3,8 @@
 
 #include "Animation/CAnimInstance.h"
 #include "Widgets/CWidget_HUD.h"
-#include "Components/CWeaponComponent.h"
 #include "Attributes/CAttributeSet.h"
+#include "Components/CWeaponComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -63,11 +63,11 @@ ACPlayer::ACPlayer()
 	CHelpers::GetClass<UCWidget_HUD>(&HUDClass, "WidgetBlueprint'/Game/Widgets/WB_HUD.WB_HUD_C'");
 	
 	//Weapon 설정
-	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &Weapon, "Weapon");
+	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
 
 
 	//캐릭터 기본 설정
-	GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = 400;
 	GetCharacterMovement()->MaxAcceleration = 512;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
@@ -133,13 +133,6 @@ float ACPlayer::GetMaxMP() const
 	return 0.0f;
 }
 
-void ACPlayer::HandleMPChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags)
-{
-	if (bAbilitiesInitialized)
-	{
-		OnMPChanged(DeltaValue, EventTags);
-	}
-}
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -173,6 +166,12 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	//회피
 	PlayerInputComponent->BindAction("Evade", IE_Pressed, this, &ACPlayer::BeginEvade);
+	
+	//무기 교체
+	PlayerInputComponent->BindAction("Weapon1", IE_Pressed, this, &ACPlayer::OnEquip1);
+	PlayerInputComponent->BindAction("Weapon2", IE_Pressed, this, &ACPlayer::OnEquip2);
+	PlayerInputComponent->BindAction("Weapon3", IE_Pressed, this, &ACPlayer::OnEquip3);
+	PlayerInputComponent->BindAction("Weapon4", IE_Pressed, this, &ACPlayer::OnEquip4);
 }
 
 void ACPlayer::BeginEvade()
@@ -268,31 +267,53 @@ void ACPlayer::EndMoveF()
 {
 	bMoving[0] = false;
 	if(!IsMoving())
-		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 400;
 }
 void ACPlayer::EndMoveB()
 {
 	bMoving[1] = false;
 	if (!IsMoving())
-		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 400;
 }
 void ACPlayer::EndMoveL()
 {
 	bMoving[2] = false;
 	if (!IsMoving())
-		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 400;
 }
 void ACPlayer::EndMoveR()
 {
 	bMoving[3] = false;
 	if (!IsMoving())
-		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = 400;
 }
 
 void ACPlayer::BeginRunning()
 {
-	GetCharacterMovement()->MaxWalkSpeed = RunningSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = 800;
 }
+
+
+//  *********************
+//      무기 교체
+//  *********************
+void ACPlayer::OnEquip1()
+{
+	Equip(0);
+}
+void ACPlayer::OnEquip2()
+{
+	Equip(1);
+}
+void ACPlayer::OnEquip3()
+{
+	Equip(2);
+}
+void ACPlayer::OnEquip4()
+{
+	Equip(3);
+}
+
 
 void ACPlayer::UseControlRotation()
 {
@@ -304,3 +325,20 @@ void ACPlayer::NotUseControlRotation()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
+
+//  *********************
+//      Equip 처리
+//  *********************
+void ACPlayer::Equip(uint8 const& InNumber)
+{
+	Super::Equip(InNumber);
+	CheckNull(WeaponComponent);
+	WeaponComponent->Equip(InNumber);
+}
+
+void ACPlayer::UnEquip()
+{
+	Super::UnEquip();
+	CheckNull(WeaponComponent);
+	WeaponComponent->UnEquip();
+}

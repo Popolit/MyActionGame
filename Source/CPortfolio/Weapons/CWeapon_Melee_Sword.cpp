@@ -2,6 +2,7 @@
 #include "Global.h"
 
 #include "Characters/Player/CPlayer.h"
+#include "Weapons/CWeaponAsset.h"
 
 ACWeapon_Melee_Sword::ACWeapon_Melee_Sword()
 {
@@ -9,12 +10,17 @@ ACWeapon_Melee_Sword::ACWeapon_Melee_Sword()
 	CHelpers::GetAsset<UStaticMesh>(&mesh, "StaticMesh'/Game/Weapon/Sword/Meshes/SM_Sword.SM_Sword'");
 	Mesh->SetStaticMesh(mesh);
 
-    HolsterSocketName = "HolsterSwordSocket";
+    Type = EWeaponType::Sword;
 }
 
 void ACWeapon_Melee_Sword::BeginPlay()
 {
     Super::BeginPlay();
-    this->AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), HolsterSocketName);
-
 }
+
+void ACWeapon_Melee_Sword::EndEquip()
+{
+    Super::EndEquip();
+    
+}
+

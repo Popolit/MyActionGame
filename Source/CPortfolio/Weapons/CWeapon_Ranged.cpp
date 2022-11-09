@@ -5,4 +5,6 @@ ACWeapon_Ranged::ACWeapon_Ranged()
 {
     CHelpers::CreateComponent<USkeletalMeshComponent>(this, &Mesh, "Mesh", Root);
     Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    Type = EWeaponType::Shotgun;
 }

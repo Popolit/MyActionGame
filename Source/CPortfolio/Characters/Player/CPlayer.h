@@ -23,17 +23,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+
 private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCameraComponent* Camera;
-
-
-		
-protected:
-	UPROPERTY(EditDefaultsOnly, Category = "HUD")
-		TSubclassOf<class UCWidget_HUD> HUDClass;
 
 
 //  *********************
@@ -45,44 +40,43 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attribute")
 		float GetMaxMP() const;
 
-protected:
-	UFUNCTION(BlueprintImplementableEvent)
-		void OnMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
-protected:
-	virtual void HandleMPChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags);
-protected:
-	void SetCurrMP(float InAmount);
-	void SetMaxMP(float InAmount); 
-
+/* protected:
 	void HandleDamage(float InAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, ACCharacter_Base* InstigatorCharacter, AActor* DamageCauser);
 	void HandleHPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 	void HandleMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 	void HandleMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 
+ */
 
+//  *********************
+//      입력 처리
+//  *********************
+public:
+	FORCEINLINE float GetAimPitch() const { return AimPitch; }
+	FORCEINLINE float GetAimYaw() const { return AimYaw; }
 
 public:
-	FORCEINLINE float GetAimPitch() { return AimPitch; }
-	FORCEINLINE float GetAimYaw() { return AimYaw; }
-
-public:
-	void BeginEvade() override;
-	void EndEvade() override;
+	virtual void BeginEvade() override;
+	virtual void EndEvade() override;
 	bool IsMoving();
 private:
+	//WSAD 축입력
 	void OnMoveForward(float AxisValue);
 	void OnMoveRight(float AxisValue);
+
+	//마우스 축입력
 	void OnVerticalLook(float AxisValue);
 	void OnHorizontalLook(float AxisValue);
 
 	void Jump() override;
 	
-
+	//WSAD
 	void BeginMoveF();
 	void BeginMoveB();
 	void BeginMoveL();
 	void BeginMoveR();
 
+	//WSAD Release
 	void EndMoveF();
 	void EndMoveB();
 	void EndMoveL();
@@ -90,15 +84,33 @@ private:
 
 	void BeginRunning();
 
+	//무기 교체
+	void OnEquip1();
+	void OnEquip2();
+	void OnEquip3();
+	void OnEquip4();
+
 public:
 	void UseControlRotation();
 	void NotUseControlRotation();
 
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+//  *********************
+//      Equip 처리
+//  *********************
+private:
+	virtual void Equip(uint8 const& InNumber = 0) override;
+	virtual void UnEquip() override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "HUD")
+		TSubclassOf<class UCWidget_HUD> HUDClass;
 private:
 	class UCWidget_HUD* HUD;
+
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCWeaponComponent* WeaponComponent;
 
 private:
 	bool bMoving[4];	//{Forward, Backward, Left, Right}

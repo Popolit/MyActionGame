@@ -25,8 +25,6 @@ public:
 	virtual void UnPossessed() override;
 	virtual void OnRep_Controller() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-protected:
-	virtual void Tick(float DeltaTime) override;
 
 
 //  *********************
@@ -37,7 +35,7 @@ protected:
 		bool IsInAir;
 public:
 	bool GetIsInAir();
-	void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode) override;
 
 
 //  *********************
@@ -66,12 +64,15 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnHPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 	UFUNCTION(BlueprintImplementableEvent)
+		void OnMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
+	UFUNCTION(BlueprintImplementableEvent)
 		void OnMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 
 
 protected:
 	virtual void HandleDamage(float InAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, ACCharacter_Base* InstigatorCharacter, AActor* DamageCauser);
 	virtual void HandleHPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
+	virtual void HandleMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 	virtual void HandleMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
 
 protected:		
@@ -88,7 +89,7 @@ protected:
 		TArray<TSubclassOf<class UCGameplayAbility>> GameplayAbilities;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Ability")
 		TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
-	UPROPERTY(VisibleDefaultsOnly, Category = "Ability")
+	UPROPERTY(EditDefaultsOnly, Category = "Ability")
 		TArray<TSubclassOf<class UGameplayEffect>> StartupEffects;
 
 protected:
@@ -99,12 +100,23 @@ protected:
 protected:
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual void AddStartupGameplayAbilities();
-	virtual void AddCharacterAbilities();
 	virtual void RemoveStartupGameplayAbilities();
 	bool ActivateAbilitiesWithTags(FGameplayTagContainer AbilityTags, bool bAllowRemoteActivation = true);
 
 protected:
 	bool bAbilitiesInitialized;
+
+//  *********************
+//      Equip 贸府
+//  *********************
+protected:
+	UFUNCTION(Category = "Equip")
+		virtual void Equip(uint8 const& InNumber = 0);
+	UFUNCTION(Category = "Equip")
+		virtual void EndEquip();
+	UFUNCTION(Category = "UnEquip")
+		virtual void UnEquip();
+
 
 //  *********************
 //      荤噶 贸府
@@ -125,7 +137,4 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Animation")
 		class UAnimMontage* DeathMontage;
 
-protected:
-	UPROPERTY(VisibleDefaultsOnly)
-		class UCWeaponComponent* Weapon;
 };

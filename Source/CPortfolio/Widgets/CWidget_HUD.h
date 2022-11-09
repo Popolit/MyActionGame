@@ -19,7 +19,7 @@ public:
 	void UpdateMP(const float& CurrMP, const float& MaxMP);
 
 //º¯¼ö
-private:	
+private:
 	class UProgressBar* HealthBar;
 	class UProgressBar* ManaBar;
 	uint8 FrameCount = 0;
