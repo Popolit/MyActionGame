@@ -62,13 +62,10 @@ ACPlayer::ACPlayer()
 	CurrMP = 0.0f; */
 	CHelpers::GetClass<UCWidget_HUD>(&HUDClass, "WidgetBlueprint'/Game/Widgets/WB_HUD.WB_HUD_C'");
 	
-	//Weapon 설정
-	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
-
+	
 
 	//캐릭터 기본 설정
 	GetCharacterMovement()->MaxWalkSpeed = 400;
-	GetCharacterMovement()->MaxAcceleration = 512;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
 	bCanEvade = true;

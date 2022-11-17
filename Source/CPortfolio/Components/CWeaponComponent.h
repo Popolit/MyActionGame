@@ -6,7 +6,7 @@
 #include "CWeaponComponent.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FWeaponChanged, TSubclassOf<class ACWeapon>, TSubclassOf<class ACWeapon>)
+DECLARE_MULTICAST_DELEGATE_OneParam(FWeaponChanged, EWeaponType)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCWeaponComponent : public UActorComponent
@@ -30,9 +30,6 @@ private:
 		class ACPlayer* Owner;
 	TArray<ACWeapon*> WeaponList;
 
-public:
-	UFUNCTION()
-		void ChangeWeaponType(TSubclassOf<ACWeapon> PrevType, TSubclassOf<ACWeapon> NewType);
 
 public:
 	UPROPERTY()

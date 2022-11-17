@@ -5,6 +5,8 @@
 #include "Attributes/CAttributeSet.h"
 #include "Components/CAbilitySystemComponent.h"
 #include "Components/CWeaponComponent.h"
+#include "Components/CStatusComponent.h"
+#include "Components/CStateComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -23,6 +25,12 @@ ACCharacter_Base::ACCharacter_Base()
 
 	CHelpers::CreateActorComponent<UCAttributeSet>(this, &AttributeSet, "AttributeSet");
 	bAbilitiesInitialized = false;
+
+	//Weapon ¼³Á¤
+	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
+	CHelpers::CreateActorComponent<UCStatusComponent>(this, &StatusComponent, "Status");
+	CHelpers::CreateActorComponent<UCStateComponent>(this, &StateComponent, "State");
+	
 }
 
 void ACCharacter_Base::PossessedBy(AController* NewController)

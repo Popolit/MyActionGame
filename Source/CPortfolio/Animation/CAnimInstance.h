@@ -27,9 +27,7 @@ protected:
         float AimYaw;
     
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
-        EWeaponType WeaponType;
-
-  
+         EWeaponType WeaponType;
 
 
 public:
@@ -37,5 +35,10 @@ public:
     virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 private:
+    UFUNCTION()
+        void OnWeaponTypeChanged(EWeaponType NewWeapon);
+    
+private:
     class ACPlayer* Owner;
+    class UCWeaponComponent* Weapon;
 };

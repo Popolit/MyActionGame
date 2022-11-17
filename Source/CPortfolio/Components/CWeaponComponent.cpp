@@ -35,15 +35,9 @@ void UCWeaponComponent::BeginPlay()
 			WeaponList.Add(weapon);
 		}
 	}
-
-	//델리게이션
-	OnWeaponChanged.AddUFunction(this, FName("ChangeWeaponType"));
 }
 
-void UCWeaponComponent::ChangeWeaponType(TSubclassOf<ACWeapon> PrevType, TSubclassOf<ACWeapon> NewType)
-{
-	
-}
+
 
 //  *********************
 //      Equip
@@ -64,9 +58,7 @@ void UCWeaponComponent::Equip(uint8 const& Index)
 		//무기 교체 시 즉시 UnEquip 종료
 		EndUnEquip();
 	}
-
-	/*TODO: Equip과 EndEquip시 선후관계 확실히 파악 후
-	마저 진행하기 아직 미완성임 여기*/
+	
 	CurrWeapon = WeaponList[Index];
 	WeaponType = CurrWeapon->GetType();
 	CurrWeapon->Equip();
@@ -77,8 +69,8 @@ void UCWeaponComponent::EndEquip() const
 	CheckNull(CurrWeapon);
 
 	CurrWeapon->EndEquip();
-	/*if(OnWeaponChanged.IsBound())
-		OnWeaponChanged.Broadcast();*/
+	if(OnWeaponChanged.IsBound())
+		OnWeaponChanged.Broadcast(CurrWeapon->GetType());
 }
 void UCWeaponComponent::UnEquip() const
 {
@@ -93,6 +85,6 @@ void UCWeaponComponent::EndUnEquip()
 
 	CurrWeapon->EndUnEquip();
 	CurrWeapon = nullptr;
-	/*if(OnWeaponChanged.IsBound())
-		OnWeaponChanged.Broadcast();*/
+	if(OnWeaponChanged.IsBound())
+		OnWeaponChanged.Broadcast(EWeaponType::Max);
 }

@@ -109,8 +109,7 @@ protected:
 private:
 	class UCWidget_HUD* HUD;
 
-	UPROPERTY(VisibleDefaultsOnly)
-		class UCWeaponComponent* WeaponComponent;
+
 
 private:
 	bool bMoving[4];	//{Forward, Backward, Left, Right}

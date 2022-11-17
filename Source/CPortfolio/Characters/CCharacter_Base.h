@@ -26,6 +26,13 @@ public:
 	virtual void OnRep_Controller() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+protected:
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCWeaponComponent* WeaponComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCStatusComponent* StatusComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCStateComponent* StateComponent;
 
 //  *********************
 //      Movement Ã³¸®

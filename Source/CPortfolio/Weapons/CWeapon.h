@@ -48,5 +48,7 @@ public:
 
 protected:
 	class ACCharacter_Base* Owner;
+	class UCStatusComponent* Status;
+	class UCStateComponent* State;
 
 };
