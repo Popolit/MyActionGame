@@ -1,9 +1,7 @@
 #include "CWeaponAsset.h"
 #include "Global.h"
 
-#include "CWeaponAsset.h"
 #include "Actions/CAttack.h"
-#include "Actions/CSubAction.h"
 #include "CWeaponData.h"
 
 #include "GameFramework/Character.h"

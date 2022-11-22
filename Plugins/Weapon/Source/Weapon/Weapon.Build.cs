@@ -29,7 +29,8 @@ public class Weapon : ModuleRules
 				"SlateCore",
 				"Projects",
 				"EditorStyle",
-				"UnrealEd"
+				"UnrealEd",
+				"InputCore"
 			}
 			);
 	}

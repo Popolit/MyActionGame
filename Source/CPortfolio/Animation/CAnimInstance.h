@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "Weapons/CWeaponStructure.h"
+#include "Struct/FeetData.h"
 #include "CAnimInstance.generated.h"
 
 UCLASS()
@@ -28,6 +29,12 @@ protected:
     
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
          EWeaponType WeaponType;
+    
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+        bool bFeetIK;
+    
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+        FFeetData FeetData;
 
 
 public:
@@ -39,6 +46,7 @@ private:
         void OnWeaponTypeChanged(EWeaponType NewWeapon);
     
 private:
-    class ACPlayer* Owner;
+    class ACCharacter_Base* Owner;
     class UCWeaponComponent* Weapon;
+    class UCFeetComponent* Feet;
 };

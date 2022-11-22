@@ -6,7 +6,6 @@
 #include "CWeaponAsset.generated.h"
 
 
-//Weapon에 데이터셋
 UCLASS()
 class CPORTFOLIO_API UCWeaponAsset : public UDataAsset
 {

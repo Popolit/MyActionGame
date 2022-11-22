@@ -7,7 +7,7 @@
 ACWeapon_Melee_Sword::ACWeapon_Melee_Sword()
 {
     UStaticMesh* mesh;
-	CHelpers::GetAsset<UStaticMesh>(&mesh, "StaticMesh'/Game/Weapon/Sword/Meshes/SM_Sword.SM_Sword'");
+	CHelpers::GetAsset<UStaticMesh>(&mesh, "StaticMesh'/Game/Weapons/Sword/Meshes/SM_Sword.SM_Sword'");
 	Mesh->SetStaticMesh(mesh);
 
     Type = EWeaponType::Sword;

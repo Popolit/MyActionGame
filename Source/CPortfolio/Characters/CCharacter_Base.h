@@ -33,6 +33,8 @@ protected:
 		class UCStatusComponent* StatusComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCStateComponent* StateComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCFeetComponent* FeetComponent;
 
 //  *********************
 //      Movement Ã³¸®

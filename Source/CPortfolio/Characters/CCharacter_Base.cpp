@@ -7,6 +7,7 @@
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
+#include "Components/CFeetComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -30,6 +31,7 @@ ACCharacter_Base::ACCharacter_Base()
 	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
 	CHelpers::CreateActorComponent<UCStatusComponent>(this, &StatusComponent, "Status");
 	CHelpers::CreateActorComponent<UCStateComponent>(this, &StateComponent, "State");
+	CHelpers::CreateActorComponent<UCFeetComponent>(this, &FeetComponent, "Feet");
 	
 }
 
