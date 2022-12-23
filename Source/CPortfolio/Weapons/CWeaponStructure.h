@@ -10,7 +10,6 @@ enum class EWeaponType : uint8
 	Sword, Shotgun, Max,
 };
 
-
 USTRUCT(BlueprintType)
 struct FEquipData
 {
@@ -30,8 +29,10 @@ public:
 		bool bUseControlRotation = true;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 USTRUCT(BlueprintType)
-struct FUnequipData
+struct FUnEquipData
 {
 	GENERATED_BODY()
 
@@ -42,46 +43,6 @@ public:
 	UPROPERTY(EditAnywhere)
 		float PlayRatio = 1;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-USTRUCT(BlueprintType)
-struct FAttackData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere)
-		class UAnimMontage* Montage;
-
-	UPROPERTY(EditAnywhere)
-		float PlayRatio = 1;
-
-	UPROPERTY(EditAnywhere)
-		bool bCanMove = true;
-
-	UPROPERTY(EditAnywhere)
-		bool bFixedCamera = false;
-
-	UPROPERTY(EditAnywhere)
-		class UFXSystemAsset* Effect;
-
-	UPROPERTY(EditAnywhere)
-		FVector EffectLocation = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere)
-		FVector EffectScale = FVector::OneVector;
-
-public:
-	void Attack(class ACharacter* InOwner);
-	void End_Attack(class ACharacter* InOwner);
-
-	void PlayEffect(class ACharacter* InOwner);
-	void PlayEffect(class USkeletalMeshComponent* InMesh, FName InSocketName = NAME_None);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 USTRUCT(BlueprintType)
 struct FHitData
 {
@@ -134,6 +95,46 @@ struct FActionDamageEvent : public FDamageEvent
 public:
 	FHitData* HitData;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+USTRUCT(BlueprintType)
+struct FActionContent
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* Montage;
+
+	UPROPERTY(EditAnywhere)
+		float PlayRatio = 1;
+
+	UPROPERTY(EditAnywhere)
+		bool bCanMove = true;
+
+	UPROPERTY(EditAnywhere)
+		bool bFixedCamera = false;
+
+	UPROPERTY(EditAnywhere)
+		class UFXSystemAsset* Effect;
+
+	UPROPERTY(EditAnywhere)
+		FVector EffectLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere)
+		FVector EffectScale = FVector::OneVector;
+
+	UPROPERTY(EditAnywhere)
+		FHitData HitData;
+
+public:
+	void DoAction(class ACCharacter_Base* InOwner);
+	void EndAction(class ACCharacter_Base* InOwner);
+
+	void PlayEffect(class ACCharacter_Base* InOwner);
+	void PlayEffect(class USkeletalMeshComponent* InMesh, FName InSocketName = NAME_None);
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Weapons/Actions/CActionStructure.h"
 #include "Weapons/CWeaponStructure.h"
 #include "Struct/FeetData.h"
 #include "CAnimInstance.generated.h"
@@ -13,7 +14,7 @@ class CPORTFOLIO_API UCAnimInstance : public UAnimInstance
 
 protected:
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
-        bool IsInAir;
+        bool bIsInAir;
 
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
         float Speed;
@@ -26,6 +27,8 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
         float AimYaw;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+        EStateType StateType;
     
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
          EWeaponType WeaponType;
@@ -43,10 +46,17 @@ public:
 
 private:
     UFUNCTION()
-        void OnWeaponTypeChanged(EWeaponType NewWeapon);
+        void OnWeaponTypeChanged(EWeaponType PrevWeapon, EWeaponType NewWeapon);
+    UFUNCTION()
+        void OnStateTypeChanged(EStateType NewStateType);
+    UFUNCTION()
+        void OnAerialConditionChanged(bool IsInAir);
+    UFUNCTION()
+        void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
     
 private:
     class ACCharacter_Base* Owner;
     class UCWeaponComponent* Weapon;
+    class UCStateComponent* State;
     class UCFeetComponent* Feet;
 };

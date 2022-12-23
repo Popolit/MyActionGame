@@ -1,14 +1,17 @@
 #include "CEquipment.h"
 #include "Global.h"
-#include "GameFramework/Character.h"
+#include "Animation/CAnimInstance.h"
+
+#include "Characters/CCharacter_Base.h"
 #include "Components/CStateComponent.h"
 #include "Components/CStatusComponent.h"
 
-void UCEquipment::BeginPlay(class ACharacter* InOwner, const FEquipData& InEquipData, const FUnequipData& InUnequipData)
+
+void UCEquipment::BeginPlay(class ACCharacter_Base* InOwner, const FEquipData& InEquipData, const FUnEquipData& InUnEquipData)
 {
 	OwnerCharacter = InOwner;
 	EquipData = InEquipData;
-	UnequipData = InUnequipData;
+	UnEquipData = InUnEquipData;
 
 	State = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	Status = CHelpers::GetComponent<UCStatusComponent>(OwnerCharacter);
@@ -16,10 +19,11 @@ void UCEquipment::BeginPlay(class ACharacter* InOwner, const FEquipData& InEquip
 
 
 //  *********************
-//     Equip, Unequip
+//     Equip, UnEquip
 //  *********************
 void UCEquipment::Equip_Implementation()
 {
+	bBeginEquip = true;
 	State->SetEquipMode();
 
 	if (EquipData.bCanMove == false)
@@ -27,37 +31,49 @@ void UCEquipment::Equip_Implementation()
 	if (!!EquipData.Montage)
 		OwnerCharacter->PlayAnimMontage(EquipData.Montage, EquipData.PlayRatio);
 	else
-	{
-		Begin_Equip();
-		End_Equip();
-	}
+		EndEquip();
 
 	if (EquipData.bUseControlRotation)
 		Status->EnableControlRotation();
 }
 
-void UCEquipment::Begin_Equip_Implementation()
-{
-	bBeginEquip = true;
 
-	if (OnEquip.IsBound())
-		OnEquip.Broadcast();
-}
-
-void UCEquipment::End_Equip_Implementation()
+void UCEquipment::EndEquip_Implementation()
 {
 	bEquipping = true;
 	bBeginEquip = false;
 
 	State->SetIdleMode();
 	Status->Move();
+
+	if(OnEndEquip.IsBound())
+		OnEndEquip.Broadcast();
 }
 
-void UCEquipment::Unequip_Implementation()
+void UCEquipment::UnEquip_Implementation()
+{
+	bBeginUnEquip = true;
+	State->SetEquipMode();
+	
+	if (!!UnEquipData.Montage)
+		OwnerCharacter->PlayAnimMontage(UnEquipData.Montage, UnEquipData.PlayRatio);
+	else
+		EndUnEquip();
+
+	if (EquipData.bUseControlRotation)
+		Status->EnableControlRotation();
+}
+
+void UCEquipment::EndUnEquip_Implementation()
 {
 	bEquipping = false;
+	bBeginUnEquip = false;
 	Status->DisableControlRotation();
+	
 
-	if (OnUnequip.IsBound())
-		OnUnequip.Broadcast();
+	State->SetIdleMode();
+	Status->Move();
+	
+	if(OnEndUnEquip.IsBound())
+		OnEndUnEquip.Broadcast();
 }

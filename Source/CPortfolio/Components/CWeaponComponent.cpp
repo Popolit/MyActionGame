@@ -2,6 +2,8 @@
 #include "Global.h"
 
 #include "Characters/Player/CPlayer.h"
+#include "Weapons/CEquipment.h"
+#include "Weapons/CWeaponAsset.h"
 #include "Weapons/CWeapon.h"
 
 
@@ -10,7 +12,8 @@
 //  *********************
 UCWeaponComponent::UCWeaponComponent()
 {
-	WeaponType = EWeaponType::Max;
+	CurrWeaponIndex = -1;
+	PrevWeaponIndex = -1;
 }
 
 
@@ -19,72 +22,94 @@ void UCWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	//오너 캐릭터 세팅
-	Owner = Cast<ACPlayer>(GetOwner());
-	CheckNull(Owner);
+	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
+	CheckNull(OwnerCharacter);
 
-	FActorSpawnParameters params;
-	params.Owner = Owner;
-	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	//무기 세팅
-	for (TSubclassOf<ACWeapon> weaponClass : WeaponClasses)
+	//Weapon 세팅
+	for(UCWeaponAsset* weapon : Weapons)
 	{
-		if (!!weaponClass)
-		{
-			ACWeapon* weapon = Owner->GetWorld()->SpawnActor<ACWeapon>(weaponClass, params);
-			WeaponList.Add(weapon);
-		}
+		UCWeapon* newWeaponData;
+		weapon->BeginPlay(OwnerCharacter, &newWeaponData);
+		WeaponDatas.Emplace(newWeaponData);
 	}
+
 }
 
 
+//  *********************
+//      Weapon Asset
+//  *********************
+
+UCEquipment* UCWeaponComponent::GetEquipment()
+{
+	if(GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+		return NULL;
+	return WeaponDatas[CurrWeaponIndex]->GetEquipment();
+}
+
+UCEquipment* UCWeaponComponent::GetPrevEquipment()
+{
+	if (GetWeaponType(PrevWeaponIndex) == EWeaponType::Max)
+		return NULL;
+	return WeaponDatas[PrevWeaponIndex]->GetEquipment();
+}
+
+EWeaponType UCWeaponComponent::GetWeaponType(int const& Index)
+{
+	if (Index == -1)
+		return EWeaponType::Max;
+	if (!WeaponDatas[CurrWeaponIndex])
+		return EWeaponType::Max;
+
+	return WeaponDatas[CurrWeaponIndex]->GetType();
+}
+
+UCActionData* UCWeaponComponent::GetActionData()
+{
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
+		return nullptr;
+	return WeaponDatas[CurrWeaponIndex]->GetActionData();
+}
 
 //  *********************
 //      Equip
 //  *********************
-void UCWeaponComponent::Equip(uint8 const& Index)
-{
-	CheckNull(WeaponList[Index]);
-	//무기를 장착함
-	if(WeaponType != EWeaponType::Max)
-	{
-		//무기 해제
-		if(WeaponType == WeaponList[Index]->GetType())
-		{
-			UnEquip();
-			return;
-		}
 
-		//무기 교체 시 즉시 UnEquip 종료
-		EndUnEquip();
-	}
-	
-	CurrWeapon = WeaponList[Index];
-	WeaponType = CurrWeapon->GetType();
-	CurrWeapon->Equip();
+void UCWeaponComponent::ChangeWeapon(int const& Index)
+{
+	if (WeaponDatas.Num() <= Index)
+		return;
+
+	PrevWeaponIndex = CurrWeaponIndex;
+	//장착 중인 무기이면 해제
+	if (CurrWeaponIndex == Index)
+		CurrWeaponIndex = -1;
+	else
+		CurrWeaponIndex = Index;
+
+	UnEquipWeapon();
+	EquipWeapon();
+
+	if(OnWeaponTypeChanged.IsBound())
+		OnWeaponTypeChanged.Broadcast(GetWeaponType(PrevWeaponIndex), GetWeaponType(CurrWeaponIndex));
 }
 
-void UCWeaponComponent::EndEquip() const
+void UCWeaponComponent::EquipWeapon()
 {
-	CheckNull(CurrWeapon);
+	if (GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+		return;
 
-	CurrWeapon->EndEquip();
-	if(OnWeaponChanged.IsBound())
-		OnWeaponChanged.Broadcast(CurrWeapon->GetType());
-}
-void UCWeaponComponent::UnEquip() const
-{
-	CheckNull(CurrWeapon);
-
-	CurrWeapon->UnEquip();
+	WeaponDatas[CurrWeaponIndex]->GetEquipment()->Equip();
 }
 
-void UCWeaponComponent::EndUnEquip() 
+void UCWeaponComponent::UnEquipWeapon()
 {
-	CheckNull(CurrWeapon);
+	if (GetWeaponType(PrevWeaponIndex) == EWeaponType::Max)
+		return;
 
-	CurrWeapon->EndUnEquip();
-	CurrWeapon = nullptr;
-	if(OnWeaponChanged.IsBound())
-		OnWeaponChanged.Broadcast(EWeaponType::Max);
+	if(GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+		WeaponDatas[PrevWeaponIndex]->GetEquipment()->UnEquip();
+	else
+		WeaponDatas[PrevWeaponIndex]->GetEquipment()->EndUnEquip();
 }
+

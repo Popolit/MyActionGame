@@ -1,19 +1,44 @@
 #include "CWeaponAsset.h"
 #include "Global.h"
 
-#include "Actions/CAttack.h"
-#include "CWeaponData.h"
+#include "CWeapon.h"
+#include "CEquipment.h"
 
-#include "GameFramework/Character.h"
+#include "Characters/CCharacter_Base.h"
+#include "Weapons/Actions/CActionAsset.h"
 
 
 UCWeaponAsset::UCWeaponAsset()
 {
-	AttackClass = UCAttack::StaticClass();
 }
 
-void UCWeaponAsset::BeginPlay(ACharacter* InOwner, UCWeaponData** OutWeaponData)
+void UCWeaponAsset::BeginPlay(ACCharacter_Base* InOwner, UCWeapon** OutWeaponData)
 {
+	*OutWeaponData = NewObject<UCWeapon>();
+	for(TSubclassOf<ACAttachment> attachmentclass : AttachmentClasses)
+	{
+		FActorSpawnParameters params;
+		params.Owner = InOwner;
+
+		(*OutWeaponData)->Attachments.Emplace(InOwner->GetWorld()->SpawnActor<ACAttachment>(attachmentclass, params));
+	}
+
+	UCEquipment* equipment = nullptr;
+	
+	equipment = NewObject<UCEquipment>(this);
+	equipment->BeginPlay(InOwner, EquipData, UnEquipData);
+
+	for (ACAttachment* attachment : (*OutWeaponData)->Attachments)
+	{
+		equipment->OnEndEquip.AddUObject(attachment, &ACAttachment::OnEndEquip);
+		equipment->OnEndUnEquip.AddUObject(attachment, &ACAttachment::OnEndUnEquip);
+	}
+	
+	(*OutWeaponData)->Equipment = equipment;
+	(*OutWeaponData)->Type = Type;
+
+	CheckNull(ActionDataAsset);
+	ActionDataAsset->BeginPlay(InOwner, &(*OutWeaponData)->ActionData);
 }
 
 void UCWeaponAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

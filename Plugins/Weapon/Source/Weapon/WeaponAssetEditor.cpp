@@ -1,8 +1,6 @@
 #include "WeaponAssetEditor.h"
 
-#include "SWeaponListView.h"
 #include "WeaponDetailsView.h"
-#include "WeaponEquipmentData.h"
 #include "Weapons/CWeaponAsset.h"
 
 const FName FWeaponAssetEditor::EditorName = "WeaponAssetEditor";
@@ -17,10 +15,29 @@ void FWeaponAssetEditor::OpenWindow(FString InAssetName)
 	//이미 열린 창이 있으면 닫음
 	if(Instance.IsValid())
 	{
-		Instance->CloseWindow();
+		//창은 이미 열림, 리스트뷰의 아이템 선택
+		if(Instance->ListView.IsValid())
+		{
+			FWeaponRowDataPtr ptr = nullptr;
 
-		Instance.Reset();
-		Instance = nullptr;
+			//애셋 네임이 존재
+			if(0 < InAssetName.Len())
+				ptr = Instance->ListView->GetRowDataPtrByName(InAssetName);
+
+			if(ptr == nullptr)
+				ptr = Instance->ListView->GetFirstDataPtr();
+
+			Instance->ListView->SelectDataPtr(ptr->Asset);
+
+			return;
+		}
+		//컨텐츠 브라우저 선택 상황
+		else
+		{
+			Instance->CloseWindow();
+			Instance.Reset();
+			Instance = nullptr;
+		}
 	}
 
 	Instance = MakeShareable(new FWeaponAssetEditor());
@@ -45,7 +62,6 @@ void FWeaponAssetEditor::Open(FString InAssetName)
 		.OnWeaponListViewSelectedItem(this, &FWeaponAssetEditor::WeaponListViewSelectedItem);
 
 	FPropertyEditorModule& prop = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	prop.RegisterCustomPropertyTypeLayout("EquipmentData", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FWeaponEquipmentData::MakeInstance));
 	prop.NotifyCustomizationModuleChanged();
 	
 	FDetailsViewArgs args(false, false, true, FDetailsViewArgs::ObjectsUseNameArea);
@@ -93,15 +109,24 @@ void FWeaponAssetEditor::Open(FString InAssetName)
 
 	UCWeaponAsset* asset = nullptr;
 
-	//이름이 없다 = 툴바에서 열었음
-	if(InAssetName.Len() > 0)
+	//이름이 있다 지정한 애셋을 열었음
+	if(0 < InAssetName.Len())
 	{
-		
+		FWeaponRowDataPtr ptr = ListView->GetRowDataPtrByName(InAssetName);
+
+		//이미 열려있는 애셋임
+		if(ListView->SelectedRowDataPtrName() == InAssetName)
+			return;
+
+		if(ptr.IsValid() == false)
+			asset = ListView->GetFirstDataPtr()->Asset;
+		else
+			asset = ptr->Asset;			
 	}
-	//이름이 있다 = 지정한 애셋을 열었음
+	//이름이 없다 = 툴바에서 열었음
 	else
 	{
-		
+		asset = ListView->GetFirstDataPtr()->Asset;
 	}
 	//에디터 초기화
 	InitAssetEditor
@@ -114,15 +139,21 @@ void FWeaponAssetEditor::Open(FString InAssetName)
 		, NewObject<UCWeaponAsset>()			//편집할 애셋
 	);
 
-	DetailsView->SetObject(asset);
+	ListView->SelectDataPtr(asset);
 }
 
 bool FWeaponAssetEditor::OnRequestClose()
 {
+	if(DetailsView.IsValid())
+	{
+		//GEditor = 에디터 전역을 관리하는 객체
+		if(!!GEditor && !!GEditor->GetEditorSubsystem<UAssetEditorSubsystem>())
+			GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(GetEditingObject(), this);
+		
+	}
 	if(FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		FPropertyEditorModule& prop = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		prop.UnregisterCustomPropertyTypeLayout("EquipmentData");
 		prop.NotifyCustomizationModuleChanged();
 	}
 		
@@ -193,5 +224,14 @@ TSharedRef<SDockTab> FWeaponAssetEditor::Spawn_DetailsTab(const FSpawnTabArgs& I
 
 void FWeaponAssetEditor::WeaponListViewSelectedItem(FWeaponRowDataPtr InPtr)
 {
-	
+	//빈공간 클릭
+	if(InPtr == nullptr)
+		return;
+
+	//창을 열었을 때 다른 에디팅중인 애셋을 제거해줌
+	if(!!GetEditingObject())
+		RemoveEditingObject(GetEditingObject());
+
+	AddEditingObject(InPtr->Asset);
+	DetailsView->SetObject(InPtr->Asset);
 }

@@ -1,17 +1,21 @@
 #include "CPlayer.h"
 #include "Global.h"
 
+#include "Components/CWeaponComponent.h"
+#include "Components/CActionComponent.h"
+#include "Components/CStateComponent.h"
+#include "Components/CStatusComponent.h"
 #include "Animation/CAnimInstance.h"
 #include "Widgets/CWidget_HUD.h"
 #include "Attributes/CAttributeSet.h"
-#include "Components/CWeaponComponent.h"
+#include "Weapons/Actions/CAction.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+
 
 
 //  *********************
@@ -46,14 +50,6 @@ ACPlayer::ACPlayer()
 	CHelpers::GetClass<UCAnimInstance>(&animInstance, "AnimBlueprint'/Game/Animations/ABP_Character.ABP_Character_C'");
 	GetMesh()->SetAnimClass(animInstance);
 	
-	UAnimMontage* jumpAnimMontage_1, *jumpAnimMontage_2;
-	CHelpers::GetAsset<UAnimMontage>(&jumpAnimMontage_1, "AnimMontage'/Game/Montages/Player/Common/Jump_Start_Montage.Jump_Start_Montage'");
-	CHelpers::GetAsset<UAnimMontage>(&jumpAnimMontage_2, "AnimMontage'/Game/Montages/Player/Common/DoubleJump_Montage.DoubleJump_Montage'");
-	CHelpers::GetAsset<UAnimMontage>(&EvadeAnimMontage, "AnimMontage'/Game/Montages/Player/Common/Evade_Step_F_Montage.Evade_Step_F_Montage'");
-	JumpAnimMontages.Add(jumpAnimMontage_1);
-	JumpAnimMontages.Add(jumpAnimMontage_2);
-
-
 
 	//HP, MP HUD 클래스 설정
 	/* MaxHP = 10000.0f;
@@ -68,13 +64,9 @@ ACPlayer::ACPlayer()
 	GetCharacterMovement()->MaxWalkSpeed = 400;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
-	bCanEvade = true;
 
 	JumpMaxCount = 2;
 	JumpMaxHoldTime = 0.5f;
-	MaxEvadeCount = 2;
-	EvadeCount = MaxEvadeCount;
-	Timer_RefillEvadeCount = 0.0f;
 
 	for(UINT u = 0; u < 4; u++)
 		bMoving[u] = false;
@@ -102,15 +94,6 @@ void ACPlayer::Tick(float DeltaTime)
 	//에너지 게이지 자연 증가
 	/* CurrMP += TickMPAmount; */
 	//HUD->UpdateMP(GetCurrMP(), GetMaxMP());
-
-	//회피 횟수 리필
-	if (bCanEvade)
-	{
-		if (0 < Timer_RefillEvadeCount)
-			Timer_RefillEvadeCount -= DeltaTime;
-		else
-			EvadeCount = MaxEvadeCount;
-	}
 }
 
 
@@ -142,15 +125,15 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("HorizontalLook", this, &ACPlayer::OnHorizontalLook);
 	
 	//이동 입력 감지, 더블 탭 시 달리기
-	PlayerInputComponent->BindAction("MoveF", IE_Pressed, this, &ACPlayer::BeginMoveF);
-	PlayerInputComponent->BindAction("MoveR", IE_Pressed, this, &ACPlayer::BeginMoveB);
-	PlayerInputComponent->BindAction("MoveB", IE_Pressed, this, &ACPlayer::BeginMoveL);
-	PlayerInputComponent->BindAction("MoveL", IE_Pressed, this, &ACPlayer::BeginMoveR);
+	PlayerInputComponent->BindAction("MoveF", IE_Pressed, this, &ACPlayer::PressedMoveF);
+	PlayerInputComponent->BindAction("MoveR", IE_Pressed, this, &ACPlayer::PressedMoveB);
+	PlayerInputComponent->BindAction("MoveB", IE_Pressed, this, &ACPlayer::PressedMoveL);
+	PlayerInputComponent->BindAction("MoveL", IE_Pressed, this, &ACPlayer::PressedMoveR);
 
-	PlayerInputComponent->BindAction("MoveF", IE_Released, this, &ACPlayer::EndMoveF);
-	PlayerInputComponent->BindAction("MoveR", IE_Released, this, &ACPlayer::EndMoveB);
-	PlayerInputComponent->BindAction("MoveB", IE_Released, this, &ACPlayer::EndMoveL);
-	PlayerInputComponent->BindAction("MoveL", IE_Released, this, &ACPlayer::EndMoveR);
+	PlayerInputComponent->BindAction("MoveF", IE_Released, this, &ACPlayer::ReleasedMoveF);
+	PlayerInputComponent->BindAction("MoveR", IE_Released, this, &ACPlayer::ReleasedMoveB);
+	PlayerInputComponent->BindAction("MoveB", IE_Released, this, &ACPlayer::ReleasedMoveL);
+	PlayerInputComponent->BindAction("MoveL", IE_Released, this, &ACPlayer::ReleasedMoveR);
 
 	PlayerInputComponent->BindAction("MoveF", IE_DoubleClick, this, &ACPlayer::BeginRunning);
 	PlayerInputComponent->BindAction("MoveR", IE_DoubleClick, this, &ACPlayer::BeginRunning);
@@ -158,39 +141,27 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("MoveL", IE_DoubleClick, this, &ACPlayer::BeginRunning);
 	
 	//점프
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACPlayer::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACPlayer::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACPlayer::PressedJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACPlayer::ReleasedJump);
 	
 	//회피
-	PlayerInputComponent->BindAction("Evade", IE_Pressed, this, &ACPlayer::BeginEvade);
+	PlayerInputComponent->BindAction("Evade", IE_Pressed, this, &ACPlayer::PressedEvade);
 	
 	//무기 교체
-	PlayerInputComponent->BindAction("Weapon1", IE_Pressed, this, &ACPlayer::OnEquip1);
-	PlayerInputComponent->BindAction("Weapon2", IE_Pressed, this, &ACPlayer::OnEquip2);
-	PlayerInputComponent->BindAction("Weapon3", IE_Pressed, this, &ACPlayer::OnEquip3);
-	PlayerInputComponent->BindAction("Weapon4", IE_Pressed, this, &ACPlayer::OnEquip4);
+	PlayerInputComponent->BindAction("Weapon1", IE_Pressed, this, &ACPlayer::ChangeWeapon1);
+	PlayerInputComponent->BindAction("Weapon2", IE_Pressed, this, &ACPlayer::ChangeWeapon2);
+	PlayerInputComponent->BindAction("Weapon3", IE_Pressed, this, &ACPlayer::ChangeWeapon3);
+	PlayerInputComponent->BindAction("Weapon4", IE_Pressed, this, &ACPlayer::ChangeWeapon4);
+
+	//액션 키
+	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ACPlayer::PressedAction);
+	PlayerInputComponent->BindAction("Action", IE_Released, this, &ACPlayer::ReleasedAction);
+
+	//서브액션 키
+	PlayerInputComponent->BindAction("SubAction", IE_Pressed, this, &ACPlayer::PressedSubAction);
+	PlayerInputComponent->BindAction("SubAction", IE_Released, this, &ACPlayer::ReleasedSubAction);
 }
 
-void ACPlayer::BeginEvade()
-{
-	Super::BeginEvade();
-	if (EvadeCount == 0)
-		return;
-	if (!bCanEvade || IsInAir)
-		return;
-	GetMesh()->GetAnimInstance()->Montage_Play(EvadeAnimMontage);
-	bCanEvade = false;
-	EvadeCount--;
-}
-
-
-
-void ACPlayer::EndEvade()
-{
-	Super::EndEvade();
-	bCanEvade = true;
-	Timer_RefillEvadeCount = 1.0f;
-}
 
 bool ACPlayer::IsMoving()
 {
@@ -200,6 +171,7 @@ bool ACPlayer::IsMoving()
 
 void ACPlayer::OnMoveForward(float AxisValue)
 {
+	CheckFalse(StatusComponent->CanMove());
 	FRotator rotator = FRotator(0, GetControlRotation().Yaw, 0);
 	FVector direction = FQuat(rotator).GetForwardVector().GetSafeNormal2D();
 
@@ -208,6 +180,7 @@ void ACPlayer::OnMoveForward(float AxisValue)
 
 void ACPlayer::OnMoveRight(float AxisValue)
 {
+	CheckFalse(StatusComponent->CanMove());
 	FRotator rotator = FRotator(0, GetControlRotation().Yaw, 0);
 	FVector direction = FQuat(rotator).GetRightVector().GetSafeNormal2D();
 
@@ -224,69 +197,85 @@ void ACPlayer::OnHorizontalLook(float AxisValue)
 	AddControllerYawInput(AxisValue);
 }
 
-void ACPlayer::Jump()
+void ACPlayer::PressedJump()
 {
-	Super::Jump();
-	//점프 카운트 모두 소모
-	if (JumpCurrentCount == 2)
-		return;
+	CheckFalse(StatusComponent->CanAction());
+	ActionComponent->OnActionInput.Execute(EActionType::Jump, true);
+}
 
-	//1단 점프
-	if (JumpCurrentCount == 0 && !IsInAir)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(JumpAnimMontages[0]);
-		return;
-	}
-	//2단 점프
-	if(JumpCurrentCount == 1 || IsInAir)
-		GetMesh()->GetAnimInstance()->Montage_Play(JumpAnimMontages[1]);
+void ACPlayer::ReleasedJump()
+{
+	ActionComponent->OnActionInput.Execute(EActionType::Jump, false);
+}
+
+void ACPlayer::PressedEvade()
+{
+	CheckFalse(StatusComponent->CanAction());
+	ActionComponent->OnActionInput.Execute(EActionType::Dash, true);
 }
 
 
-void ACPlayer::BeginMoveF()
+void ACPlayer::PressedMoveF()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[0] = true;
 }
-void ACPlayer::BeginMoveB()
+void ACPlayer::PressedMoveB()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[1] = true;
 }
-void ACPlayer::BeginMoveL()
+void ACPlayer::PressedMoveL()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[2] = true;
 }
-void ACPlayer::BeginMoveR()
+void ACPlayer::PressedMoveR()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[3] = true;
 }
 
-void ACPlayer::EndMoveF()
+void ACPlayer::ReleasedMoveF()
 {
 	bMoving[0] = false;
-	if(!IsMoving())
+	if (!IsMoving())
+	{
+		StateComponent->SetIdleMode();
 		GetCharacterMovement()->MaxWalkSpeed = 400;
+	}
 }
-void ACPlayer::EndMoveB()
+void ACPlayer::ReleasedMoveB()
 {
 	bMoving[1] = false;
 	if (!IsMoving())
+	{
+		StateComponent->SetIdleMode();
 		GetCharacterMovement()->MaxWalkSpeed = 400;
+	}
 }
-void ACPlayer::EndMoveL()
+void ACPlayer::ReleasedMoveL()
 {
 	bMoving[2] = false;
 	if (!IsMoving())
+	{
+		StateComponent->SetIdleMode();
 		GetCharacterMovement()->MaxWalkSpeed = 400;
+	}
 }
-void ACPlayer::EndMoveR()
+void ACPlayer::ReleasedMoveR()
 {
 	bMoving[3] = false;
 	if (!IsMoving())
+	{
+		StateComponent->SetIdleMode();
 		GetCharacterMovement()->MaxWalkSpeed = 400;
+	}
 }
 
 void ACPlayer::BeginRunning()
 {
+	StateComponent->SetDashMode();
 	GetCharacterMovement()->MaxWalkSpeed = 800;
 }
 
@@ -294,21 +283,47 @@ void ACPlayer::BeginRunning()
 //  *********************
 //      무기 교체
 //  *********************
-void ACPlayer::OnEquip1()
+void ACPlayer::ChangeWeapon1()
 {
-	Equip(0);
+	CheckFalse(StatusComponent->CanMove());
+	ChangeWeapon(0);
 }
-void ACPlayer::OnEquip2()
+void ACPlayer::ChangeWeapon2()
 {
-	Equip(1);
+	CheckFalse(StatusComponent->CanMove());
+	ChangeWeapon(1);
 }
-void ACPlayer::OnEquip3()
+void ACPlayer::ChangeWeapon3()
 {
-	Equip(2);
+	CheckFalse(StatusComponent->CanMove());
+	ChangeWeapon(2);
 }
-void ACPlayer::OnEquip4()
+void ACPlayer::ChangeWeapon4()
 {
-	Equip(3);
+	CheckFalse(StatusComponent->CanMove());
+	ChangeWeapon(3);
+}
+
+void ACPlayer::PressedAction()
+{
+	CheckFalse(StatusComponent->CanAction());
+	ActionComponent->OnActionInput.Execute(EActionType::Action, true);
+}
+
+void ACPlayer::ReleasedAction()
+{
+	ActionComponent->OnActionInput.Execute(EActionType::Action, false);
+}
+
+void ACPlayer::PressedSubAction()
+{
+	CheckFalse(StatusComponent->CanAction());
+	ActionComponent->OnActionInput.Execute(EActionType::SubAction, true);
+}
+
+void ACPlayer::ReleasedSubAction()
+{
+	ActionComponent->OnActionInput.Execute(EActionType::SubAction, false);
 }
 
 
@@ -326,16 +341,9 @@ void ACPlayer::NotUseControlRotation()
 //  *********************
 //      Equip 처리
 //  *********************
-void ACPlayer::Equip(uint8 const& InNumber)
+void ACPlayer::ChangeWeapon(uint8 const& InNumber)
 {
-	Super::Equip(InNumber);
+	Super::ChangeWeapon(InNumber);
 	CheckNull(WeaponComponent);
-	WeaponComponent->Equip(InNumber);
-}
-
-void ACPlayer::UnEquip()
-{
-	Super::UnEquip();
-	CheckNull(WeaponComponent);
-	WeaponComponent->UnEquip();
+	WeaponComponent->ChangeWeapon(InNumber);
 }

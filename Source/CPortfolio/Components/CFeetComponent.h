@@ -21,6 +21,7 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
 public:
 	FORCEINLINE const FFeetData& GetData() { return FeetData; }
 private:
@@ -29,7 +30,6 @@ private:
 
 private:
 	class ACCharacter_Base* Owner;
-	
 	FFeetData FeetData;
 
 public:
@@ -38,9 +38,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FeetIK")
 		FName RightFootName = "foot_r";;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FeetIK")
-		float TraceDistance = 100.0f;
+		float TraceDistance = 60.0f;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FeetIK")
-		float InterpSpeed = 60.0f;
+		float InterpSpeed = 20.0f;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FeetIK")
 		float OffsetDistance = 5.0f;
 };

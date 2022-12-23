@@ -1,6 +1,7 @@
 #include "CAttachment.h"
 
 #include "Global.h"
+#include "Characters/CCharacter_Base.h"
 
 #include "GameFramework/Character.h"
 #include "Components/SceneComponent.h"
@@ -13,7 +14,7 @@ ACAttachment::ACAttachment()
 
 void ACAttachment::BeginPlay()
 {	
-	OwnerCharacter = Cast<ACharacter>(GetOwner());
+	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
 
 	GetComponents<UShapeComponent>(Collisions);
 	for (UShapeComponent* collision : Collisions)
@@ -23,43 +24,39 @@ void ACAttachment::BeginPlay()
 	}
 	OffCollision();
 
+	
+	
+	AttachTo(HolsterSocketName);
 	Super::BeginPlay();
 }
 
 void ACAttachment::AttachTo(FName InSocketName)
 {
+	if(InSocketName.IsNone())
+		return;
 	AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
-}
-
-void ACAttachment::AttachCollisionTo(FName InSocketName)
-{
-	for (UShapeComponent* collision : Collisions)
-	{
-		if (collision->GetName() == InSocketName.ToString())
-		{
-			collision->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
-
-			return;
-		}
-	}
 }
 
 void ACAttachment::OnCollision()
 {
-	if (OnAttachmentCollision.IsBound())
-		OnAttachmentCollision.Broadcast();
-
 	for (UShapeComponent* collision : Collisions)
 		collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void ACAttachment::OffCollision()
 {
-	if (OffAttachmentCollision.IsBound())
-		OffAttachmentCollision.Broadcast();
-
 	for (UShapeComponent* collision : Collisions)
 		collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ACAttachment::OnEndEquip()
+{
+	AttachTo(HandSocketName);
+}
+
+void ACAttachment::OnEndUnEquip()
+{
+	AttachTo(HolsterSocketName);
 }
 
 void ACAttachment::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

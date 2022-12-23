@@ -1,54 +1,48 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
 #include "CWeaponStructure.h"
-#include "GameFramework/Actor.h"
-
 #include "CWeapon.generated.h"
 
 
 
 UCLASS()
-class CPORTFOLIO_API ACWeapon : public AActor
+class CPORTFOLIO_API UCWeapon : public UObject
 {
 	GENERATED_BODY()
+
+private:
+	friend class UCWeaponAsset;
 	
-//  *********************
-//      기본 세팅
-//  *********************
-public:	
-	ACWeapon();
-	EWeaponType GetType();
-protected:
-	UPROPERTY(VisibleDefaultsOnly)
-		class USceneComponent* Root;
-	EWeaponType Type;
-protected:
-	virtual void BeginPlay() override;
-
-//  *********************
-//      Equip 세팅
-//  *********************
-protected:
-	UPROPERTY(EditAnywhere, Category="Data")
-		class UCWeaponAsset* WeaponData;
-
-protected:
-	bool bEquipped;
 public:
-	UFUNCTION(Category="Equip")
-		void Equip();
-	UFUNCTION(Category="Equip")
-		virtual void EndEquip();
-	UFUNCTION(Category="Equip")
-		void UnEquip();
-	UFUNCTION(Category="Equip")
-		void EndUnEquip();
+	FORCEINLINE EWeaponType GetType() { return Type; }
+	FORCEINLINE TArray<class ACAttachment*> GetAttachments() { return Attachments; }
+	FORCEINLINE class UCEquipment* GetEquipment() { return Equipment; }
+	FORCEINLINE class UCActionData* GetActionData() { return ActionData; }
+	
+public:
+	
 
+public:
+	
+	
+public:
+	
+	void EndPlay(ACCharacter_Base* InOwner);
+	
+private:
+	UPROPERTY()
+		EWeaponType Type;
+	
+	UPROPERTY()
+		TArray<class ACAttachment*> Attachments;
 
-protected:
-	class ACCharacter_Base* Owner;
-	class UCStatusComponent* Status;
-	class UCStateComponent* State;
+	UPROPERTY()
+		class UCEquipment* Equipment;
 
+	UPROPERTY()
+		class UCActionData* ActionData;
 };
+
+

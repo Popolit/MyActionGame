@@ -5,16 +5,16 @@
 #include "CWeaponStructure.h"
 #include "CEquipment.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEquipmentBehavior);
+DECLARE_MULTICAST_DELEGATE(FEquipmentBehavior);
 
-//Equip, Unequip 행동을 정의한 클래스
+//Equip, UnEquip 행동을 정의한 클래스
 UCLASS(Blueprintable)
 class CPORTFOLIO_API UCEquipment : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	void BeginPlay(class ACharacter* InOwner, const FEquipData& InEquipData, const FUnequipData& InUnequipData);
+	void BeginPlay(class ACCharacter_Base* InOwner, const FEquipData& InEquipData, const FUnEquipData& InUnEquipData);
 
 //  *********************
 //      Equip bool
@@ -22,10 +22,12 @@ public:
 public:
 	FORCEINLINE const bool* GetEquipping() { return &bEquipping; }
 	FORCEINLINE bool GetBeginEquip() { return bBeginEquip; }
+	FORCEINLINE bool GetBeginUnEquip() { return bBeginUnEquip; }
 
 private:
 	bool bEquipping;
 	bool bBeginEquip;
+	bool bBeginUnEquip;
 
 
 //  *********************
@@ -37,23 +39,20 @@ public:
 	void Equip_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent)
-		void Begin_Equip();
-	void Begin_Equip_Implementation();
+		void EndEquip();
+	void EndEquip_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent)
-		void End_Equip();
-	void End_Equip_Implementation();
+		void UnEquip();
+	void UnEquip_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent)
-		void Unequip();
-	void Unequip_Implementation();
+		void EndUnEquip();
+	void EndUnEquip_Implementation();
 
 public:
-	UPROPERTY(BlueprintAssignable)
-		FEquipmentBehavior OnEquip;
-
-	UPROPERTY(BlueprintAssignable)
-		FEquipmentBehavior OnUnequip;
+	FEquipmentBehavior OnEndEquip;
+	FEquipmentBehavior OnEndUnEquip;
 
 
 
@@ -62,16 +61,15 @@ public:
 //  *********************
 protected:
 	UPROPERTY(BlueprintReadOnly)
-		class ACharacter* OwnerCharacter;
+		class ACCharacter_Base* OwnerCharacter;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
 		FEquipData EquipData;
 	UPROPERTY(BlueprintReadOnly)
-		FUnequipData UnequipData;
+		FUnEquipData UnEquipData;
 
 private:
 	class UCStateComponent* State;
 	class UCStatusComponent* Status;
-
 };

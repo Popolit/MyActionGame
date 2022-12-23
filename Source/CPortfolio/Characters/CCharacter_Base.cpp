@@ -4,6 +4,7 @@
 
 #include "Attributes/CAttributeSet.h"
 #include "Components/CAbilitySystemComponent.h"
+#include "Components/CActionComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
@@ -19,8 +20,6 @@
 //  *********************
 ACCharacter_Base::ACCharacter_Base()
 {
-	IsInAir = false;
-
 	CHelpers::CreateActorComponent<UCAbilitySystemComponent>(this, &AbilitySystemComponent, "AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 
@@ -29,10 +28,10 @@ ACCharacter_Base::ACCharacter_Base()
 
 	//Weapon 汲沥
 	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
+	CHelpers::CreateActorComponent<UCActionComponent>(this, &ActionComponent, "Action");
 	CHelpers::CreateActorComponent<UCStatusComponent>(this, &StatusComponent, "Status");
 	CHelpers::CreateActorComponent<UCStateComponent>(this, &StateComponent, "State");
 	CHelpers::CreateActorComponent<UCFeetComponent>(this, &FeetComponent, "Feet");
-	
 }
 
 void ACCharacter_Base::PossessedBy(AController* NewController)
@@ -61,18 +60,11 @@ void ACCharacter_Base::OnRep_Controller()
 void ACCharacter_Base::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//DOREPLIFETIME(ACCharacter_Base, 1);
 }
 
 //  *********************
 //      Movement 贸府
 //  *********************
-
-bool ACCharacter_Base::GetIsInAir()
-{
-	return IsInAir;
-}
 
 void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode)
 {
@@ -84,22 +76,48 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 		case EMovementMode::MOVE_Walking : 
 		case EMovementMode::MOVE_NavWalking :
 		{
-			IsInAir = false;
+			StateComponent->SetIsInAir(false);
 			break;
 		}
 
 		case EMovementMode::MOVE_Falling :
 		case EMovementMode::MOVE_Flying :
 		{
-			IsInAir = true;
+			StateComponent->SetIsInAir(true);
 			break;
 		}
 	}
-	if(IsInAir)
-		CLog::Print("In Air");
-	else
-		CLog::Print("On Ground");
 }
+
+/*
+void ACCharacter_Base::OnJumped_Implementation()
+{
+	StateComponent->SetIsInAir(true);
+	CLog::Print("Jumped");
+}
+
+void ACCharacter_Base::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
+{
+	StateComponent->SetIsInAir(true);
+	CLog::Print("OffLedge");
+}
+
+void ACCharacter_Base::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
+{
+
+	Super::LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+	if(bZOverride)
+		StateComponent->SetIsInAir(true);
+	CLog::Print("Launched");
+}
+
+void ACCharacter_Base::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	StateComponent->SetIsInAir(false);
+	CLog::Print("Landed");
+}
+*/
 
 
 //  *********************
@@ -234,9 +252,7 @@ void ACCharacter_Base::RemoveStartupGameplayAbilities()
 //  *********************
 //      Equip 贸府
 //  *********************
-void ACCharacter_Base::Equip(uint8 const& InNumber) {}
-void ACCharacter_Base::EndEquip() {}
-void ACCharacter_Base::UnEquip() {}
+void ACCharacter_Base::ChangeWeapon(uint8 const& InNumber) {}
 
 //  *********************
 //      荤噶 贸府

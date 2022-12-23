@@ -54,6 +54,7 @@ void UCFeetComponent::Trace(FName const& InSocketName, float& OutDistance, FRota
 	OutRotator.Pitch = -(UKismetMathLibrary::DegAtan2(result.ImpactNormal.X, result.ImpactNormal.Z));
 }
 
+//IK Àû¿ë
 void UCFeetComponent::ApplyIK(float DeltaTime)
 {
 	float leftDistance = 0.0f;

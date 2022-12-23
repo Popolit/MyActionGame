@@ -16,7 +16,6 @@ class CPORTFOLIO_API ACPlayer : public ACCharacter_Base
 //      기본 세팅
 //  *********************
 public:
-
 	ACPlayer();
 protected:
 	virtual void BeginPlay() override;
@@ -56,9 +55,8 @@ public:
 	FORCEINLINE float GetAimYaw() const { return AimYaw; }
 
 public:
-	virtual void BeginEvade() override;
-	virtual void EndEvade() override;
 	bool IsMoving();
+	
 private:
 	//WSAD 축입력
 	void OnMoveForward(float AxisValue);
@@ -68,27 +66,40 @@ private:
 	void OnVerticalLook(float AxisValue);
 	void OnHorizontalLook(float AxisValue);
 
-	void Jump() override;
+	//점프
+	void PressedJump();
+	void ReleasedJump();
+
+	//회피
+	void PressedEvade();
 	
 	//WSAD
-	void BeginMoveF();
-	void BeginMoveB();
-	void BeginMoveL();
-	void BeginMoveR();
+	void PressedMoveF();
+	void PressedMoveB();
+	void PressedMoveL();
+	void PressedMoveR();
 
 	//WSAD Release
-	void EndMoveF();
-	void EndMoveB();
-	void EndMoveL();
-	void EndMoveR();
+	void ReleasedMoveF();
+	void ReleasedMoveB();
+	void ReleasedMoveL();
+	void ReleasedMoveR();
 
 	void BeginRunning();
 
 	//무기 교체
-	void OnEquip1();
-	void OnEquip2();
-	void OnEquip3();
-	void OnEquip4();
+	void ChangeWeapon1();
+	void ChangeWeapon2();
+	void ChangeWeapon3();
+	void ChangeWeapon4();
+
+	//좌클릭
+	void PressedAction();
+	void ReleasedAction();
+
+	//우클릭
+	void PressedSubAction();
+	void ReleasedSubAction();
 
 public:
 	void UseControlRotation();
@@ -100,8 +111,7 @@ public:
 //      Equip 처리
 //  *********************
 private:
-	virtual void Equip(uint8 const& InNumber = 0) override;
-	virtual void UnEquip() override;
+	virtual void ChangeWeapon(uint8 const& InNumber = 0) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "HUD")
@@ -113,11 +123,8 @@ private:
 
 private:
 	bool bMoving[4];	//{Forward, Backward, Left, Right}
-	bool bCanEvade;
 
 private:
-	TArray<class UAnimMontage*> JumpAnimMontages;
-	class UAnimMontage* EvadeAnimMontage;
 	int MaxEvadeCount;
 	int EvadeCount;
 	float Timer_RefillEvadeCount;	//마지막 회피 이후 회피 카운트를 채우는 타이머

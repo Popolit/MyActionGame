@@ -2,11 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Weapons/CWeapon.h"
 #include "Weapons/CWeaponStructure.h"
 #include "CWeaponComponent.generated.h"
 
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FWeaponChanged, EWeaponType)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FWeaponTypeChanged, EWeaponType, EWeaponType)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnComboEnable, bool)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCWeaponComponent : public UActorComponent
@@ -22,33 +23,42 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-		TArray<TSubclassOf<class ACWeapon>> WeaponClasses;
+	class ACCharacter_Base* OwnerCharacter;
 
-private:
-	UPROPERTY()
-		class ACPlayer* Owner;
-	TArray<ACWeapon*> WeaponList;
 
+//  *********************
+//      Weapon Asset
+//  *********************
 
 public:
+	class UCEquipment* GetEquipment();
+	class UCEquipment* GetPrevEquipment();
+	EWeaponType GetWeaponType(int const& Index);
+	UCActionData* GetActionData();
+
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+		TArray<class UCWeaponAsset*> Weapons;
 	UPROPERTY()
-		ACWeapon* CurrWeapon;
-	EWeaponType WeaponType;
+		TArray<class UCWeapon*> WeaponDatas;
+
+private:
+	TArray<EWeaponType> WeaponTypes;
+	int CurrWeaponIndex;	//-1 = Unarmed
+	int PrevWeaponIndex;
 
 //  *********************
 //      Equip
 //  *********************
 public:
-	UFUNCTION(Category="Equip")
-		void Equip(uint8 const& Index);
-	UFUNCTION(Category="Equip")
-		void EndEquip() const;
-	UFUNCTION(Category="Equip")
-		void UnEquip() const;
-	UFUNCTION(Category="Equip")
-		void EndUnEquip();
+	void ChangeWeapon(int const& Index);
+
+private:
+	void EquipWeapon();
+	void UnEquipWeapon();
 
 public:
-	FWeaponChanged OnWeaponChanged;
+	FWeaponTypeChanged OnWeaponTypeChanged;
+	FOnComboEnable OnComboEnable;
 };

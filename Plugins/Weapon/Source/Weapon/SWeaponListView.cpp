@@ -95,11 +95,51 @@ void SWeaponListView::Construct(const FArguments& InArgs)
 	ReadAssets();
 }
 
+
+
 //행의 갯수만큼 콜
 TSharedRef<ITableRow> SWeaponListView::OnGenerateRow(FWeaponRowDataPtr InRow, const TSharedRef<STableViewBase>& InTable)
 {
 	return SNew(SWeaponTableRow, InTable)
 		.Row(InRow);
+}
+
+FWeaponRowDataPtr SWeaponListView::GetRowDataPtrByName(FString const& InName)
+{
+	if(!HasDataPtrs())
+		return nullptr;
+
+	for(FWeaponRowDataPtr ptr : RowDatas)
+	{
+		if(ptr->Context == InName)
+			return ptr;
+	}
+
+	return nullptr;
+}
+
+void SWeaponListView::SelectDataPtr(UCWeaponAsset* InAsset)
+{
+	if(!HasDataPtrs())
+		return;
+
+	for(FWeaponRowDataPtr ptr : RowDatas)
+	{
+		if(ptr->Asset == InAsset)
+		{
+			ListView->SetSelection(ptr);
+			return;
+		}
+	}
+}
+
+FString SWeaponListView::SelectedRowDataPtrName()
+{
+	TArray<FWeaponRowDataPtr> ptrs = ListView->GetSelectedItems();
+
+	if(ptrs.Num() == 0)
+		return "";
+	return ptrs[0]->Asset->GetName();
 }
 
 void SWeaponListView::ReadAssets()

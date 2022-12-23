@@ -1,5 +1,6 @@
 #include "CStatusComponent.h"
 #include "Global.h"
+
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

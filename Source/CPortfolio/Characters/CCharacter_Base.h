@@ -30,6 +30,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCWeaponComponent* WeaponComponent;
 	UPROPERTY(VisibleDefaultsOnly)
+		class UCActionComponent* ActionComponent;
+	UPROPERTY(VisibleDefaultsOnly)
 		class UCStatusComponent* StatusComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCStateComponent* StateComponent;
@@ -39,14 +41,13 @@ protected:
 //  *********************
 //      Movement 贸府
 //  *********************
-protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-		bool IsInAir;
 public:
-	bool GetIsInAir();
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode) override;
-
-
+	/*virtual void OnJumped_Implementation() override;
+	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta) override;
+	virtual void LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride) override;
+	virtual void Landed(const FHitResult& Hit) override;*/
+	
 //  *********************
 //      Evade 贸府
 //  *********************	
@@ -120,11 +121,7 @@ protected:
 //  *********************
 protected:
 	UFUNCTION(Category = "Equip")
-		virtual void Equip(uint8 const& InNumber = 0);
-	UFUNCTION(Category = "Equip")
-		virtual void EndEquip();
-	UFUNCTION(Category = "UnEquip")
-		virtual void UnEquip();
+		virtual void ChangeWeapon(uint8 const& InNumber = 0);
 
 
 //  *********************
@@ -147,3 +144,4 @@ protected:
 		class UAnimMontage* DeathMontage;
 
 };
+

@@ -1,19 +1,17 @@
 #include "CWeaponStructure.h"
 #include "Global.h"
 
-#include "GameFramework/Character.h"
+#include "Characters/CCharacter_Base.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Sound/SoundCue.h"
 
-void FAttackData::Attack(ACharacter* InOwner)
+void FActionContent::DoAction(ACCharacter_Base* InOwner)
 {
 	UCStatusComponent* status = CHelpers::GetComponent<UCStatusComponent>(InOwner);
 	if (!!status)
-	{
 		bCanMove ? status->Move() : status->Stop();
-	}
 
 	if (!!Montage)
 		InOwner->PlayAnimMontage(Montage, PlayRatio);
@@ -22,7 +20,7 @@ void FAttackData::Attack(ACharacter* InOwner)
 		status->EnableFixedCamera();
 }
 
-void FAttackData::End_Attack(ACharacter* InOwner)
+void FActionContent::EndAction(ACCharacter_Base* InOwner)
 {
 	UCStatusComponent* status = CHelpers::GetComponent<UCStatusComponent>(InOwner);
 	if (!!status)
@@ -36,7 +34,7 @@ void FAttackData::End_Attack(ACharacter* InOwner)
 		state->SetIdleMode();
 }
 
-void FAttackData::PlayEffect(ACharacter* InOwner)
+void FActionContent::PlayEffect(ACCharacter_Base* InOwner)
 {
 	CheckNull(Effect);
 
@@ -55,7 +53,7 @@ void FAttackData::PlayEffect(ACharacter* InOwner)
 	CHelpers::PlayEffect(InOwner->GetWorld(), Effect, transform);
 }
 
-void FAttackData::PlayEffect(USkeletalMeshComponent* InMesh, FName InSocketName)
+void FActionContent::PlayEffect(USkeletalMeshComponent* InMesh, FName InSocketName)
 {
 	CheckNull(Effect);
 
@@ -147,7 +145,10 @@ void FHitData::SendDamage(ACharacter* InAttacker, AActor* InAttackCauser, AChara
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
 UAnimMontage* UCWeaponStructure::Default_HitMontage = NULL;
+
+
 
 UCWeaponStructure::UCWeaponStructure()
 {

@@ -17,19 +17,34 @@ void UCStateComponent::SetIdleMode()
 	ChangeType(EStateType::Idle);
 }
 
-void UCStateComponent::SetRollMode()
+void UCStateComponent::SetDashMode()
 {
-	ChangeType(EStateType::Roll);
+	ChangeType(EStateType::Dash);
 }
 
-void UCStateComponent::SetBackStepMode()
+void UCStateComponent::SetEvadeMode()
 {
-	ChangeType(EStateType::BackStep);
+	ChangeType(EStateType::Evade);
 }
 
 void UCStateComponent::SetEquipMode()
 {
 	ChangeType(EStateType::Equip);
+}
+
+void UCStateComponent::SetGuardMode()
+{
+	ChangeType(EStateType::Guard);
+}
+
+void UCStateComponent::SetZoomMode()
+{
+	ChangeType(EStateType::Zoom);
+}
+
+void UCStateComponent::SetActionMode()
+{
+	ChangeType(EStateType::Action);
 }
 
 void UCStateComponent::SetHittedMode()
@@ -42,26 +57,24 @@ void UCStateComponent::SetDeadMode()
 	ChangeType(EStateType::Dead);
 }
 
-void UCStateComponent::SetActionMode()
-{
-	ChangeType(EStateType::Action);
-}
-
 void UCStateComponent::ChangeType(EStateType InType)
 {
 	EStateType prevType = Type;
 	Type = InType;
-
+	
 	if (OnStateTypeChanged.IsBound())
-		OnStateTypeChanged.Broadcast(prevType, Type);
+		OnStateTypeChanged.Broadcast(Type);
+
+	FString const ss[uint8(EStateType::Max) + 1] = {"Idle", "Dash", "Evade", "Equip", "Guard", "Zoom", "Action", "Hitted", "Dead", "Max"};
+	CLog::Print(ss[uint8(Type)]);
 }
 
-void UCStateComponent::OnSubActionMode()
+//True = IsInAir
+void UCStateComponent::SetIsInAir(bool const& InAirCondition)
 {
-	bInSubActionMode = true;
-}
-
-void UCStateComponent::OffSubActionMode()
-{
-	bInSubActionMode = false;
+	if(bIsInAir == InAirCondition)
+		return;
+	bIsInAir = InAirCondition;
+	if (OnAerialConditionChanged.IsBound())
+		OnAerialConditionChanged.Broadcast(bIsInAir);
 }

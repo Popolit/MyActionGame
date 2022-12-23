@@ -23,14 +23,23 @@ private:
 		float MaxHealth = 100;
 
 public:
+	UFUNCTION(BlueprintCallable)
+		void Move() { bCanMove = true; }
+	UFUNCTION(BlueprintCallable)
+		void Stop() { bCanMove = false; }
+	UFUNCTION(BlueprintCallable)
+		void Action() { bCanAction = true; }
+	UFUNCTION(BlueprintCallable)
+		void StopAction() { bCanAction = false; }
+	
+public:
 	FORCEINLINE float GetWalkSpeed() { return Speed[(int32)ESpeedType::Walk]; }
 	FORCEINLINE float GetRunSpeed() { return Speed[(int32)ESpeedType::Run]; }
 	FORCEINLINE float GetSprintSpeed() { return Speed[(int32)ESpeedType::Sprint]; }
 
 	FORCEINLINE bool CanMove() { return bCanMove; }
+	FORCEINLINE bool CanAction() { return bCanAction; }
 
-	FORCEINLINE void Move() { bCanMove = true; }
-	FORCEINLINE void Stop() { bCanMove = false; }
 
 	FORCEINLINE float GetHealth() { return Health; }
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
@@ -58,6 +67,7 @@ private:
 	class ACharacter* OwnerCharacter;
 
 	bool bCanMove = true;
+	bool bCanAction = true;
 	float Health;
 
 	bool bFixedCamera;

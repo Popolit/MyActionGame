@@ -70,6 +70,13 @@ private:
 
 private:
 	FOnWeaponListViewSelectedItem OnWeaponListViewSelectedItem;
+
+public:
+	bool HasDataPtrs() { return 0 < RowDatas.Num(); }
+	FWeaponRowDataPtr GetRowDataPtrByName(FString const& InName);
+	FWeaponRowDataPtr GetFirstDataPtr() {return RowDatas[0];}
+	void SelectDataPtr(UCWeaponAsset* InAsset);
+	FString SelectedRowDataPtrName();
 	
 private:
 	void ReadAssets();

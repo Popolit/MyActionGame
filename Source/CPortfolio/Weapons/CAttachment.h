@@ -4,9 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "CAttachment.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttachmentCollision);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAttachmentOverlap, class ACharacter*, InAttacker, class AActor*, InAttackCauser, class ACharacter*, InOtherCharacter);
 
+//무기의 외형, Collision Box 클래스
 UCLASS()
 class CPORTFOLIO_API ACAttachment : public AActor
 {
@@ -15,6 +15,13 @@ class CPORTFOLIO_API ACAttachment : public AActor
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly)
 		class USceneComponent* Root;
+	
+	UPROPERTY(EditAnywhere)
+		FName HolsterSocketName;
+
+	UPROPERTY(EditAnywhere)
+		FName HandSocketName;
+
 
 public:	
 	ACAttachment();
@@ -22,13 +29,9 @@ public:
 	void OnCollision();
 	void OffCollision();
 
-public:
-	UFUNCTION(BlueprintImplementableEvent)
-		void OnEquip();
-
-	UFUNCTION(BlueprintImplementableEvent)
-		void OnUnequip();
-
+	void OnEndEquip();
+	void OnEndUnEquip();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -43,19 +46,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void AttachTo(FName InSocketName);
 
-	UFUNCTION(BlueprintCallable)
-		void AttachCollisionTo(FName InSocketName);
-
 public:
-	FAttachmentCollision OnAttachmentCollision;
-	FAttachmentCollision OffAttachmentCollision;
-
 	FAttachmentOverlap OnAttachmentBeginOverlap;
 	FAttachmentOverlap OnAttachmentEndOverlap;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
-		class ACharacter* OwnerCharacter;
+		class ACCharacter_Base* OwnerCharacter;
 
 	UPROPERTY(BlueprintReadOnly)
 		TArray<class UShapeComponent*> Collisions;
