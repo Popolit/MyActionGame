@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		uint8 MaxActionCount = 2;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		float CoolTime = 2.0f;
+		float CoolTime = 1.0f;
 	
 private:
 	uint8 ActionCountLeft;

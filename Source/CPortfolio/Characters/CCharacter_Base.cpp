@@ -89,41 +89,12 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 	}
 }
 
-/*
 void ACCharacter_Base::OnJumped_Implementation()
 {
-	StateComponent->SetIsInAir(true);
-	CLog::Print("Jumped");
+	Super::OnJumped_Implementation();
+	if(OnJumped.IsBound())
+		OnJumped.Broadcast();
 }
-
-void ACCharacter_Base::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
-{
-	StateComponent->SetIsInAir(true);
-	CLog::Print("OffLedge");
-}
-
-void ACCharacter_Base::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-
-	Super::LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	if(bZOverride)
-		StateComponent->SetIsInAir(true);
-	CLog::Print("Launched");
-}
-
-void ACCharacter_Base::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-	StateComponent->SetIsInAir(false);
-	CLog::Print("Landed");
-}
-*/
-
-
-//  *********************
-//      Evade 贸府
-//  *********************	
-
 
 //  *********************
 //		Attribute 贸府

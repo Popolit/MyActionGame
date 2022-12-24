@@ -12,24 +12,34 @@
 //  *********************
 UCActionComponent::UCActionComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 
 void UCActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	//오너 캐릭터 세팅
 	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
 	CheckNull(OwnerCharacter);
-
-
+	
 	UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
 	state->OnStateTypeChanged.AddDynamic(this, &UCActionComponent::SetStateTrigger);
 	state->OnAerialConditionChanged.AddDynamic(this, &UCActionComponent::SetAerialTrigger);
 	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::SetActionData);
 	OnActionInput.BindUObject(this, &UCActionComponent::ExecuteActionInput);
+}
+
+void UCActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	for(uint8 u = 0; u < ActionMax; u++)
+	{
+		if(Actions[u] == nullptr)
+			continue;
+		Actions[u]->Tick(DeltaTime);
+	}
 }
 
 //  **********************

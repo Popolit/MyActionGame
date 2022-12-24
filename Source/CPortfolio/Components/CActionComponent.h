@@ -20,6 +20,7 @@ public:
 	UCActionComponent();
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	class ACCharacter_Base* OwnerCharacter;
@@ -56,7 +57,7 @@ private:
 private:
 	FActionTrigger Trigger;
 	UCAction** RecentAction;
-
+	uint8 const ActionMax = (uint8)EActionType::None + 1;
 public:
 	FOnActionChanged OnActionChanged;
 	

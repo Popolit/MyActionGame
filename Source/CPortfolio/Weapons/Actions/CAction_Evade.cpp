@@ -20,12 +20,12 @@ void UCAction_Evade::Pressed_Implementation()
 
 	if(!ActionMontages.IsValidIndex(0))
 		return;
-	if(MaxActionCount == 0)
+	if(ActionCountLeft == 0)
 		return;
 	if(0.0f < CoolTimeLeft)
 		return;
 	
-	MaxActionCount--;
+	ActionCountLeft--;
 	State->SetEvadeMode();
 	ActionMontages[0].DoAction(OwnerCharacter);
 
@@ -36,6 +36,8 @@ void UCAction_Evade::EndAction_Implementation()
 	Super::EndAction_Implementation();
 	
 	State->SetIdleMode();
+	if(ActionCountLeft == MaxActionCount)
+		return;
 	CoolTimeLeft = CoolTime;
 	ActionCountLeft = MaxActionCount;
 }

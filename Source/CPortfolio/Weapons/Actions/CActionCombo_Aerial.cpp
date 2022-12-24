@@ -14,6 +14,7 @@ void UCActionCombo_Aerial::BeginPlay(ACCharacter_Base* InOwner, const TArray<FAc
 {
 	Super::BeginPlay(InOwner, InActionMontages);
 	State->OnAerialConditionChanged.AddDynamic(this, &UCActionCombo_Aerial::OnAerialConditionChanged);
+	InOwner->OnJumped.AddDynamic(this, &UCActionCombo_Aerial::OnJumped);
 }
 
 void UCActionCombo_Aerial::Pressed_Implementation()
@@ -47,6 +48,12 @@ void UCActionCombo_Aerial::BeginCombo()
 
 
 void UCActionCombo_Aerial::OnAerialConditionChanged(bool IsInAir)
+{
+	if(IsInAir)
+		bEnableAction = true;
+}
+
+void UCActionCombo_Aerial::OnJumped()
 {
 	bEnableAction = true;
 }

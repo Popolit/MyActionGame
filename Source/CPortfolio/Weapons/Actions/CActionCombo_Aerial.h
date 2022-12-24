@@ -23,6 +23,8 @@ public:
 protected:
 	UFUNCTION()
 		void OnAerialConditionChanged(bool IsInAir);
+	UFUNCTION()
+		void OnJumped();
 
 protected:
 	bool bEnableAction;

@@ -9,6 +9,7 @@
 #include "CCharacter_Base.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ACCharacter_Base*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJumped);
 UCLASS()
 class CPORTFOLIO_API ACCharacter_Base : public ACharacter, public IAbilitySystemInterface
 {
@@ -43,19 +44,10 @@ protected:
 //  *********************
 public:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode) override;
-	/*virtual void OnJumped_Implementation() override;
-	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta) override;
-	virtual void LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride) override;
-	virtual void Landed(const FHitResult& Hit) override;*/
-	
-//  *********************
-//      Evade Ã³¸®
-//  *********************	
+	virtual void OnJumped_Implementation() override;
+
 public:
-	UFUNCTION(Category = "Evade")
-		virtual void BeginEvade() {}
-	UFUNCTION(Category = "Evade")
-		virtual void EndEvade() {}
+	FOnJumped OnJumped;
 
 
 //  *********************

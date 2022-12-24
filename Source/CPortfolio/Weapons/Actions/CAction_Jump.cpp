@@ -5,7 +5,7 @@
 void UCAction_Jump::Pressed_Implementation()
 {
 	Super::Pressed_Implementation();
-	if(OwnerCharacter->JumpCurrentCount == OwnerCharacter->JumpMaxCount)
+	if(!OwnerCharacter->CanJump())
 		return;
 	OwnerCharacter->Jump();
 	if(ActionMontages.IsValidIndex(0))
