@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Weapons/Actions/CActionData.h"
+#include "Actions/CActionData.h"
 #include "CActionComponent.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FOnActionInput, EActionType, bool)
@@ -58,6 +58,7 @@ private:
 	FActionTrigger Trigger;
 	UCAction** RecentAction;
 	uint8 const ActionMax = (uint8)EActionType::None + 1;
+	
 public:
 	FOnActionChanged OnActionChanged;
 	

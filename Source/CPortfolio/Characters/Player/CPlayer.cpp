@@ -8,7 +8,7 @@
 #include "Animation/CAnimInstance.h"
 #include "Widgets/CWidget_HUD.h"
 #include "Attributes/CAttributeSet.h"
-#include "Weapons/Actions/CAction.h"
+#include "Actions/CAction.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -238,6 +238,7 @@ void ACPlayer::PressedMoveR()
 
 void ACPlayer::ReleasedMoveF()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[0] = false;
 	if (!IsMoving())
 	{
@@ -247,6 +248,7 @@ void ACPlayer::ReleasedMoveF()
 }
 void ACPlayer::ReleasedMoveB()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[1] = false;
 	if (!IsMoving())
 	{
@@ -256,6 +258,7 @@ void ACPlayer::ReleasedMoveB()
 }
 void ACPlayer::ReleasedMoveL()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[2] = false;
 	if (!IsMoving())
 	{
@@ -265,6 +268,7 @@ void ACPlayer::ReleasedMoveL()
 }
 void ACPlayer::ReleasedMoveR()
 {
+	CheckFalse(StatusComponent->CanMove());
 	bMoving[3] = false;
 	if (!IsMoving())
 	{
@@ -286,22 +290,22 @@ void ACPlayer::BeginRunning()
 void ACPlayer::ChangeWeapon1()
 {
 	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(0);
+	ChangeWeapon(1);
 }
 void ACPlayer::ChangeWeapon2()
 {
 	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(1);
+	ChangeWeapon(2);
 }
 void ACPlayer::ChangeWeapon3()
 {
 	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(2);
+	ChangeWeapon(3);
 }
 void ACPlayer::ChangeWeapon4()
 {
 	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(3);
+	ChangeWeapon(4);
 }
 
 void ACPlayer::PressedAction()

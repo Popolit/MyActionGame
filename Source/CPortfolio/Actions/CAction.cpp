@@ -5,7 +5,7 @@
 #include "Components/CStateComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Weapons/CAttachment.h"
-#include "Weapons/Actions/CActionStructure.h"
+#include "Actions/CActionStructure.h"
 
 UCAction::UCAction()
 {

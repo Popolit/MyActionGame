@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "CActionStructure.h"
+#include "CI_Action_Tick.h"
 #include "CActionData.generated.h"
 
 UCLASS()
@@ -13,9 +14,12 @@ private:
 	friend class UCActionAsset;
 
 public:
-	UCAction* GetAction(FActionTrigger const& Trigger);
+	FORCEINLINE UCAction* GetAction(FActionTrigger const& Trigger);
+	FORCEINLINE TArray<UCAction*> const& GetTickableActions() { return TickableActions; };
 
 private:
 	UPROPERTY()
 		TMap<FActionTrigger, class UCAction*> Actions;
+	UPROPERTY()
+		TArray<UCAction*> TickableActions;
 };

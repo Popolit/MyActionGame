@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Weapons/Actions/CActionStructure.h"
+#include "Actions/CActionStructure.h"
 #include "Weapons/CWeaponStructure.h"
 #include "Struct/FeetData.h"
 #include "CAnimInstance.generated.h"

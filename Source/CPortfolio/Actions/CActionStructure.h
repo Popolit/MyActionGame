@@ -7,9 +7,62 @@
 UENUM(BlueprintType)
 enum class EActionType : uint8
 {
-	Action, SubAction, Skill_A, Skill_B, Jump, Dash, None
+	Action, SubAction, Skill_A, Skill_B, Jump, Evade, None
 };
 
+/////////////////////////////////////////////////////////////////
+
+USTRUCT(BlueprintType)
+struct FHitData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+		float PlayRatio = 1;
+
+	UPROPERTY(EditAnywhere)
+		bool bCanMove = true;
+
+	UPROPERTY(EditAnywhere)
+		float Damage = 0;
+
+	UPROPERTY(EditAnywhere)
+		float Launch = 100;
+
+	UPROPERTY(EditAnywhere)
+		float StopTime = 0;
+
+	UPROPERTY(EditAnywhere)
+		class UFXSystemAsset* Effect;
+
+	UPROPERTY(EditAnywhere)
+		FVector EffectLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere)
+		FVector EffectScale = FVector::OneVector;
+
+	UPROPERTY(EditAnywhere)
+		class USoundCue* SoundCue;
+
+public:
+	void PlayMontage(class ACCharacter_Base* InOwner);
+	void PlayHitStop(class UWorld* InWorld);
+	void PlaySoundCue(class ACCharacter_Base* InOwner);
+	void PlayEffect(class UWorld* InWorld, const FVector& InLocation);
+	void SendDamage(class ACCharacter_Base* InAttacker, class AActor* InAttackCauser, class ACCharacter_Base* InOtherCharacter);
+};
+
+/////////////////////////////////////////////////////////////////
+
+USTRUCT(BlueprintType)
+struct FActionDamageEvent : public FDamageEvent
+{
+	GENERATED_BODY()
+
+public:
+	FHitData* HitData;
+};
 /////////////////////////////////////////////////////////////////
 
 USTRUCT(BlueprintType)
@@ -39,6 +92,7 @@ struct CPORTFOLIO_API FActionTrigger
 		return FCrc::MemCrc32(&Other, sizeof(FActionTrigger));
 	}
 };
+
 /////////////////////////////////////////////////////////////////
 
 USTRUCT(BlueprintType)
@@ -67,8 +121,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector EffectScale = FVector::OneVector;
 
-	/*UPROPERTY(EditAnywhere)
-	FHitData HitData;*/
+	UPROPERTY(EditAnywhere)
+	FHitData HitData;
 
 public:
 	void DoAction(class ACCharacter_Base* InOwner) const;

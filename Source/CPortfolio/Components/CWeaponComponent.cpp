@@ -12,8 +12,9 @@
 //  *********************
 UCWeaponComponent::UCWeaponComponent()
 {
-	CurrWeaponIndex = -1;
-	PrevWeaponIndex = -1;
+	CHelpers::GetAsset(&UnarmedAsset, "/Game/Weapons/DA_Unarmed.DA_Unarmed");
+	CurrWeaponIndex = 0;
+	PrevWeaponIndex = 0;
 }
 
 
@@ -25,12 +26,14 @@ void UCWeaponComponent::BeginPlay()
 	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
 	CheckNull(OwnerCharacter);
 
+	UCWeapon* newWeaponData;
+	UnarmedAsset->BeginPlay(OwnerCharacter, &newWeaponData);
+	WeaponDatas.Push(newWeaponData);
 	//Weapon 세팅
 	for(UCWeaponAsset* weapon : Weapons)
 	{
-		UCWeapon* newWeaponData;
 		weapon->BeginPlay(OwnerCharacter, &newWeaponData);
-		WeaponDatas.Emplace(newWeaponData);
+		WeaponDatas.Push(newWeaponData);
 	}
 
 }
@@ -42,24 +45,33 @@ void UCWeaponComponent::BeginPlay()
 
 UCEquipment* UCWeaponComponent::GetEquipment()
 {
-	if(GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
 		return NULL;
+	CheckNullResult(WeaponDatas[CurrWeaponIndex], NULL);
 	return WeaponDatas[CurrWeaponIndex]->GetEquipment();
 }
 
 UCEquipment* UCWeaponComponent::GetPrevEquipment()
 {
-	if (GetWeaponType(PrevWeaponIndex) == EWeaponType::Max)
+	if(!WeaponDatas.IsValidIndex(PrevWeaponIndex))
 		return NULL;
+	CheckNullResult(WeaponDatas[PrevWeaponIndex], NULL);
 	return WeaponDatas[PrevWeaponIndex]->GetEquipment();
+}
+
+TArray<ACAttachment*> const* UCWeaponComponent::GetAttachments()
+{
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
+		return nullptr;
+	CheckNullResult(WeaponDatas[CurrWeaponIndex], nullptr);
+	return WeaponDatas[CurrWeaponIndex]->GetAttachments();
 }
 
 EWeaponType UCWeaponComponent::GetWeaponType(int const& Index)
 {
-	if (Index == -1)
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
 		return EWeaponType::Max;
-	if (!WeaponDatas[CurrWeaponIndex])
-		return EWeaponType::Max;
+	CheckNullResult(WeaponDatas[CurrWeaponIndex], EWeaponType::Max);
 
 	return WeaponDatas[CurrWeaponIndex]->GetType();
 }
@@ -77,13 +89,13 @@ UCActionData* UCWeaponComponent::GetActionData()
 
 void UCWeaponComponent::ChangeWeapon(int const& Index)
 {
-	if (WeaponDatas.Num() <= Index)
+	if (!WeaponDatas.IsValidIndex(Index))
 		return;
 
 	PrevWeaponIndex = CurrWeaponIndex;
 	//장착 중인 무기이면 해제
 	if (CurrWeaponIndex == Index)
-		CurrWeaponIndex = -1;
+		CurrWeaponIndex = 0;
 	else
 		CurrWeaponIndex = Index;
 
@@ -96,18 +108,19 @@ void UCWeaponComponent::ChangeWeapon(int const& Index)
 
 void UCWeaponComponent::EquipWeapon()
 {
-	if (GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
 		return;
-
+	CheckNull(WeaponDatas[CurrWeaponIndex]);
 	WeaponDatas[CurrWeaponIndex]->GetEquipment()->Equip();
 }
 
 void UCWeaponComponent::UnEquipWeapon()
 {
-	if (GetWeaponType(PrevWeaponIndex) == EWeaponType::Max)
+	if(!WeaponDatas.IsValidIndex(CurrWeaponIndex))
 		return;
+	CheckNull(WeaponDatas[CurrWeaponIndex]);
 
-	if(GetWeaponType(CurrWeaponIndex) == EWeaponType::Max)
+	if(GetWeaponType(CurrWeaponIndex) == EWeaponType::Unarmed)
 		WeaponDatas[PrevWeaponIndex]->GetEquipment()->UnEquip();
 	else
 		WeaponDatas[PrevWeaponIndex]->GetEquipment()->EndUnEquip();

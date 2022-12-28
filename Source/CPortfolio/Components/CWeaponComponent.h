@@ -33,11 +33,14 @@ private:
 public:
 	class UCEquipment* GetEquipment();
 	class UCEquipment* GetPrevEquipment();
+	TArray<class ACAttachment*> const* GetAttachments();
 	EWeaponType GetWeaponType(int const& Index);
 	UCActionData* GetActionData();
 
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+		UCWeaponAsset* UnarmedAsset;
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 		TArray<class UCWeaponAsset*> Weapons;
 	UPROPERTY()

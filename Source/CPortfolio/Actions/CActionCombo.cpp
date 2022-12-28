@@ -1,5 +1,9 @@
 #include "CActionCombo.h"
+#include "Global.h"
+
 #include "Characters/CCharacter_Base.h"
+#include "Components/CWeaponComponent.h"
+#include "Weapons/CAttachment.h"
 
 UCActionCombo::UCActionCombo()
 {
@@ -11,6 +15,14 @@ UCActionCombo::UCActionCombo()
 void UCActionCombo::BeginPlay(ACCharacter_Base* InOwner, const TArray<FActionMontage>& InActionMontages)
 {
 	Super::BeginPlay(InOwner, InActionMontages);
+	
+	UCWeaponComponent* weapon = CHelpers::GetComponent<UCWeaponComponent>(InOwner);
+	CheckNull(weapon);
+	for(ACAttachment* attachment : weapon->GetAttachments())
+	{
+		attachment->OnAttachmentBeginOverlap.AddDynamic(this, &UCActionCombo::OnAttachmentBeginOverlap);
+		attachment->OnAttachmentEndOverlap.AddDynamic(this, &UCActionCombo::OnAttachmentEndOverlap);
+	}
 }
 
 
@@ -57,6 +69,16 @@ void UCActionCombo::BeginCombo()
 void UCActionCombo::SetComboEnable(bool IsComboEnable)
 {
 	bComboEnable = IsComboEnable;
+}
+
+void UCActionCombo::OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOtherCharacter)
+{
+	
+	CLog::Print("Collision!");
+}
+
+void UCActionCombo::OnAttachmentEndOverlap(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOtherCharacter)
+{
 }
 
 

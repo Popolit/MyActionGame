@@ -17,19 +17,12 @@ private:
 	
 public:
 	FORCEINLINE EWeaponType GetType() { return Type; }
-	FORCEINLINE TArray<class ACAttachment*> GetAttachments() { return Attachments; }
+	FORCEINLINE TArray<class ACAttachment*> const* GetAttachments() { return &Attachments; }
 	FORCEINLINE class UCEquipment* GetEquipment() { return Equipment; }
 	FORCEINLINE class UCActionData* GetActionData() { return ActionData; }
-	
-public:
-	
 
 public:
-	
-	
-public:
-	
-	void EndPlay(ACCharacter_Base* InOwner);
+	void EndPlay(class ACCharacter_Base* InOwner);
 	
 private:
 	UPROPERTY()

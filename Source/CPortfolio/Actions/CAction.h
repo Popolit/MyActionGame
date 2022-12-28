@@ -16,7 +16,6 @@ public:
 	UCAction();
 
 	virtual void BeginPlay(class ACCharacter_Base* InOwner, const TArray<struct FActionMontage>& InActionMontages);
-	virtual void Tick(float InDeltaTime) { }
 	
 public:
 	UFUNCTION(BlueprintNativeEvent)

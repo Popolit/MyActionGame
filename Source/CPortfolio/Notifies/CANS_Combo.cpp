@@ -3,7 +3,7 @@
 
 #include "Characters/CCharacter_Base.h"
 #include "Components/CActionComponent.h"
-#include "Weapons/Actions/CActionCombo.h"
+#include "Actions/CActionCombo.h"
 
 
 FString UCANS_Combo::GetNotifyName_Implementation() const
@@ -13,6 +13,8 @@ FString UCANS_Combo::GetNotifyName_Implementation() const
 
 void UCANS_Combo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
+	CheckNull(MeshComp);
+	CheckNull(MeshComp->GetOwner());
 	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComponent);
 	
@@ -23,6 +25,8 @@ void UCANS_Combo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 
 void UCANS_Combo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
+	CheckNull(MeshComp);
+	CheckNull(MeshComp->GetOwner());
 	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComponent);
 	

@@ -5,7 +5,7 @@
 #include "CEquipment.h"
 
 #include "Characters/CCharacter_Base.h"
-#include "Weapons/Actions/CActionAsset.h"
+#include "Actions/CActionAsset.h"
 
 
 UCWeaponAsset::UCWeaponAsset()

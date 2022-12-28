@@ -12,9 +12,8 @@ FString UCAN_EndEquip::GetNotifyName_Implementation() const
 
 void UCAN_EndEquip::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-    ACCharacter_Base* character = Cast<ACCharacter_Base>(MeshComp->GetOwner());
-    CheckNull(character);
-
+    CheckNull(MeshComp);
+    CheckNull(MeshComp->GetOwner());
     UCWeaponComponent* weapon = CHelpers::GetComponent<UCWeaponComponent>(MeshComp->GetOwner());
     CheckNull(weapon);
 	CheckNull(weapon->GetEquipment());

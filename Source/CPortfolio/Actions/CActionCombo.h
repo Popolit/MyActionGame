@@ -22,6 +22,10 @@ public:
 	virtual void BeginCombo();
 	void SetComboEnable(bool IsComboEnable);
 
+public:
+	virtual void OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOtherCharacter) override;
+	virtual void OnAttachmentEndOverlap(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOtherCharacter) override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly)
 		uint8 ComboIndex;

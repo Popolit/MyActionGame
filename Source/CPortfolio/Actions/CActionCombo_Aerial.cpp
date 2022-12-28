@@ -13,6 +13,7 @@ UCActionCombo_Aerial::UCActionCombo_Aerial()
 void UCActionCombo_Aerial::BeginPlay(ACCharacter_Base* InOwner, const TArray<FActionMontage>& InActionMontages)
 {
 	Super::BeginPlay(InOwner, InActionMontages);
+	
 	State->OnAerialConditionChanged.AddDynamic(this, &UCActionCombo_Aerial::OnAerialConditionChanged);
 	InOwner->OnJumped.AddDynamic(this, &UCActionCombo_Aerial::OnJumped);
 }

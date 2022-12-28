@@ -4,7 +4,8 @@
 #include "Global.h"
 
 #include "Characters/Player/CPlayer.h"
-#include "Weapons/Actions/CAction.h"
+#include "Actions/CAction.h"
+#include "Actions/CI_Action_Tick.h"
 
 
 //  *********************
@@ -29,17 +30,15 @@ void UCActionComponent::BeginPlay()
 	state->OnAerialConditionChanged.AddDynamic(this, &UCActionComponent::SetAerialTrigger);
 	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::SetActionData);
 	OnActionInput.BindUObject(this, &UCActionComponent::ExecuteActionInput);
+	ActionData = WeaponComponent->GetActionData();
 }
 
 void UCActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	for(uint8 u = 0; u < ActionMax; u++)
-	{
-		if(Actions[u] == nullptr)
-			continue;
-		Actions[u]->Tick(DeltaTime);
-	}
+	CheckNull(ActionData);
+	for(UCAction* action : ActionData->GetTickableActions())
+		Cast<ICI_Action_Tick>(action)->Tick(DeltaTime);
 }
 
 //  **********************

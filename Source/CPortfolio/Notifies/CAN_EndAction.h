@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "Weapons/Actions/CActionStructure.h"
+#include "Actions/CActionStructure.h"
 #include "CAN_EndAction.generated.h"
 
 

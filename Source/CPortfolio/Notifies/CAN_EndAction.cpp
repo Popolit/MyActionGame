@@ -3,7 +3,7 @@
 
 #include "Characters/CCharacter_Base.h"
 #include "Components/CActionComponent.h"
-#include "Weapons/Actions/CAction.h"
+#include "Actions/CAction.h"
 
 FString UCAN_EndAction::GetNotifyName_Implementation() const
 {
@@ -12,9 +12,8 @@ FString UCAN_EndAction::GetNotifyName_Implementation() const
 
 void UCAN_EndAction::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	ACCharacter_Base* character = Cast<ACCharacter_Base>(MeshComp->GetOwner());
-	CheckNull(character);
-
+	CheckNull(MeshComp);
+	CheckNull(MeshComp->GetOwner());
 	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComponent);
 
