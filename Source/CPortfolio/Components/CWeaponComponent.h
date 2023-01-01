@@ -48,7 +48,7 @@ private:
 
 private:
 	TArray<EWeaponType> WeaponTypes;
-	int CurrWeaponIndex;	//-1 = Unarmed
+	int CurrWeaponIndex;	//0 = Unarmed
 	int PrevWeaponIndex;
 
 //  *********************

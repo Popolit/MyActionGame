@@ -23,8 +23,6 @@ void ACAttachment::BeginPlay()
 		collision->OnComponentEndOverlap.AddDynamic(this, &ACAttachment::OnComponentEndOverlap);
 	}
 	OffCollision();
-
-	
 	
 	AttachTo(HolsterSocketName);
 	Super::BeginPlay();
@@ -63,16 +61,14 @@ void ACAttachment::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	CheckTrue(OwnerCharacter == OtherActor);
 	CheckTrue(OwnerCharacter->GetClass() == OtherActor->GetClass());
-	
-	if (OnAttachmentBeginOverlap.IsBound())
-		OnAttachmentBeginOverlap.Broadcast(OwnerCharacter, this, Cast<ACharacter>(OtherActor));
+
+	OnAttachmentBeginOverlap.ExecuteIfBound(OwnerCharacter, this, Cast<ACCharacter_Base>(OtherActor));
 }
 
 void ACAttachment::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	CheckTrue(OwnerCharacter == OtherActor);
 	CheckTrue(OwnerCharacter->GetClass() == OtherActor->GetClass());
-
-	if (OnAttachmentEndOverlap.IsBound())
-		OnAttachmentEndOverlap.Broadcast(OwnerCharacter, this, Cast<ACharacter>(OtherActor));
+	
+	OnAttachmentEndOverlap.ExecuteIfBound(OwnerCharacter, this, Cast<ACCharacter_Base>(OtherActor));
 }

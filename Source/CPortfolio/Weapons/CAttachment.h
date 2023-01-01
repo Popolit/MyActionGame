@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "CAttachment.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAttachmentOverlap, class ACharacter*, InAttacker, class AActor*, InAttackCauser, class ACharacter*, InOtherCharacter);
+DECLARE_DELEGATE_ThreeParams(FAttachmentOverlap, class ACCharacter_Base*, class AActor*, class ACCharacter_Base*);
 
 //무기의 외형, Collision Box 클래스
 UCLASS()

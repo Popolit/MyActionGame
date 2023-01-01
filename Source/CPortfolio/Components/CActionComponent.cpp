@@ -5,7 +5,9 @@
 
 #include "Characters/Player/CPlayer.h"
 #include "Actions/CAction.h"
+#include "Actions/CI_Action_Collision.h"
 #include "Actions/CI_Action_Tick.h"
+#include "Weapons/CAttachment.h"
 
 
 //  *********************
@@ -88,16 +90,35 @@ bool UCActionComponent::SetAction()
 	
 	if(OnActionChanged.IsBound())
 		OnActionChanged.Broadcast(Actions[(uint8)trigger.ActionType], newAction);
-
+	
 	
 	if(RecentAction != nullptr && (*RecentAction) != nullptr)
 	{
 		(*RecentAction)->EndAction();
 		(*RecentAction) = nullptr;
 		RecentAction = nullptr;
+
+		//콜리전 Unbind
+		for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
+		{
+			attachment->OnAttachmentBeginOverlap.Unbind();
+			attachment->OnAttachmentEndOverlap.Unbind();
+		}
 	}
+	
 	Actions[(uint8)trigger.ActionType] = newAction;
 	RecentAction = &Actions[(uint8)trigger.ActionType];
+
+
+	if(newAction->GetClass()->ImplementsInterface(UCI_Action_Collision::StaticClass()))
+	{
+		//New Collision Bind
+		for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
+		{
+			attachment->OnAttachmentBeginOverlap.BindUFunction(newAction, "OnAttachmentBeginOverlap");
+			attachment->OnAttachmentEndOverlap.BindUFunction(newAction, "OnAttachmentEndOverlap");
+		}
+	}
 	
 	return true;
 }
@@ -107,6 +128,11 @@ void UCActionComponent::EndAction(EActionType const & InActionInput)
 	CheckNull(Actions[(uint8)InActionInput]);
 	Actions[(uint8)InActionInput]->EndAction();
 	Actions[(uint8)InActionInput] = nullptr;
+	for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
+	{
+		attachment->OnAttachmentBeginOverlap.Unbind();
+		attachment->OnAttachmentEndOverlap.Unbind();
+	}
 
 	if(*RecentAction == nullptr)
 		RecentAction = nullptr;

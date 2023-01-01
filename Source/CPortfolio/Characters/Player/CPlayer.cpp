@@ -211,7 +211,7 @@ void ACPlayer::ReleasedJump()
 void ACPlayer::PressedEvade()
 {
 	CheckFalse(StatusComponent->CanAction());
-	ActionComponent->OnActionInput.Execute(EActionType::Dash, true);
+	ActionComponent->OnActionInput.Execute(EActionType::Evade, true);
 }
 
 
@@ -330,16 +330,6 @@ void ACPlayer::ReleasedSubAction()
 	ActionComponent->OnActionInput.Execute(EActionType::SubAction, false);
 }
 
-
-void ACPlayer::UseControlRotation()
-{
-	GetCharacterMovement()->bOrientRotationToMovement = false;
-}
-
-void ACPlayer::NotUseControlRotation()
-{
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-}
 
 
 //  *********************

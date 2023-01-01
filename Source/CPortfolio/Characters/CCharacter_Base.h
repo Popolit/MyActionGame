@@ -114,8 +114,13 @@ protected:
 protected:
 	UFUNCTION(Category = "Equip")
 		virtual void ChangeWeapon(uint8 const& InNumber = 0);
-
-
+	
+//  *********************
+//      单固瘤 贸府
+//  *********************
+public:
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
 //  *********************
 //      荤噶 贸府
 //  *********************

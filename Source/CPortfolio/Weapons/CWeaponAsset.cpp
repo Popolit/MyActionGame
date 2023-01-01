@@ -19,8 +19,7 @@ void UCWeaponAsset::BeginPlay(ACCharacter_Base* InOwner, UCWeapon** OutWeaponDat
 	{
 		FActorSpawnParameters params;
 		params.Owner = InOwner;
-
-		(*OutWeaponData)->Attachments.Emplace(InOwner->GetWorld()->SpawnActor<ACAttachment>(attachmentclass, params));
+		(*OutWeaponData)->Attachments.Push(InOwner->GetWorld()->SpawnActor<ACAttachment>(attachmentclass, params));
 	}
 
 	UCEquipment* equipment = nullptr;
@@ -64,7 +63,6 @@ void UCWeaponAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 		{
 			FPropertyEditorModule& propertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 			TSharedPtr<IDetailsView> detailsView = propertyEditor.FindDetailView("WeaponEditorDetailsView");
-			
 			if(detailsView.IsValid())
 				detailsView->ForceRefresh();
 		}

@@ -27,15 +27,16 @@ void UCWeaponComponent::BeginPlay()
 	CheckNull(OwnerCharacter);
 
 	UCWeapon* newWeaponData;
-	UnarmedAsset->BeginPlay(OwnerCharacter, &newWeaponData);
+	if(!!UnarmedAsset)
+		UnarmedAsset->BeginPlay(OwnerCharacter, &newWeaponData);
 	WeaponDatas.Push(newWeaponData);
+	
 	//Weapon ¼¼ÆÃ
 	for(UCWeaponAsset* weapon : Weapons)
 	{
 		weapon->BeginPlay(OwnerCharacter, &newWeaponData);
 		WeaponDatas.Push(newWeaponData);
 	}
-
 }
 
 

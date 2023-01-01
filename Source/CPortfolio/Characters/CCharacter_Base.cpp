@@ -49,6 +49,7 @@ void ACCharacter_Base::UnPossessed()
 	
 }
 
+
 void ACCharacter_Base::OnRep_Controller()
 {
 	Super::OnRep_Controller();
@@ -185,8 +186,6 @@ void ACCharacter_Base::AddStartupGameplayAbilities()
 		}
 	} 
 
-	//AddSlottedGameplayAbilities();
-
 	bAbilitiesInitialized = true;
 }
 
@@ -224,6 +223,24 @@ void ACCharacter_Base::RemoveStartupGameplayAbilities()
 //      Equip 贸府
 //  *********************
 void ACCharacter_Base::ChangeWeapon(uint8 const& InNumber) {}
+
+
+
+//  *********************
+//      单固瘤 贸府
+//  *********************
+
+float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float const damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if(damage == 0.f)
+		return 0.f;
+
+	StatusComponent->Damage(damage);
+	StateComponent->SetHittedMode();
+	return damage;
+}
+
 
 //  *********************
 //      荤噶 贸府

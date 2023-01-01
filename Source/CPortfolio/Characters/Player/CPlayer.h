@@ -101,10 +101,6 @@ private:
 	void PressedSubAction();
 	void ReleasedSubAction();
 
-public:
-	void UseControlRotation();
-	void NotUseControlRotation();
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 //  *********************

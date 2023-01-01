@@ -2,11 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "CAction_Evade.h"
-#include "CAction_Evade_Aerial.generated.h"
+#include "CAction.h"
+#include "CAction_Hitted.generated.h"
 
 UCLASS(Blueprintable)
-class CPORTFOLIO_API UCAction_Evade_Aerial : public UCAction_Evade
+class CPORTFOLIO_API UCAction_Hitted : public UCAction
 {
 	GENERATED_BODY()
 public:

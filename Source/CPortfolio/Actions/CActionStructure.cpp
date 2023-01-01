@@ -6,14 +6,6 @@
 #include "Characters/CCharacter_Base.h"
 #include "Components/CStatusComponent.h"
 
-void FHitData::PlayMontage(ACCharacter_Base* InOwner)
-{
-	UCStatusComponent* status = CHelpers::GetComponent<UCStatusComponent>(InOwner);
-	if (!!status)
-	{
-		bCanMove ? status->Move() : status->Stop();
-	}
-}
 
 void FHitData::PlayHitStop(UWorld* InWorld)
 {
@@ -28,14 +20,14 @@ void FHitData::PlayHitStop(UWorld* InWorld)
 	}
 
 	for (ACCharacter_Base* character : characters)
-		character->CustomTimeDilation = 1e-3f;		
+		character->CustomTimeDilation = 0.0001f;		
 
 
 	FTimerDelegate timerDelegate = FTimerDelegate::CreateLambda([=]()
 	{
 
 		for (ACCharacter_Base* character : characters)
-			character->CustomTimeDilation = 1;
+			character->CustomTimeDilation = 1.0f;
 	});
 
 	FTimerHandle timerHandle;
