@@ -40,7 +40,7 @@ public:
 	UFUNCTION()
 		void SetActionTrigger(EActionType InActionType);
 	UFUNCTION()
-		void SetActionData(enum EWeaponType PrevWeaponType, enum EWeaponType NewWeaponType);
+		void OnWeaponChanged(enum EWeaponType PrevWeaponType, enum EWeaponType NewWeaponType);
 
 private:
 	bool SetAction();
@@ -61,6 +61,14 @@ private:
 	
 public:
 	FOnActionChanged OnActionChanged;
+
+//  *********************
+//      Overlap Event
+//  *********************
+private:
+	void OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
+	void OnAttachmentEndOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
+	
 	
 //  *********************
 //      Inputs

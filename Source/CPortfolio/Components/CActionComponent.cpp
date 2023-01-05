@@ -25,13 +25,17 @@ void UCActionComponent::BeginPlay()
 	//오너 캐릭터 세팅
 	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
 	CheckNull(OwnerCharacter);
-	
+
+	//컴포넌트 세팅
 	UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
+
+	//델리게이션
 	state->OnStateTypeChanged.AddDynamic(this, &UCActionComponent::SetStateTrigger);
 	state->OnAerialConditionChanged.AddDynamic(this, &UCActionComponent::SetAerialTrigger);
-	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::SetActionData);
+	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
 	OnActionInput.BindUObject(this, &UCActionComponent::ExecuteActionInput);
+	
 	ActionData = WeaponComponent->GetActionData();
 }
 
@@ -71,9 +75,14 @@ void UCActionComponent::SetActionTrigger(EActionType InActionType)
 	Trigger.ActionType = InActionType;
 }
 
-void UCActionComponent::SetActionData(EWeaponType PrevWeaponType, EWeaponType NewWeaponType)
+void UCActionComponent::OnWeaponChanged(EWeaponType PrevWeaponType, EWeaponType NewWeaponType)
 {
 	ActionData = WeaponComponent->GetActionData();
+	for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
+	{
+		attachment->OnAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
+		attachment->OnAttachmentEndOverlap.BindUObject(this, &UCActionComponent::OnAttachmentEndOverlap);
+	}
 }
 
 //Action 변경되면 true
@@ -97,28 +106,10 @@ bool UCActionComponent::SetAction()
 		(*RecentAction)->EndAction();
 		(*RecentAction) = nullptr;
 		RecentAction = nullptr;
-
-		//콜리전 Unbind
-		for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
-		{
-			attachment->OnAttachmentBeginOverlap.Unbind();
-			attachment->OnAttachmentEndOverlap.Unbind();
-		}
 	}
 	
 	Actions[(uint8)trigger.ActionType] = newAction;
 	RecentAction = &Actions[(uint8)trigger.ActionType];
-
-
-	if(newAction->GetClass()->ImplementsInterface(UCI_Action_Collision::StaticClass()))
-	{
-		//New Collision Bind
-		for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
-		{
-			attachment->OnAttachmentBeginOverlap.BindUFunction(newAction, "OnAttachmentBeginOverlap");
-			attachment->OnAttachmentEndOverlap.BindUFunction(newAction, "OnAttachmentEndOverlap");
-		}
-	}
 	
 	return true;
 }
@@ -128,15 +119,34 @@ void UCActionComponent::EndAction(EActionType const & InActionInput)
 	CheckNull(Actions[(uint8)InActionInput]);
 	Actions[(uint8)InActionInput]->EndAction();
 	Actions[(uint8)InActionInput] = nullptr;
-	for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
-	{
-		attachment->OnAttachmentBeginOverlap.Unbind();
-		attachment->OnAttachmentEndOverlap.Unbind();
-	}
 
 	if(*RecentAction == nullptr)
 		RecentAction = nullptr;
 }
+
+
+//  *********************
+//      Overlap Event
+//  *********************
+
+void UCActionComponent::OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter)
+{
+	CheckFalse((*RecentAction)->GetClass()->ImplementsInterface(UCI_Action_Collision::StaticClass()));
+
+	FHitData hitData;
+	ICI_Action_Collision::Execute_GetHitData(*RecentAction, hitData);
+
+	hitData.PlayHitStop(InAttacker->GetWorld());
+	CheckNull(InOtherCharacter);
+	hitData.PlaySoundCue(InOtherCharacter);
+	hitData.PlayEffect(InAttacker->GetWorld(), InOtherCharacter->GetActorLocation());
+	hitData.SendDamage(InAttacker, InAttackCauser, InOtherCharacter);
+}
+
+void UCActionComponent::OnAttachmentEndOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter)
+{
+}
+
 
 //  *********************
 //      Inputs

@@ -28,7 +28,10 @@ void UCWeaponComponent::BeginPlay()
 
 	UCWeapon* newWeaponData;
 	if(!!UnarmedAsset)
+	{
 		UnarmedAsset->BeginPlay(OwnerCharacter, &newWeaponData);
+		EquipWeapon();
+	}
 	WeaponDatas.Push(newWeaponData);
 	
 	//Weapon ¼¼ÆÃ

@@ -4,10 +4,9 @@
 #include "Sound/SoundCue.h"
 
 #include "Characters/CCharacter_Base.h"
-#include "Components/CStatusComponent.h"
 
 
-void FHitData::PlayHitStop(UWorld* InWorld)
+void FHitData::PlayHitStop(UWorld* InWorld) const
 {
 	CheckTrue(FMath::IsNearlyZero(StopTime));
 
@@ -34,17 +33,16 @@ void FHitData::PlayHitStop(UWorld* InWorld)
 	InWorld->GetTimerManager().SetTimer(timerHandle, timerDelegate, StopTime, false);
 }
 
-void FHitData::PlaySoundCue(ACCharacter_Base* InOwner)
+void FHitData::PlaySoundCue(ACCharacter_Base* InOwner) const
 {
 	CheckNull(SoundCue);
-
 	UWorld* world = InOwner->GetWorld();
 	FVector location = InOwner->GetActorLocation();
 
 	UGameplayStatics::SpawnSoundAtLocation(world, SoundCue, location);
 }
 
-void FHitData::PlayEffect(UWorld* InWorld, const FVector& InLocation)
+void FHitData::PlayEffect(UWorld* InWorld, const FVector& InLocation) const
 {
 	CheckNull(Effect);
 
