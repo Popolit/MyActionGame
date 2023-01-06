@@ -136,10 +136,7 @@ void UCActionComponent::OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, A
 	FHitData hitData;
 	ICI_Action_Collision::Execute_GetHitData(*RecentAction, hitData);
 
-	hitData.PlayHitStop(InAttacker->GetWorld());
 	CheckNull(InOtherCharacter);
-	hitData.PlaySoundCue(InOtherCharacter);
-	hitData.PlayEffect(InAttacker->GetWorld(), InOtherCharacter->GetActorLocation());
 	hitData.SendDamage(InAttacker, InAttackCauser, InOtherCharacter);
 }
 

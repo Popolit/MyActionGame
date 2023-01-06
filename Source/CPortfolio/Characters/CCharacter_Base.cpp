@@ -1,9 +1,9 @@
 #include "Characters/CCharacter_Base.h"
 #include "Global.h"
 
-
 #include "Attributes/CAttributeSet.h"
 #include "Components/CAbilitySystemComponent.h"
+#include "Actions/CActionStructure.h"
 #include "Components/CActionComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
@@ -80,8 +80,10 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 			StateComponent->SetIsInAir(false);
 			break;
 		}
-
 		case EMovementMode::MOVE_Falling :
+		{
+			break;
+		}
 		case EMovementMode::MOVE_Flying :
 		{
 			StateComponent->SetIsInAir(true);
@@ -93,8 +95,24 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 void ACCharacter_Base::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
+	StateComponent->SetIsInAir(true);
 	if(OnJumped.IsBound())
 		OnJumped.Broadcast();
+}
+
+void ACCharacter_Base::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
+{
+	Super::OnWalkingOffLedge_Implementation(PreviousFloorImpactNormal, PreviousFloorContactNormal, PreviousLocation, TimeDelta);
+
+	StateComponent->SetIsInAir(true);
+}
+
+void ACCharacter_Base::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
+{
+	Super::LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+	if(!bZOverride)
+		return;
+	StateComponent->SetIsInAir(true);
 }
 
 //  *********************
@@ -232,13 +250,44 @@ void ACCharacter_Base::ChangeWeapon(uint8 const& InNumber) {}
 
 float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float const damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if(damage == 0.f)
+	if(DamageAmount == 0.f)
 		return 0.f;
+	if(!DamageEvent.IsOfType(FActionDamageEvent::ClassID))
+		return 0.f;
+	
+	FActionDamageEvent* const actionDamageEvent = (FActionDamageEvent*) &DamageEvent;
 
-	StatusComponent->Damage(damage);
+	//데미지 방향 벡터 설정
+	FVector damageDirection;
+
+	//직접 타격
+	if(EventInstigator)
+		damageDirection = GetActorLocation() - EventInstigator->GetPawn()->GetActorLocation();
+	//스킬 등 투사체 타격
+	else
+		damageDirection = GetActorLocation() - DamageCauser->GetActorLocation();
+	damageDirection.Z = 0.f;
+	damageDirection.Normalize();
+	
+	//넉백 벡터 설정
+	FVector knockBack = damageDirection;
+	knockBack *= actionDamageEvent->HitData->Launch;
+	knockBack.Z += actionDamageEvent->HitData->LaunchZ;
+	LaunchCharacter(knockBack * 5, true, false);
+	
+	//캐릭터 방향 세
+	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-damageDirection));
+
+
+	//피격 처리
+	actionDamageEvent->HitData->PlayHitStop(GetWorld());
+	actionDamageEvent->HitData->PlayEffect(GetWorld(), GetActorLocation());
+	actionDamageEvent->HitData->PlaySoundCue(this);
+	
+	StatusComponent->Damage(DamageAmount);
 	StateComponent->SetHittedMode();
-	return damage;
+
+	return DamageAmount;
 }
 
 
