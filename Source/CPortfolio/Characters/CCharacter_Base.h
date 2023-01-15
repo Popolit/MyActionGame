@@ -47,9 +47,14 @@ public:
 	virtual void OnJumped_Implementation() override;
 	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta) override;
 	virtual void LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride) override;
+	virtual void Landed(const FHitResult& Hit) override;
 
 public:
+	UPROPERTY(EditDefaultsOnly)
+		FVector LaunchZ_InAir = FVector(0, 0, 200.f);
+public:
 	FOnJumped OnJumped;
+	
 
 
 //  *********************

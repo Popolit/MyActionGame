@@ -5,7 +5,7 @@
 #include "CAttachment.generated.h"
 
 DECLARE_DELEGATE_ThreeParams(FAttachmentOverlap, class ACCharacter_Base*, class AActor*, class ACCharacter_Base*);
-
+DECLARE_DELEGATE(FAttachmentCollision)
 //무기의 외형, Collision Box 클래스
 UCLASS()
 class CPORTFOLIO_API ACAttachment : public AActor
@@ -49,6 +49,8 @@ protected:
 public:
 	FAttachmentOverlap OnAttachmentBeginOverlap;
 	FAttachmentOverlap OnAttachmentEndOverlap;
+	FAttachmentCollision OnAttachmentCollision;
+	FAttachmentCollision OffAttachmentCollision;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

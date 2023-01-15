@@ -74,6 +74,8 @@ void UCStateComponent::SetIsInAir(bool const& InAirCondition)
 {
 	if(bIsInAir == InAirCondition)
 		return;
+
+	CLog::Print("IsInAir" + bIsInAir);
 	bIsInAir = InAirCondition;
 	if (OnAerialConditionChanged.IsBound())
 		OnAerialConditionChanged.Broadcast(bIsInAir);

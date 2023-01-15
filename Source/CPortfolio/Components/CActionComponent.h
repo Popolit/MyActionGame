@@ -25,6 +25,7 @@ protected:
 private:
 	class ACCharacter_Base* OwnerCharacter;
 	class UCWeaponComponent* WeaponComponent;
+	class UCStatusComponent* StatusComponent;
 
 //  **********************
 //      Action & Trigger
@@ -68,7 +69,10 @@ public:
 private:
 	void OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
 	void OnAttachmentEndOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
+	void OnAttachmentOffCollision();
 	
+private:
+	TArray<ACCharacter_Base*> Arr_Hitted;
 	
 //  *********************
 //      Inputs

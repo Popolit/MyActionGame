@@ -29,7 +29,8 @@ void UCActionComponent::BeginPlay()
 	//컴포넌트 세팅
 	UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
-
+	StatusComponent = CHelpers::GetComponent<UCStatusComponent>(OwnerCharacter);
+	
 	//델리게이션
 	state->OnStateTypeChanged.AddDynamic(this, &UCActionComponent::SetStateTrigger);
 	state->OnAerialConditionChanged.AddDynamic(this, &UCActionComponent::SetAerialTrigger);
@@ -82,6 +83,7 @@ void UCActionComponent::OnWeaponChanged(EWeaponType PrevWeaponType, EWeaponType 
 	{
 		attachment->OnAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
 		attachment->OnAttachmentEndOverlap.BindUObject(this, &UCActionComponent::OnAttachmentEndOverlap);
+		attachment->OffAttachmentCollision.BindUObject(this, &UCActionComponent::OnAttachmentOffCollision);
 	}
 }
 
@@ -95,7 +97,9 @@ bool UCActionComponent::SetAction()
 	CheckNullResult(newAction, false);
 	if(newAction == Actions[(uint8)trigger.ActionType])
 		return true;
-	
+
+	if(!StatusComponent->CanAction())
+		return false;
 	
 	if(OnActionChanged.IsBound())
 		OnActionChanged.Broadcast(Actions[(uint8)trigger.ActionType], newAction);
@@ -133,6 +137,10 @@ void UCActionComponent::OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, A
 {
 	CheckFalse((*RecentAction)->GetClass()->ImplementsInterface(UCI_Action_Collision::StaticClass()));
 
+	if(Arr_Hitted.Contains(InOtherCharacter))
+		return;
+
+	Arr_Hitted.Add(InOtherCharacter);
 	FHitData hitData;
 	ICI_Action_Collision::Execute_GetHitData(*RecentAction, hitData);
 
@@ -142,6 +150,11 @@ void UCActionComponent::OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, A
 
 void UCActionComponent::OnAttachmentEndOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter)
 {
+}
+
+void UCActionComponent::OnAttachmentOffCollision()
+{
+	Arr_Hitted.Empty();
 }
 
 
@@ -154,9 +167,8 @@ void UCActionComponent::ExecuteActionInput(EActionType InActionInput, bool InPre
 	if(InPressed)
 	{
 		SetActionTrigger(InActionInput);
-		if(!SetAction())
-			return;
-		Pressed(InActionInput);
+		if(SetAction())
+			Pressed(InActionInput);
 	}
 	else
 		Released(InActionInput);

@@ -13,6 +13,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
@@ -70,6 +71,8 @@ ACPlayer::ACPlayer()
 
 	for(UINT u = 0; u < 4; u++)
 		bMoving[u] = false;
+
+	StateComponent->OnAerialConditionChanged.AddDynamic(this, &ACPlayer::OnAerialConditionChanged);
 }
 
 void ACPlayer::BeginPlay()
@@ -96,6 +99,14 @@ void ACPlayer::Tick(float DeltaTime)
 	//HUD->UpdateMP(GetCurrMP(), GetMaxMP());
 }
 
+
+void ACPlayer::OnAerialConditionChanged(bool IsInAir)
+{
+	if(IsInAir)
+		GetCapsuleComponent()->SetCollisionProfileName("Ragdoll");
+	else
+		GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+}
 
 //  *********************
 //      Attribute Ã³¸®

@@ -4,6 +4,8 @@
 #include "Attributes/CAttributeSet.h"
 #include "Components/CAbilitySystemComponent.h"
 #include "Actions/CActionStructure.h"
+#include "Actions/CAction.h"
+#include "Actions/CI_Action_Tick.h"
 #include "Components/CActionComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
@@ -71,25 +73,9 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);
 	EMovementMode NewMovementMode = GetCharacterMovement()->MovementMode;
-
-	switch (NewMovementMode)
-	{
-		case EMovementMode::MOVE_Walking : 
-		case EMovementMode::MOVE_NavWalking :
-		{
-			StateComponent->SetIsInAir(false);
-			break;
-		}
-		case EMovementMode::MOVE_Falling :
-		{
-			break;
-		}
-		case EMovementMode::MOVE_Flying :
-		{
-			StateComponent->SetIsInAir(true);
-			break;
-		}
-	}
+	if(NewMovementMode == EMovementMode::MOVE_Flying)
+		StateComponent->SetIsInAir(true);
+			
 }
 
 void ACCharacter_Base::OnJumped_Implementation()
@@ -113,6 +99,13 @@ void ACCharacter_Base::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride,
 	if(!bZOverride)
 		return;
 	StateComponent->SetIsInAir(true);
+}
+
+void ACCharacter_Base::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	StateComponent->SetIsInAir(false);
 }
 
 //  *********************
@@ -273,19 +266,32 @@ float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	FVector knockBack = damageDirection;
 	knockBack *= actionDamageEvent->HitData->Launch;
 	knockBack.Z += actionDamageEvent->HitData->LaunchZ;
-	LaunchCharacter(knockBack * 5, true, false);
+
+	if(StateComponent->IsInAir())
+		LaunchCharacter(knockBack.Z == 0.f ? LaunchZ_InAir : knockBack, true, true);
+	else if(knockBack.Z == 0.f)
+		LaunchCharacter(knockBack, true, false);
+	else
+		LaunchCharacter(knockBack, true, true);
 	
-	//캐릭터 방향 세
+	//캐릭터 방향 세팅
 	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-damageDirection));
 
 
 	//피격 처리
+	
 	actionDamageEvent->HitData->PlayHitStop(GetWorld());
 	actionDamageEvent->HitData->PlayEffect(GetWorld(), GetActorLocation());
 	actionDamageEvent->HitData->PlaySoundCue(this);
 	
 	StatusComponent->Damage(DamageAmount);
 	StateComponent->SetHittedMode();
+	
+	UCAction* action = ActionComponent->GetAction(EActionType::None);
+	ICI_Action_Tick* tickableAction = Cast<ICI_Action_Tick>(action);
+
+	if(tickableAction)
+		tickableAction->SetTickTime(actionDamageEvent->HitData->StaggerTime);
 
 	return DamageAmount;
 }

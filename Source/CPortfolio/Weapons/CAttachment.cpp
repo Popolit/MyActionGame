@@ -39,12 +39,16 @@ void ACAttachment::OnCollision()
 {
 	for (UShapeComponent* collision : Collisions)
 		collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	if(OnAttachmentCollision.IsBound())
+		OnAttachmentCollision.Execute();
 }
 
 void ACAttachment::OffCollision()
 {
 	for (UShapeComponent* collision : Collisions)
 		collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if(OffAttachmentCollision.IsBound())
+		OffAttachmentCollision.Execute();
 }
 
 void ACAttachment::OnEndEquip()

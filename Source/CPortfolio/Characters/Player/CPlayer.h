@@ -29,6 +29,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCameraComponent* Camera;
 
+private:
+	UFUNCTION()
+		void OnAerialConditionChanged(bool IsInAir);
 
 //  *********************
 //      Attribute Ã³¸®
