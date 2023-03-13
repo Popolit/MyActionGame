@@ -1,5 +1,5 @@
 #include "CStateComponent.h"
-#include "Global.h"
+#include "CLog.h"
 
 UCStateComponent::UCStateComponent()
 {
@@ -32,15 +32,11 @@ void UCStateComponent::SetEquipMode()
 	ChangeType(EStateType::Equip);
 }
 
-void UCStateComponent::SetGuardMode()
+void UCStateComponent::SetSubActionMode()
 {
-	ChangeType(EStateType::Guard);
+	ChangeType(EStateType::SubAction);
 }
 
-void UCStateComponent::SetZoomMode()
-{
-	ChangeType(EStateType::Zoom);
-}
 
 void UCStateComponent::SetActionMode()
 {
@@ -65,7 +61,7 @@ void UCStateComponent::ChangeType(EStateType InType)
 	if (OnStateTypeChanged.IsBound())
 		OnStateTypeChanged.Broadcast(Type);
 
-	FString const ss[uint8(EStateType::Max) + 1] = {"Idle", "Dash", "Evade", "Equip", "Guard", "Zoom", "Action", "Hitted", "Dead", "Max"};
+	FString const ss[uint8(EStateType::Max) + 1] = {"Idle", "Dash", "Evade", "Equip", "SubAction", "Action", "Hitted", "Dead", "Max"};
 	CLog::Print(ss[uint8(Type)]);
 }
 
@@ -74,8 +70,7 @@ void UCStateComponent::SetIsInAir(bool const& InAirCondition)
 {
 	if(bIsInAir == InAirCondition)
 		return;
-
-	CLog::Print("IsInAir" + bIsInAir);
+	
 	bIsInAir = InAirCondition;
 	if (OnAerialConditionChanged.IsBound())
 		OnAerialConditionChanged.Broadcast(bIsInAir);

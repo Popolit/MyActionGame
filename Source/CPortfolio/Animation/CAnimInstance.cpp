@@ -1,14 +1,12 @@
 #include "Animation/CAnimInstance.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/Player/CPlayer.h"
 #include "Components/CFeetComponent.h"
 #include "Components/CWeaponComponent.h"
-#include "CAnimMetaData.h"
 #include "Components/CStateComponent.h"
 
 #include "GameFramework/Character.h"
-#include "Weapons/CEquipment.h"
 
 
 void UCAnimInstance::NativeBeginPlay()
@@ -72,8 +70,7 @@ void UCAnimInstance::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	if(!bInterrupted)
 		return;
 	//Equip 애니메이션 interrupt 시 equip 마무리
-	
-	if(!(Weapon->GetEquipment() == nullptr) && Weapon->GetEquipment()->GetBeginEquip())
+	/*if(Weapon->GetEquipment() != nullptr && Weapon->GetEquipment()->GetBeginEquip())
 	{
 		Weapon->GetEquipment()->EndEquip();
 		return;
@@ -83,5 +80,10 @@ void UCAnimInstance::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		Weapon->GetPrevEquipment()->EndUnEquip();
 		return;
-	}
+	}*/
+}
+
+void UCAnimInstance::OnHitted(uint8 InMontageIndex)
+{
+	HitMontageNum = InMontageIndex;
 }

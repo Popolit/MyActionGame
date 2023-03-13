@@ -1,11 +1,11 @@
 #include "CFeetComponent.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/CCharacter_Base.h"
 
+#include "Kismet/KismetMathLibrary.h"
 #include "CollisionQueryParams.h"
 #include "Components/CapsuleComponent.h"
-#include "Engine/SkeletalMeshSocket.h"
 
 
 UCFeetComponent::UCFeetComponent()

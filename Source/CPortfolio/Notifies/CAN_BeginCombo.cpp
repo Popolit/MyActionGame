@@ -1,5 +1,5 @@
 ﻿#include "CAN_BeginCombo.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/CCharacter_Base.h"
 #include "Components/CActionComponent.h"
@@ -17,7 +17,7 @@ void UCAN_BeginCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComponent);
 	
-	UCActionCombo* action = Cast<UCActionCombo>(actionComponent->GetAction(EActionType::Action));
+	/*UCActionCombo* action = Cast<UCActionCombo>(actionComponent->GetAction(EActionType::Action));
 	CheckNull(action);
-	action->BeginCombo();
+	action->BeginCombo();*/
 }

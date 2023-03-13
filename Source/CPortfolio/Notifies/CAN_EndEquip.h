@@ -11,9 +11,12 @@ class CPORTFOLIO_API UCAN_EndEquip : public UAnimNotify
 	GENERATED_BODY()
 	
 public:
-	//UCAN_EndEquip();
+	UCAN_EndEquip();
 
 	FString GetNotifyName_Implementation() const override;
 
 	void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+private:
+	FString const NotifyName;
 };

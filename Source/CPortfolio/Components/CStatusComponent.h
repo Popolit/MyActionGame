@@ -1,14 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreEnums.h"
 #include "Components/ActorComponent.h"
 #include "CStatusComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class ESpeedType : uint8
-{
-	Walk, Run, Sprint, Max,
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCStatusComponent : public UActorComponent

@@ -1,9 +1,7 @@
 #include "CAN_EndUnEquip.h"
-#include "Global.h"
+#include "CHelpers.h"
 
-#include "Characters/CCharacter_Base.h"
 #include "Components/CWeaponComponent.h"
-#include "Weapons/CEquipment.h"
 
 FString UCAN_EndUnEquip::GetNotifyName_Implementation() const
 {
@@ -16,7 +14,7 @@ void UCAN_EndUnEquip::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
     CheckNull(MeshComp->GetOwner());
     UCWeaponComponent* weapon = CHelpers::GetComponent<UCWeaponComponent>(MeshComp->GetOwner());
     CheckNull(weapon);
-    CheckNull(weapon->GetPrevEquipment());
+    /*CheckNull(weapon->GetPrevEquipment());
 
-    weapon->GetPrevEquipment()->EndUnEquip();
+    weapon->GetPrevEquipment()->EndUnEquip();*/
 }

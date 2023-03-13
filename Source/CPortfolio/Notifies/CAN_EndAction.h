@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "Actions/CActionStructure.h"
 #include "CAN_EndAction.generated.h"
 
 
@@ -12,11 +11,14 @@ class CPORTFOLIO_API UCAN_EndAction : public UAnimNotify
 	GENERATED_BODY()
 	
 public:
+	UCAN_EndAction();
 	FString GetNotifyName_Implementation() const override;
 
 	void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
-public:
+/*public:
 	UPROPERTY(EditInstanceOnly)
-		EActionType ActionType = EActionType::None;
+		EActionType ActionType;*/
+private:
+	FString const NotifyName;
 };

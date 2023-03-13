@@ -1,13 +1,8 @@
 ﻿#include "CActionComponent.h"
 
-#include "CWeaponComponent.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/Player/CPlayer.h"
-#include "Actions/CAction.h"
-#include "Actions/CI_Action_Collision.h"
-#include "Actions/CI_Action_Tick.h"
-#include "Weapons/CAttachment.h"
 
 
 //  *********************
@@ -27,7 +22,7 @@ void UCActionComponent::BeginPlay()
 	CheckNull(OwnerCharacter);
 
 	//컴포넌트 세팅
-	UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
+	/*UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
 	StatusComponent = CHelpers::GetComponent<UCStatusComponent>(OwnerCharacter);
 	
@@ -37,22 +32,43 @@ void UCActionComponent::BeginPlay()
 	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
 	OnActionInput.BindUObject(this, &UCActionComponent::ExecuteActionInput);
 	
-	ActionData = WeaponComponent->GetActionData();
+	ActionData = WeaponComponent->GetActionData();*/
 }
 
 void UCActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	CheckNull(ActionData);
-	for(UCAction* action : ActionData->GetTickableActions())
-		Cast<ICI_Action_Tick>(action)->Tick(DeltaTime);
+	/*for(TScriptInterface<ICI_Tickable> Action : Actions_Tickable)
+		Action->Tick(DeltaTime);*/
 }
 
+/*
+void UCActionComponent::KeyPressed(EActionType const& InActionInput)
+{
+	/*ICI_KeyTrigger* Action = Cast<ICI_KeyTrigger>(Actions_TriggeredByKey[InActionInput]);
+	CheckNull(Action);
+	Action->KeyPressed();#1#
+}
+
+void UCActionComponent::KeyReleased(EActionType const& InActionInput)
+{
+	/*ICI_KeyTrigger* Action = Cast<ICI_KeyTrigger>(Actions_TriggeredByKey[InActionInput]);
+	CheckNull(Action);
+	Action->KeyReleased();#1#
+}
+
+void UCActionComponent::StateChanged(EStateType NewStateType)
+{
+	/*ICI_StateTrigger* Action = Cast<ICI_StateTrigger>(Actions_TriggeredByState[NewStateType]);
+	CheckNull(Action);
+	Action->StateChanged();#1#
+}*/
+/*
 //  **********************
 //      Action & Trigger
 //  **********************
 
-UCAction* UCActionComponent::GetAction(EActionType const & InActionInput)
+UCAction_Base* UCActionComponent::GetAction(EActionType const & InActionInput)
 {
 	CheckNullResult(Actions[(uint8)InActionInput], nullptr);
 	return Actions[(uint8)InActionInput];
@@ -79,6 +95,7 @@ void UCActionComponent::SetActionTrigger(EActionType InActionType)
 void UCActionComponent::OnWeaponChanged(EWeaponType PrevWeaponType, EWeaponType NewWeaponType)
 {
 	ActionData = WeaponComponent->GetActionData();
+	CheckNull(ActionData);
 	for(ACAttachment* attachment : *WeaponComponent->GetAttachments())
 	{
 		attachment->OnAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
@@ -92,7 +109,7 @@ bool UCActionComponent::SetAction()
 {
 	CheckNullResult(ActionData, false);
 	FActionTrigger trigger = Trigger;
-	UCAction* newAction = ActionData->GetAction(trigger);
+	UCAction_Base* newAction = ActionData->GetAction(trigger);
 	
 	CheckNullResult(newAction, false);
 	if(newAction == Actions[(uint8)trigger.ActionType])
@@ -168,23 +185,24 @@ void UCActionComponent::ExecuteActionInput(EActionType InActionInput, bool InPre
 	{
 		SetActionTrigger(InActionInput);
 		if(SetAction())
-			Pressed(InActionInput);
+			KeyPressed(InActionInput);
 	}
 	else
-		Released(InActionInput);
+		KeyReleased(InActionInput);
 }
 
-void UCActionComponent::Pressed(EActionType const & InActionInput)
+void UCActionComponent::KeyPressed(EActionType const & InActionInput)
 {
 	CheckNull(Actions[(uint8)InActionInput]);
 	Actions[(uint8)InActionInput]->Pressed();
 }
 
-void UCActionComponent::Released(EActionType const & InActionInput)
+void UCActionComponent::KeyReleased(EActionType const & InActionInput)
 {
 	CheckNull(Actions[(uint8)InActionInput]);
 	Actions[(uint8)InActionInput]->Released();
 }
+*/
 
 
 

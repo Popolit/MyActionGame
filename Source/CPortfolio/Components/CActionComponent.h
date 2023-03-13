@@ -2,17 +2,48 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Actions/CActionData.h"
 #include "CActionComponent.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FOnActionInput, EActionType, bool)
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActionChanged, class UCAction*, class UCAction*)
+class ACCharacter_Base;
+class UCActionData;
+class UCStateComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCActionComponent : public UActorComponent
 {
 	GENERATED_BODY()
+public:
+	UCActionComponent();
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+/*public:
+	void KeyPressed(EActionType const& InActionInput);
+	void KeyReleased(EActionType const& InActionInput);
+
+public:
+	void StateChanged(EStateType NewStateType);*/
+	
+private:
+	UPROPERTY()
+		ACCharacter_Base* OwnerCharacter;
+	/*
+	UPROPERTY()
+		UCACtionData* DefaultActions;
+	UPROPERTY()
+		UCStateComponent* StateComponent;
+		*/
+
+/*
+private:
+	TMap<EActionType, UCAction_Base*> Actions_TriggeredByKey;
+	TMap<EStateType, UCAction_Base*> Actions_TriggeredByState;
+	TArray<ICI_Tickable*> Actions_Tickable;*/
+};
+
+
+
+/*
 //  *********************
 //      기본 세팅
 //  *********************
@@ -33,7 +64,7 @@ private:
 	
 public:
 	UFUNCTION(BlueprintCallable)
-		UCAction* GetAction(EActionType const & InActionInput);
+		UCAction_Base* GetAction(EActionType const & InActionInput);
 	UFUNCTION()
 		void SetStateTrigger(EStateType InStateType);
 	UFUNCTION()
@@ -51,13 +82,13 @@ public:
 
 private:
 	UPROPERTY()
-		UCAction* Actions[(uint8)EActionType::None + 1];
+		UCAction_Base* Actions[(uint8)EActionType::None + 1];
 	UPROPERTY()
 		UCActionData* ActionData;
 		
 private:
 	FActionTrigger Trigger;
-	UCAction** RecentAction;
+	UCAction_Base** RecentAction;
 	uint8 const ActionMax = (uint8)EActionType::None + 1;
 	
 public:
@@ -84,8 +115,9 @@ public:
 	FOnActionInput OnActionInput;
 
 public:
-	void Pressed(EActionType const & InActionInput);
-	void Released(EActionType const & InActionInput);
+	void KeyPressed(EActionType const & InActionInput);
+	void KeyReleased(EActionType const & InActionInput);
 };
+*/
 
 

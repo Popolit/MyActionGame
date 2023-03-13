@@ -1,6 +1,6 @@
 ﻿#include "CGhostTrail.h"
 
-#include "Global.h"
+#include "CHelpers.h"
 #include "GameFramework/Character.h"
 #include "Components/PoseableMeshComponent.h"
 #include "Components/CapsuleComponent.h"

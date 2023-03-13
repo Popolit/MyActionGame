@@ -1,14 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreEnums.h"
 #include "Components/ActorComponent.h"
 #include "CStateComponent.generated.h"
-
-UENUM(BlueprintType)
-enum class EStateType : uint8
-{
-	Idle, Dash, Evade, Equip, Guard, Zoom, Action, Hitted, Dead, Max,
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateTypeChanged, EStateType, NewStateType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAerialConditionChanged, bool, IsInAir);
@@ -34,9 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsEquipMode() { return Type == EStateType::Equip; }
 	UFUNCTION(BlueprintCallable)
-		FORCEINLINE bool IsGuardMode() { return Type == EStateType::Guard; }
-	UFUNCTION(BlueprintCallable)
-		FORCEINLINE bool IsZoomMode() { return Type == EStateType::Zoom; }
+		FORCEINLINE bool IsSubActionMode() { return Type == EStateType::SubAction; }
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsActionMode() { return Type == EStateType::Action; }
 	UFUNCTION(BlueprintCallable)
@@ -57,9 +50,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetEquipMode();
 	UFUNCTION(BlueprintCallable)
-		void SetGuardMode();
-	UFUNCTION(BlueprintCallable)
-		void SetZoomMode();
+		void SetSubActionMode();
 	UFUNCTION(BlueprintCallable)
 		void SetActionMode();
 	UFUNCTION(BlueprintCallable)

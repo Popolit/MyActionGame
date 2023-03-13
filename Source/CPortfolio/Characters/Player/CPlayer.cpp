@@ -1,14 +1,11 @@
 #include "CPlayer.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Components/CWeaponComponent.h"
-#include "Components/CActionComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Animation/CAnimInstance.h"
 #include "Widgets/CWidget_HUD.h"
-#include "Attributes/CAttributeSet.h"
-#include "Actions/CAction.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -22,17 +19,9 @@
 //  *********************
 //      기본 세팅
 //  *********************
-ACPlayer::ACPlayer()
+ACPlayer::ACPlayer() : ACCharacter_Base(), bMoving{ false, false, false, false }
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-
-	//메쉬 설정
-	USkeletalMesh* mesh;
-	CHelpers::GetAsset<USkeletalMesh>(&mesh, "SkeletalMesh'/Game/Characters/Player/Meshes/SK_CyberpunkSamurai_WithHelmet.SK_CyberpunkSamurai_WithHelmet'");
-	GetMesh()->SetSkeletalMesh(mesh);
-	GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
-	GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 
 	//카메라 설정
 	CHelpers::CreateComponent<USpringArmComponent>(this, &SpringArm, "SpringArm", GetMesh());
@@ -46,21 +35,6 @@ ACPlayer::ACPlayer()
 	Camera->SetRelativeLocation(FVector(-30, 0, 0));
 	Camera->bUsePawnControlRotation = false;
 
-	//애니메이션 설정
-	TSubclassOf<UCAnimInstance> animInstance;
-	CHelpers::GetClass<UCAnimInstance>(&animInstance, "AnimBlueprint'/Game/Animations/ABP_Character.ABP_Character_C'");
-	GetMesh()->SetAnimClass(animInstance);
-	
-
-	//HP, MP HUD 클래스 설정
-	/* MaxHP = 10000.0f;
-	CurrHP = MaxHP;
-	MaxMP = 100.0f;
-	CurrMP = 0.0f; */
-	CHelpers::GetClass<UCWidget_HUD>(&HUDClass, "WidgetBlueprint'/Game/Widgets/WB_HUD.WB_HUD_C'");
-	
-	
-
 	//캐릭터 기본 설정
 	GetCharacterMovement()->MaxWalkSpeed = 400;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -68,11 +42,6 @@ ACPlayer::ACPlayer()
 
 	JumpMaxCount = 2;
 	JumpMaxHoldTime = 0.5f;
-
-	for(UINT u = 0; u < 4; u++)
-		bMoving[u] = false;
-
-	StateComponent->OnAerialConditionChanged.AddDynamic(this, &ACPlayer::OnAerialConditionChanged);
 }
 
 void ACPlayer::BeginPlay()
@@ -85,18 +54,15 @@ void ACPlayer::BeginPlay()
 		HUD = CreateWidget<UCWidget_HUD, APlayerController>(GetController<APlayerController>(), HUDClass);
 		HUD->AddToViewport();
 		HUD->SetVisibility(ESlateVisibility::Visible);
-		HUD->UpdateHP(GetCurrHP(), GetMaxHP());
-		HUD->UpdateMP(GetCurrMP(), GetMaxMP());
+		/*HUD->UpdateHP(GetCurrHP(), GetMaxHP());
+		HUD->UpdateMP(GetCurrMP(), GetMaxMP());*/
 	}
+	StateComponent->OnAerialConditionChanged.AddDynamic(this, &ACPlayer::OnAerialConditionChanged);
 }
 
 void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//에너지 게이지 자연 증가
-	/* CurrMP += TickMPAmount; */
-	//HUD->UpdateMP(GetCurrMP(), GetMaxMP());
 }
 
 
@@ -107,23 +73,6 @@ void ACPlayer::OnAerialConditionChanged(bool IsInAir)
 	else
 		GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 }
-
-//  *********************
-//      Attribute 처리
-//  *********************
-float ACPlayer::GetCurrMP() const
-{
-	if(!!AttributeSet)
-		return AttributeSet->GetCurrMP();
-	return 0.0f;
-}
-float ACPlayer::GetMaxMP() const
-{
-	if(!!AttributeSet)
-		return AttributeSet->GetMaxMP();
-	return 0.0f;
-}
-
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -174,11 +123,6 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 
 
-bool ACPlayer::IsMoving()
-{
-	return bMoving[0] || bMoving[1] || bMoving[2] || bMoving[3];
-}
-
 
 void ACPlayer::OnMoveForward(float AxisValue)
 {
@@ -211,18 +155,18 @@ void ACPlayer::OnHorizontalLook(float AxisValue)
 void ACPlayer::PressedJump()
 {
 	CheckFalse(StatusComponent->CanAction());
-	ActionComponent->OnActionInput.Execute(EActionType::Jump, true);
+	//ActionComponent->OnActionInput.Execute(EActionType::Jump, true);
 }
 
 void ACPlayer::ReleasedJump()
 {
-	ActionComponent->OnActionInput.Execute(EActionType::Jump, false);
+	//ActionComponent->OnActionInput.Execute(EActionType::Jump, false);
 }
 
 void ACPlayer::PressedEvade()
 {
 	CheckFalse(StatusComponent->CanAction());
-	ActionComponent->OnActionInput.Execute(EActionType::Evade, true);
+	//ActionComponent->OnActionInput.Execute(EActionType::Evade, true);
 }
 
 
@@ -300,55 +244,55 @@ void ACPlayer::BeginRunning()
 //  *********************
 void ACPlayer::ChangeWeapon1()
 {
-	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(1);
+	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	{
+		return;
+	}
+	WeaponComponent->ChangeWeapon(0);
 }
 void ACPlayer::ChangeWeapon2()
 {
-	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(2);
+	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	{
+		return;
+	}
+	WeaponComponent->ChangeWeapon(1);
 }
 void ACPlayer::ChangeWeapon3()
 {
-	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(3);
+	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	{
+		return;
+	}
+	WeaponComponent->ChangeWeapon(2);
 }
 void ACPlayer::ChangeWeapon4()
 {
-	CheckFalse(StatusComponent->CanMove());
-	ChangeWeapon(4);
+	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	{
+		return;
+	}
+	WeaponComponent->ChangeWeapon(3);
 }
 
 void ACPlayer::PressedAction()
 {
 	CheckFalse(StatusComponent->CanAction());
-	ActionComponent->OnActionInput.Execute(EActionType::Action, true);
+	//ActionComponent->OnActionInput.Execute(EActionType::Action, true);
 }
 
 void ACPlayer::ReleasedAction()
 {
-	ActionComponent->OnActionInput.Execute(EActionType::Action, false);
+	//ActionComponent->OnActionInput.Execute(EActionType::Action, false);
 }
 
 void ACPlayer::PressedSubAction()
 {
 	CheckFalse(StatusComponent->CanAction());
-	ActionComponent->OnActionInput.Execute(EActionType::SubAction, true);
+	//ActionComponent->OnActionInput.Execute(EActionType::SubAction, true);
 }
 
 void ACPlayer::ReleasedSubAction()
 {
-	ActionComponent->OnActionInput.Execute(EActionType::SubAction, false);
-}
-
-
-
-//  *********************
-//      Equip 처리
-//  *********************
-void ACPlayer::ChangeWeapon(uint8 const& InNumber)
-{
-	Super::ChangeWeapon(InNumber);
-	CheckNull(WeaponComponent);
-	WeaponComponent->ChangeWeapon(InNumber);
+	//ActionComponent->OnActionInput.Execute(EActionType::SubAction, false);
 }

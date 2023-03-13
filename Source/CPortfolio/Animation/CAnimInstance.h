@@ -2,10 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Actions/CActionStructure.h"
-#include "Weapons/CWeaponStructure.h"
+#include "CoreEnums.h"
 #include "Struct/FeetData.h"
 #include "CAnimInstance.generated.h"
+
+class ACCharacter_Base;
+class UCWeaponComponent;
+class UCStateComponent;
+class UCFeetComponent;
 
 UCLASS()
 class CPORTFOLIO_API UCAnimInstance : public UAnimInstance
@@ -39,6 +43,9 @@ protected:
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
         FFeetData FeetData;
 
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+        uint8 HitMontageNum;
+
 
 public:
     virtual void NativeBeginPlay() override;
@@ -53,10 +60,14 @@ private:
         void OnAerialConditionChanged(bool IsInAir);
     UFUNCTION()
         void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+public:
+    UFUNCTION()
+        void OnHitted(uint8 InMontageIndex);
     
 private:
-    class ACCharacter_Base* Owner;
-    class UCWeaponComponent* Weapon;
-    class UCStateComponent* State;
-    class UCFeetComponent* Feet;
+    ACCharacter_Base* Owner;
+    UCWeaponComponent* Weapon;
+    UCStateComponent* State;
+    UCFeetComponent* Feet;
 };
