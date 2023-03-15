@@ -2,15 +2,21 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "TraceAnalysis/Private/Store/AsioFile.h"
 
-class FWeaponModule : public IModuleInterface
+class FWeaponCommand;
+class IAssetTypeActions;
+
+class FWeaponEditorModule : public IModuleInterface
 {
 public:
-
+	FWeaponEditorModule();
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
 private:
-	TSharedPtr<class FWeaponCommand> Command;
-	TSharedPtr<class IAssetTypeActions> AssetTypeActions;
+	const FName ModuleName;
+	TSharedPtr<FWeaponCommand> Command;
+	TSharedPtr<IAssetTypeActions> AssetTypeActions;
 };

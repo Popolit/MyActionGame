@@ -2,7 +2,7 @@
 
 #include "WeaponAssetEditor.h"
 
-#include "WeaponStyle.h"
+#include "WeaponEditorStyle.h"
 #include "LevelEditor.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Modules/ModuleManager.h"
@@ -49,7 +49,7 @@ void FWeaponCommand::ToolBar_Added(FToolBarBuilder& InBuilder)
 {
 	//구분선 추가
 	InBuilder.AddSeparator();
-	InBuilder.AddToolBarButton(Id, NAME_None,  FText::FromString("Weapon"),FText::FromString("Weapon Asset Editor"), FWeaponStyle::Get()->ToolBar_Icon, NAME_None);
+	InBuilder.AddToolBarButton(Id, NAME_None,  FText::FromString("Weapon"),FText::FromString("Weapon Asset Editor"), FWeaponEditorStyle::Get()->GetToolBarIcon(), NAME_None);
 }
 
 void FWeaponCommand::ToolBar_Clicked()

@@ -8,26 +8,32 @@ class ACTIONEDITOR_API FActionEditorStyle
 public:
 	static TSharedRef<FActionEditorStyle> Get();
 	static void Shutdown();
+	const FSlateIcon& GetToolBarIcon() const;
 
-public:
+private:
 	FActionEditorStyle();
 	~FActionEditorStyle();
 
-	// Disable copy/move constructor and operator=.
+	//이동, 복사 생성자 제거
 	FActionEditorStyle(const FActionEditorStyle&) = delete;
 	FActionEditorStyle(FActionEditorStyle&&) = delete;
 	FActionEditorStyle& operator=(const FActionEditorStyle&) = delete;
 	FActionEditorStyle& operator=(FActionEditorStyle&&) = delete;
 
+	void RegisterIcon(const FString& InName, const FString& InPath, const FVector2D& InIconSize, FSlateIcon& OutSlateIcon);
+
 private:
 	struct Destroyer
 	{
-		void operator()(FActionEditorStyle* Ptr){ delete Ptr;}
+		void operator()(FActionEditorStyle const* Ptr) const { delete Ptr;}
 	};
 	friend Destroyer;
 
+
+
 private:
-	static const FName StyleSetName;
+	FName  const StyleSetName;
 	static TSharedPtr<FActionEditorStyle> Instance;
 	TSharedPtr<FSlateStyleSet> StyleSet;
+	FSlateIcon ToolBarIcon;
 };

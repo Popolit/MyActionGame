@@ -9,10 +9,10 @@ public:
 
 public:
 	//Override
-	FName GetToolkitFName() const override final;	
-	FText GetBaseToolkitName() const override final;
-	FString GetWorldCentricTabPrefix() const override final;
-	FLinearColor GetWorldCentricTabColorScale() const override final;
+	virtual FName GetToolkitFName() const override final;	
+	virtual FText GetBaseToolkitName() const override final;
+	virtual FString GetWorldCentricTabPrefix() const override final;
+	virtual FLinearColor GetWorldCentricTabColorScale() const override final;
 
 	
 /*private:

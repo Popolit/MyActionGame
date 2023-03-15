@@ -1,38 +1,43 @@
 #include "WeaponEditorModule.h"
 
 #include "AssetTypeActions_Weapon.h"
-#include "WeaponStyle.h"
+#include "WeaponEditorStyle.h"
 #include "WeaponCommand.h"
 
 #include "IAssetTools.h"
 #include "AssetToolsModule.h"
 
-#define LOCTEXT_NAMESPACE "FWeaponModule"
+#define LOCTEXT_NAMESPACE "FWeaponEditorModule"
 
-void FWeaponModule::StartupModule()
+
+FWeaponEditorModule::FWeaponEditorModule() : ModuleName("Weapon")
 {
-	FWeaponStyle::Get();
+}
+
+void FWeaponEditorModule::StartupModule()
+{
+	FWeaponEditorStyle::Get();
 
 	Command = MakeShareable(new FWeaponCommand());
 	Command->Startup();
 	
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	EAssetTypeCategories::Type type = assetTools.RegisterAdvancedAssetCategory("Weapon", FText::FromName("Weapon"));
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	EAssetTypeCategories::Type const Type = AssetTools.RegisterAdvancedAssetCategory(ModuleName, FText::FromName(ModuleName));
 	
-	AssetTypeActions = MakeShareable(new FAssetTypeActions_Weapon(type));
-	assetTools.RegisterAssetTypeActions(AssetTypeActions.ToSharedRef());
+	AssetTypeActions = MakeShareable(new FAssetTypeActions_Weapon(Type));
+	AssetTools.RegisterAssetTypeActions(AssetTypeActions.ToSharedRef());
 }
 
-void FWeaponModule::ShutdownModule()
+void FWeaponEditorModule::ShutdownModule()
 {
 	if(Command.IsValid())
 		Command.Reset();
 
 	if(AssetTypeActions.IsValid())
 		AssetTypeActions.Reset();	
-	FWeaponStyle::Shutdown();
+	FWeaponEditorStyle::Shutdown();
 }
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FWeaponModule, WeaponEditor)
+IMPLEMENT_MODULE(FWeaponEditorModule, WeaponEditor)
