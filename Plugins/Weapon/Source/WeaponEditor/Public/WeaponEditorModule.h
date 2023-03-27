@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "TraceAnalysis/Private/Store/AsioFile.h"
 
 class FWeaponCommand;
 class IAssetTypeActions;

@@ -1,39 +1,36 @@
 #include "WeaponAsset.h"
 
 #include "Weapon.h"
+#include "ActionAsset.h"
 
 UWeaponAsset::UWeaponAsset()
 {
 }
 
-void UWeaponAsset::BeginPlay(AActor* InOwner, UWeapon** OutWeaponData)
+void UWeaponAsset::BeginPlay(ACharacter* InOwnerCharacter, UWeapon** OutWeaponData)
 {
 	*OutWeaponData = NewObject<UWeapon>();
+
+	(*OutWeaponData)->OwnerCharacter = InOwnerCharacter;
+	
 	for(TSubclassOf<AWeaponAttachment> AttachmentClass : AttachmentClasses)
 	{
 		FActorSpawnParameters ActorSpawnParams;
-		ActorSpawnParams.Owner = InOwner;
+		ActorSpawnParams.Owner = InOwnerCharacter;
 		
-		(*OutWeaponData)->Attachments.Push(InOwner->GetWorld()->SpawnActor<AWeaponAttachment>(AttachmentClass, ActorSpawnParams));
+		(*OutWeaponData)->Attachments.Push(InOwnerCharacter->GetWorld()->SpawnActor<AWeaponAttachment>(AttachmentClass, ActorSpawnParams));
 	}
 
 	(*OutWeaponData)->bUseControlRotation = bUseControlRotation;
+	(*OutWeaponData)->EquipMontage = EquipMontage;
+	(*OutWeaponData)->UnEquipMontage = UnEquipMontage;
+	(*OutWeaponData)->AnimClass = AnimClass;
 	
-	/*
-	equipment = NewObject<UCEquipment>(this);
-	equipment->BeginPlay(InOwner, EquipData, UnEquipData);
-
-	for (ACAttachment* attachment : (*OutWeaponData)->Attachments)
+	if(ActionDataAsset == nullptr)
 	{
-		equipment->OnEndEquip.AddUObject(attachment, &ACAttachment::OnEndEquip);
-		equipment->OnEndUnEquip.AddUObject(attachment, &ACAttachment::OnEndUnEquip);
+		return;
 	}
-	
-	(*OutWeaponData)->Equipment = equipment;
-	(*OutWeaponData)->Type = Type;
-
-	CheckNull(ActionDataAsset);
-	ActionDataAsset->BeginPlay(InOwner, &(*OutWeaponData)->ActionData);*/
+	ActionDataAsset->BeginPlay(&(*OutWeaponData)->Actions, InOwnerCharacter);
 }
 
 void UWeaponAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

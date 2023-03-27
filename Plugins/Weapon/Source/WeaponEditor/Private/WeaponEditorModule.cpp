@@ -10,7 +10,7 @@
 #define LOCTEXT_NAMESPACE "FWeaponEditorModule"
 
 
-FWeaponEditorModule::FWeaponEditorModule() : ModuleName("Weapon")
+FWeaponEditorModule::FWeaponEditorModule() : ModuleName("WeaponEditor")
 {
 }
 

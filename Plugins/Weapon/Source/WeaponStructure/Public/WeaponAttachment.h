@@ -9,7 +9,7 @@ DECLARE_DELEGATE(FWeaponAttachmentCollision)
 
 
 //Weapon Attachment, Collisions
-UCLASS()
+UCLASS(BlueprintType)
 class WEAPONSTRUCTURE_API AWeaponAttachment : public AActor
 {
 	GENERATED_BODY()
@@ -21,13 +21,16 @@ protected:
 public:
 	void OnCollision();
 	void OffCollision();
-
-	void OnEndEquip();
-	void OnEndUnEquip();
+	
+	void EndEquip();
+	void EndUnEquip();
 
 private:
-	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	void AttachTo(FName InSocketName);

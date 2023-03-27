@@ -45,7 +45,7 @@ void UCStateComponent::SetActionMode()
 
 void UCStateComponent::SetHittedMode()
 {
-	ChangeType(EStateType::Hitted);
+	ChangeType(EStateType::Hit);
 }
 
 void UCStateComponent::SetDeadMode()

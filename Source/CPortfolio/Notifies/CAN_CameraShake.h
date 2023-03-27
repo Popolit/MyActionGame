@@ -17,7 +17,7 @@ public:
 	UCAN_CameraShake();
 
 private:
-	FString GetNotifyName_Implementation() const override;
+	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation);
+	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 };

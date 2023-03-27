@@ -6,6 +6,7 @@
 
 class FUICommandList;
 
+//자식 클래스를 알기 위한 template 클래스 상속
 class WEAPONEDITOR_API FWeaponCommand : public TCommands<FWeaponCommand>
 {
 public:

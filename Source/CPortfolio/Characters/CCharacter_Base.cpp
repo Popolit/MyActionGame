@@ -6,8 +6,8 @@
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CFeetComponent.h"
+#include "Weapon.h"
 
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -21,6 +21,17 @@ ACCharacter_Base::ACCharacter_Base() : LaunchZ_InAir(FVector(0, 0, 250.f))
 	CHelpers::CreateActorComponent<UCFeetComponent>(this, &FeetComponent, "Feet");
 }
 
+bool ACCharacter_Base::IsInAir()
+{
+	return StateComponent->IsInAir();
+}
+
+void ACCharacter_Base::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
+{
+	check(NewWeapon);
+
+	GetMesh()->SetAnimInstanceClass(NewWeapon->GetAnimClass());
+}
 void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode)
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);

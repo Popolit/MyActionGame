@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "ActionStructure.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "CAN_EndAction.generated.h"
 
@@ -16,9 +17,13 @@ public:
 
 	void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
-/*public:
+public:
 	UPROPERTY(EditInstanceOnly)
-		EActionType ActionType;*/
+		EActionType ActionType;
+	
+	UPROPERTY(EditInstanceOnly)
+		bool IsInAir;
+	
 private:
 	FString const NotifyName;
 };

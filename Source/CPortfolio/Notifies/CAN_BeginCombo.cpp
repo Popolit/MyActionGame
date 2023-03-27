@@ -1,23 +1,24 @@
 ﻿#include "CAN_BeginCombo.h"
-#include "CHelpers.h"
-
-#include "Characters/CCharacter_Base.h"
 #include "Components/CActionComponent.h"
-#include "Actions/CActionCombo.h"
+
+UCAN_BeginCombo::UCAN_BeginCombo() : NotifyName("BeginCombo")
+{
+}
 
 FString UCAN_BeginCombo::GetNotifyName_Implementation() const
 {
-	return "BeginCombo";
+	return NotifyName;
 }
 
 void UCAN_BeginCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	CheckNull(MeshComp);
-	CheckNull(MeshComp->GetOwner());
-	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
-	CheckNull(actionComponent);
-	
-	/*UCActionCombo* action = Cast<UCActionCombo>(actionComponent->GetAction(EActionType::Action));
-	CheckNull(action);
-	action->BeginCombo();*/
+	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)
+	{
+		return;
+	}
+
+	if(OnBeginCombo.IsBound())
+	{
+		OnBeginCombo.Execute();
+	}
 }

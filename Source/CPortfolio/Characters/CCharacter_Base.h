@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "CCharacter_Base.generated.h"
 
+class UWeapon;
 class UCWeaponComponent;
 class UCActionComponent;
 class UCStatusComponent;
@@ -18,6 +19,11 @@ class CPORTFOLIO_API ACCharacter_Base : public ACharacter
 	GENERATED_BODY()
 public:
 	ACCharacter_Base();
+	
+	bool IsInAir();
+	
+private:
+	void OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon);
 
 public:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode) override;
@@ -50,7 +56,5 @@ protected:
 	
 public:
 	FOnJumped OnJumped;
-	
-
 };
 

@@ -29,8 +29,7 @@ public class ActionEditor : ModuleRules
 				"Projects",
 				"EditorStyle",
 				"UnrealEd",
-				"InputCore",
-				"ActionStructure"
+				"InputCore"
 			}
 			);
 	}

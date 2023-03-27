@@ -1,18 +1,32 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "CAction_Combo.h"
-#include "CI_Action_CanBranch.h"
+#include "CAction_Replacement.h"
 #include "CAction_Combo_Branch.generated.h"
 
+class UCStateComponent;
 
-UCLASS(Blueprintable)
-class CPORTFOLIO_API UCAction_Combo_Branch : public UCAction_Combo, public ICI_Action_CanBranch
+UCLASS(Blueprintable, HideDropdown)
+class CPORTFOLIO_API UCAction_Combo_Branch : public UCAction_Replacement
 {
 	GENERATED_BODY()
 public:
-	virtual void SetBranchAction(UAction* InBranchAction) override;
+	UCAction_Combo_Branch();
+public:
+	virtual void BeginPlay() override;
+	virtual void BeginAction() override;
+	virtual void EndAction() override;
+	virtual void KeyPressed() override;
+
+	
+public:
+	void BeginCombo();
+	void EnableCombo(bool InIsEnableCombo);
+
 private:
-	UPROPERTY(EditDefaultsOnly)
-		UAction* BranchAction;
+	UCStateComponent* StateComponent;
+	uint8 ComboMaxIndex;
+	uint8 ComboIndex;
+	bool bComboEnable;
+	bool bInputExist;
 };

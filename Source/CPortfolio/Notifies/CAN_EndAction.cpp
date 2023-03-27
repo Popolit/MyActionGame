@@ -1,10 +1,9 @@
 ﻿#include "CAN_EndAction.h"
 #include "CHelpers.h"
 
-#include "Characters/CCharacter_Base.h"
 #include "Components/CActionComponent.h"
 
-UCAN_EndAction::UCAN_EndAction() : NotifyName("EndAction")
+UCAN_EndAction::UCAN_EndAction() : ActionType(EActionType::None), NotifyName("EndAction")
 {
 }
 
@@ -15,10 +14,14 @@ FString UCAN_EndAction::GetNotifyName_Implementation() const
 
 void UCAN_EndAction::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	CheckNull(MeshComp);
-	CheckNull(MeshComp->GetOwner());
+	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr || ActionType == EActionType::None)
+	{
+		return;
+	}
+	
 	UCActionComponent* ActionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
-	CheckNull(ActionComponent);
-
-	//actionComponent->EndAction(ActionType);
+	if(ActionComponent != nullptr)
+	{
+		ActionComponent->EndAction(ActionType, IsInAir);
+	}
 }

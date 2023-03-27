@@ -17,5 +17,5 @@ enum class ESpeedType : uint8
 UENUM(BlueprintType)
 enum class EStateType : uint8
 {
-	Idle, Dash, Evade, Equip, SubAction, Action, Hitted, Dead, Max,
+	Idle, Dash, Evade, Equip, SubAction, Action, Hit, Dead, Max,
 };

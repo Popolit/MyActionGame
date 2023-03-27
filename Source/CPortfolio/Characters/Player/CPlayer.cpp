@@ -4,24 +4,20 @@
 #include "Components/CWeaponComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CStatusComponent.h"
-#include "Animation/CAnimInstance.h"
 #include "Widgets/CWidget_HUD.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CActionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
 
-
-//  *********************
-//      기본 세팅
-//  *********************
 ACPlayer::ACPlayer() : ACCharacter_Base(), bMoving{ false, false, false, false }
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	//카메라 설정
 	CHelpers::CreateComponent<USpringArmComponent>(this, &SpringArm, "SpringArm", GetMesh());
@@ -57,7 +53,7 @@ void ACPlayer::BeginPlay()
 		/*HUD->UpdateHP(GetCurrHP(), GetMaxHP());
 		HUD->UpdateMP(GetCurrMP(), GetMaxMP());*/
 	}
-	StateComponent->OnAerialConditionChanged.AddDynamic(this, &ACPlayer::OnAerialConditionChanged);
+	StateComponent->OnAerialConditionChanged.AddUObject(this, &ACPlayer::OnAerialConditionChanged);
 }
 
 void ACPlayer::Tick(float DeltaTime)
@@ -122,8 +118,6 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("SubAction", IE_Released, this, &ACPlayer::ReleasedSubAction);
 }
 
-
-
 void ACPlayer::OnMoveForward(float AxisValue)
 {
 	CheckFalse(StatusComponent->CanMove());
@@ -154,19 +148,23 @@ void ACPlayer::OnHorizontalLook(float AxisValue)
 
 void ACPlayer::PressedJump()
 {
-	CheckFalse(StatusComponent->CanAction());
-	//ActionComponent->OnActionInput.Execute(EActionType::Jump, true);
+	if(StatusComponent->CanAction())
+	{
+		ActionComponent->KeyPressed(EActionType::Jump);
+	}
 }
 
 void ACPlayer::ReleasedJump()
 {
-	//ActionComponent->OnActionInput.Execute(EActionType::Jump, false);
+	ActionComponent->KeyReleased(EActionType::Jump);
 }
 
 void ACPlayer::PressedEvade()
 {
-	CheckFalse(StatusComponent->CanAction());
-	//ActionComponent->OnActionInput.Execute(EActionType::Evade, true);
+	if(StatusComponent->CanAction())
+	{
+		ActionComponent->KeyPressed(EActionType::Evade);
+	}
 }
 
 
@@ -244,46 +242,47 @@ void ACPlayer::BeginRunning()
 //  *********************
 void ACPlayer::ChangeWeapon1()
 {
-	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	if(StatusComponent->CanMove())
 	{
-		return;
+		WeaponComponent->ChangeWeapon(1);
 	}
-	WeaponComponent->ChangeWeapon(0);
 }
 void ACPlayer::ChangeWeapon2()
 {
-	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	if(StatusComponent->CanMove())
 	{
-		return;
+		WeaponComponent->ChangeWeapon(2);
 	}
-	WeaponComponent->ChangeWeapon(1);
 }
 void ACPlayer::ChangeWeapon3()
 {
-	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	if(StatusComponent->CanMove())
 	{
-		return;
+		WeaponComponent->ChangeWeapon(3);
 	}
-	WeaponComponent->ChangeWeapon(2);
 }
 void ACPlayer::ChangeWeapon4()
 {
-	if(StatusComponent->CanMove() || WeaponComponent == nullptr)
+	if(StatusComponent->CanMove())
 	{
-		return;
+		WeaponComponent->ChangeWeapon(4);
 	}
-	WeaponComponent->ChangeWeapon(3);
 }
 
 void ACPlayer::PressedAction()
 {
-	CheckFalse(StatusComponent->CanAction());
-	//ActionComponent->OnActionInput.Execute(EActionType::Action, true);
+	if(StatusComponent->CanAction())
+	{
+		ActionComponent->KeyPressed(EActionType::Action);
+	}
 }
 
 void ACPlayer::ReleasedAction()
 {
-	//ActionComponent->OnActionInput.Execute(EActionType::Action, false);
+	if(StatusComponent->CanAction())
+	{
+		ActionComponent->KeyReleased(EActionType::Action);
+	}
 }
 
 void ACPlayer::PressedSubAction()

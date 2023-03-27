@@ -1,14 +1,17 @@
 ﻿#include "CActionComponent.h"
-
 #include "CHelpers.h"
 
-#include "Characters/Player/CPlayer.h"
+#include "Characters/CCharacter_Base.h"
+#include "Action.h"
+#include "ActionSet.h"
+#include "Weapon.h"
+#include "CWeaponComponent.h"
+#include "ITickable.h"
+#include "Interfaces/CI_EventHandler.h"
+#include "Interfaces/CI_EventHandler_Toggle.h"
 
 
-//  *********************
-//      기본 세팅
-//  *********************
-UCActionComponent::UCActionComponent()
+UCActionComponent::UCActionComponent() : ActionSet(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -17,30 +20,160 @@ UCActionComponent::UCActionComponent()
 void UCActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	//오너 캐릭터 세팅
 	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
-	CheckNull(OwnerCharacter);
+	check(OwnerCharacter);
 
-	//컴포넌트 세팅
-	/*UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
-	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
-	StatusComponent = CHelpers::GetComponent<UCStatusComponent>(OwnerCharacter);
-	
-	//델리게이션
-	state->OnStateTypeChanged.AddDynamic(this, &UCActionComponent::SetStateTrigger);
-	state->OnAerialConditionChanged.AddDynamic(this, &UCActionComponent::SetAerialTrigger);
-	WeaponComponent->OnWeaponTypeChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
-	OnActionInput.BindUObject(this, &UCActionComponent::ExecuteActionInput);
-	
-	ActionData = WeaponComponent->GetActionData();*/
+	UCWeaponComponent* WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
+	if(!WeaponComponent->HasBegunPlay())
+	{
+		WeaponComponent->BeginPlay();
+	}
+	WeaponComponent->OnWeaponChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
+	ActionSet = WeaponComponent->GetWeapon()->GetActionSet();
+
+	if(ActionSet != nullptr)
+	{
+		ActionSet->SetAllDelegations<UCActionComponent>(this, &UCActionComponent::OnActionBegin);
+	}
 }
 
 void UCActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	/*for(TScriptInterface<ICI_Tickable> Action : Actions_Tickable)
-		Action->Tick(DeltaTime);*/
+
+	if(ActionSet == nullptr)
+	{
+		return;
+	}
+	
+	for(TScriptInterface<IITickable> Action_Tickable : ActionSet->GetActionsTickable())
+	{
+		Action_Tickable->Tick(DeltaTime);
+	}
 }
+
+void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_EventHandler* InEventHandler)
+{
+	
+	ActionEvents.Add(InEventName, Cast<UAction>(InEventHandler));
+}
+
+void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_EventHandler_Toggle* InEventHandler)
+{
+	ActionToggleEvents.Add(InEventName, Cast<UAction>(InEventHandler));
+}
+
+void UCActionComponent::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
+{
+	if(CurrAction != nullptr && !CurrAction->IsActionEnded())
+	{
+		CurrAction->EndAction();
+	}
+	ActionSet->UnsetAllDelegations();
+	ActionSet = NewWeapon->GetActionSet();
+	if(ActionSet != nullptr)
+	{
+		ActionSet->SetAllDelegations<UCActionComponent>(this, &UCActionComponent::OnActionBegin);
+	}
+}
+
+void UCActionComponent::OnActionBegin(UAction* InAction)
+{
+	if(CurrAction != nullptr && !CurrAction->IsActionEnded())
+	{
+		CurrAction->EndAction();
+	}
+	CurrAction = InAction;
+}
+
+void UCActionComponent::OnActionEvent(FName const& InEventName)
+{
+	if(ActionEvents.Contains(InEventName))
+	{
+		ICI_EventHandler* EventHandler = Cast<ICI_EventHandler>(ActionEvents[InEventName]);
+		if(EventHandler != nullptr)
+		{
+			EventHandler->HandleEvent();
+		}
+	}
+}
+
+void UCActionComponent::OnActionEvent(FName const& InEventName, bool const& IsEventOn)
+{
+	if(ActionToggleEvents.Contains(InEventName))
+	{
+		ICI_EventHandler_Toggle* EventHandler = Cast<ICI_EventHandler_Toggle>(ActionToggleEvents[InEventName]);
+		if(EventHandler != nullptr)
+		{
+			EventHandler->HandleEvent(IsEventOn);
+		}
+	}
+}
+
+
+void UCActionComponent::KeyPressed(EActionType const& InActionInput)
+{
+	if(ActionSet == nullptr)
+	{
+		return;
+	}
+
+	UAction* PrevAction = CurrAction;
+	//Air Action
+	if(OwnerCharacter->IsInAir())
+	{
+		UAction* Action = ActionSet->GetActionsInAir()[(uint8)InActionInput];
+		if(Action != nullptr)
+		{
+			CurrAction = Action;
+			CurrAction->KeyPressed();
+		}
+	}
+	//Ground Action
+	else
+	{
+		UAction* Action = ActionSet->GetActions()[(uint8)InActionInput];
+		if(Action != nullptr)
+		{
+			CurrAction = Action;
+			CurrAction->KeyPressed();
+		}
+	}
+}
+
+void UCActionComponent::KeyReleased(EActionType const& InActionInput) const
+{
+	if(ActionSet == nullptr)
+	{
+		return;
+	}
+	UAction* Action = ActionSet->GetActions()[(uint8)InActionInput];
+	if(Action != nullptr)
+	{
+		Action->KeyReleased();
+	}
+}
+
+void UCActionComponent::EndAction(EActionType const& InActionInput, bool IsInAir)
+{
+	if(IsInAir)
+	{
+		UAction* Action = ActionSet->GetActionsInAir()[(uint8)InActionInput];
+		if(Action != nullptr)
+		{
+			Action->EndAction();
+		}
+	}
+	else
+	{
+		UAction* Action = ActionSet->GetActions()[(uint8)InActionInput];
+		if(Action != nullptr)
+		{
+			Action->EndAction();
+		}
+	}
+}
+
 
 /*
 void UCActionComponent::KeyPressed(EActionType const& InActionInput)
@@ -135,15 +268,6 @@ bool UCActionComponent::SetAction()
 	return true;
 }
 
-void UCActionComponent::EndAction(EActionType const & InActionInput)
-{
-	CheckNull(Actions[(uint8)InActionInput]);
-	Actions[(uint8)InActionInput]->EndAction();
-	Actions[(uint8)InActionInput] = nullptr;
-
-	if(*RecentAction == nullptr)
-		RecentAction = nullptr;
-}
 
 
 //  *********************

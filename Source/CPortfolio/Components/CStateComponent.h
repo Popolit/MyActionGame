@@ -5,8 +5,8 @@
 #include "Components/ActorComponent.h"
 #include "CStateComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateTypeChanged, EStateType, NewStateType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAerialConditionChanged, bool, IsInAir);
+DECLARE_MULTICAST_DELEGATE_OneParam(FStateTypeChanged, EStateType);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAerialConditionChanged, bool);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsActionMode() { return Type == EStateType::Action; }
 	UFUNCTION(BlueprintCallable)
-		FORCEINLINE bool IsHittedMode() { return Type == EStateType::Hitted; }
+		FORCEINLINE bool IsHittedMode() { return Type == EStateType::Hit; }
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsDeadMode() { return Type == EStateType::Dead; }
 

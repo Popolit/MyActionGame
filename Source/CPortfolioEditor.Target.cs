@@ -9,6 +9,6 @@ public class CPortfolioEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "CPortfolio"} );
+		ExtraModuleNames.AddRange( new string[] { "CPortfolio" } );
 	}
 }

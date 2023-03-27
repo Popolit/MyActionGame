@@ -3,7 +3,7 @@
 #include "WeaponAsset.h"
 #include "Weapon.h"
 
-#include "Characters/Player/CPlayer.h"
+#include "Characters/CCharacter_Base.h"
 
 
 UCWeaponComponent::UCWeaponComponent()
@@ -23,8 +23,10 @@ void UCWeaponComponent::BeginPlay()
 		Weapon->BeginPlay(OwnerCharacter, &NewWeaponData);
 		Weapons.Push(NewWeaponData);
 	}
-	
-	CurrWeapon = nullptr;
+
+	check(Weapons[0]);
+	CurrWeapon = Weapons[0];
+	PrevWeapon = CurrWeapon;
 }
 
 
@@ -35,24 +37,32 @@ void UCWeaponComponent::ChangeWeapon(int const& Index)
 		return;
 	}
 
-	UWeapon* PrevWeapon = CurrWeapon;
+	PrevWeapon = CurrWeapon;
 	CurrWeapon = Weapons[Index];
 
 	//Weapon -> Unarmed
 	if(PrevWeapon == CurrWeapon)
 	{
 		PrevWeapon->UnEquip();
-		CurrWeapon = nullptr;
+		CurrWeapon = Weapons[0];
 	}
 
 	//WeaponA -> WeaponB : Immediate UnEquip
-	else if(PrevWeapon != nullptr)
+	else if(PrevWeapon != Weapons[0])
 	{
-		PrevWeapon->EndEquip();
+		PrevWeapon->EndUnEquip();
 	}
 	//EquipWeapon
 	CurrWeapon->Equip();
+
+	if(CurrWeapon->GetAnimClass() != nullptr)
+	{
+		OwnerCharacter->GetMesh()->LinkAnimGraphByTag("Weapon", CurrWeapon->GetAnimClass());
+		OwnerCharacter->GetMesh()->GetLinkedAnimGraphInstanceByTag("Weapon")->NativeBeginPlay();
+	}
 	
-	/*if(OnWeaponTypeChanged.IsBound())
-		OnWeaponTypeChanged.Broadcast();*/
+	if(OnWeaponChanged.IsBound())
+	{
+		OnWeaponChanged.Broadcast(PrevWeapon, CurrWeapon);
+	}
 }

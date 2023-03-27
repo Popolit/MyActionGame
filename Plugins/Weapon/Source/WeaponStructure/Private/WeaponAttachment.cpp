@@ -50,12 +50,13 @@ void AWeaponAttachment::OffCollision()
 	}
 }
 
-void AWeaponAttachment::OnEndEquip()
+void AWeaponAttachment::EndEquip()
 {
 	AttachTo(EquipSocketName);
 }
 
-void AWeaponAttachment::OnEndUnEquip()
+
+void AWeaponAttachment::EndUnEquip()
 {
 	AttachTo(HolsterSocketName);
 }
@@ -79,5 +80,4 @@ void AWeaponAttachment::AttachTo(FName InSocketName)
 		return;
 	}
 	AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
-
 }

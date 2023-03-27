@@ -1,38 +1,38 @@
 ﻿#include "CANS_Combo.h"
-#include "CHelpers.h"
 
-#include "Characters/CCharacter_Base.h"
-#include "Components/CActionComponent.h"
-#include "Actions/CActionCombo.h"
 
+
+UCANS_Combo::UCANS_Combo() : NotifyName("Combo")
+{
+}
 
 FString UCANS_Combo::GetNotifyName_Implementation() const
 {
-	return "Combo";
+	return NotifyName;
 }
 
 void UCANS_Combo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
-	CheckNull(MeshComp);
-	CheckNull(MeshComp->GetOwner());
-	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
-	CheckNull(actionComponent);
-	
-	/*
-	UCActionCombo* action = Cast<UCActionCombo>(actionComponent->GetAction(EActionType::Action));
-	CheckNull(action);
-	action->SetComboEnable(true);*/
+	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)
+	{
+		return;
+	}
+
+	if(OnEnableCombo.IsBound())
+	{
+		OnEnableCombo.Execute(true);
+	}
 }
 
 void UCANS_Combo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	CheckNull(MeshComp);
-	CheckNull(MeshComp->GetOwner());
-	UCActionComponent* actionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
-	CheckNull(actionComponent);
-	
-	/*
-	UCActionCombo* action = Cast<UCActionCombo>(actionComponent->GetAction(EActionType::Action));
-	CheckNull(action);
-	action->SetComboEnable(false);*/
+	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)
+	{
+		return;
+	}
+
+	if(OnEnableCombo.IsBound())
+	{
+		OnEnableCombo.Execute(false);
+	}
 }

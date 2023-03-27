@@ -1,26 +1,35 @@
 #include "Weapon.h"
 
 #include "WeaponAttachment.h"
+#include "GameFramework/Character.h"
 
-void UWeapon::Equip()
+void UWeapon::Equip() const
 {
-	//ActionData->Equip();
+	OwnerCharacter->PlayAnimMontage(EquipMontage);
 }
 
-void UWeapon::UnEquip()
+void UWeapon::UnEquip() const
 {
-	//ActionData->UnEquip();
+	OwnerCharacter->PlayAnimMontage(UnEquipMontage);
 }
 
-void UWeapon::EndEquip()
+void UWeapon::EndEquip() const
 {
+	for(AWeaponAttachment* Attachment : Attachments)
+	{
+		Attachment->EndEquip();
+	}
 }
 
-void UWeapon::EndUnEquip()
+void UWeapon::EndUnEquip() const
 {
+	for(AWeaponAttachment* Attachment : Attachments)
+	{
+		Attachment->EndUnEquip();
+	}
 }
 
-void UWeapon::OnCollision()
+void UWeapon::OnCollision() const
 {
 	for(AWeaponAttachment* Attachment : Attachments)
 	{
@@ -32,7 +41,7 @@ void UWeapon::OnCollision()
 	}
 }
 
-void UWeapon::OffCollision()
+void UWeapon::OffCollision() const
 {
 	for(AWeaponAttachment* Attachment : Attachments)
 	{
@@ -51,5 +60,4 @@ void UWeapon::EndPlay(AActor* InOwner)
 		Attachment->Destroy();
 		Attachment = nullptr;
 	}
-	//ActionData->EndPlay();
 }

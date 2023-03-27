@@ -13,7 +13,6 @@ public class CHelpers : ModuleRules
 			"Core",
 			"CoreUObject", 
 			"Engine",
-			"Niagara"
 		});
 	}
 }

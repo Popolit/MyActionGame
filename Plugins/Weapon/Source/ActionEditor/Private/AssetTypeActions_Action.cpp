@@ -1,6 +1,6 @@
 ﻿#include "AssetTypeActions_Action.h"
 
-#include "ActionAsset.h"
+//#include "ActionAsset.h"
 #include "ActionAssetEditor.h"
 
 
@@ -16,7 +16,7 @@ FText FAssetTypeActions_Action::GetName() const
 
 UClass* FAssetTypeActions_Action::GetSupportedClass() const
 {
-	return UActionAsset::StaticClass();
+	return UDataAsset::StaticClass();
 }
 
 FColor FAssetTypeActions_Action::GetTypeColor() const

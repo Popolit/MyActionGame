@@ -1,4 +1,4 @@
-﻿#include "ActionStructure.h"
+#include "ActionStructure.h"
 
 
 
@@ -25,5 +25,6 @@ FActionData::FActionData() : Montage(), PlayRatio(1.0f), bCanMove(true), bFixedC
 			EffectScale(FVector::OneVector)
 {
 }
+
 
 IMPLEMENT_MODULE(FDefaultModuleImpl, ActionStructure)
