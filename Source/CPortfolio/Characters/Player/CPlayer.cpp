@@ -232,66 +232,45 @@ void ACPlayer::ReleasedMoveR()
 
 void ACPlayer::BeginRunning()
 {
+	CheckFalse(StatusComponent->CanMove());
 	StateComponent->SetDashMode();
 	GetCharacterMovement()->MaxWalkSpeed = 800;
 }
 
 
-//  *********************
-//      무기 교체
-//  *********************
 void ACPlayer::ChangeWeapon1()
 {
-	if(StatusComponent->CanMove())
-	{
-		WeaponComponent->ChangeWeapon(1);
-	}
+	WeaponComponent->ChangeWeapon(1);
 }
 void ACPlayer::ChangeWeapon2()
 {
-	if(StatusComponent->CanMove())
-	{
-		WeaponComponent->ChangeWeapon(2);
-	}
+	WeaponComponent->ChangeWeapon(2);
 }
 void ACPlayer::ChangeWeapon3()
 {
-	if(StatusComponent->CanMove())
-	{
-		WeaponComponent->ChangeWeapon(3);
-	}
+	WeaponComponent->ChangeWeapon(3);
 }
 void ACPlayer::ChangeWeapon4()
 {
-	if(StatusComponent->CanMove())
-	{
-		WeaponComponent->ChangeWeapon(4);
-	}
+	WeaponComponent->ChangeWeapon(4);
 }
 
 void ACPlayer::PressedAction()
 {
-	if(StatusComponent->CanAction())
-	{
-		ActionComponent->KeyPressed(EActionType::Action);
-	}
+	ActionComponent->KeyPressed(EActionType::Action);
 }
 
 void ACPlayer::ReleasedAction()
 {
-	if(StatusComponent->CanAction())
-	{
-		ActionComponent->KeyReleased(EActionType::Action);
-	}
+	ActionComponent->KeyReleased(EActionType::Action);
 }
 
 void ACPlayer::PressedSubAction()
 {
-	CheckFalse(StatusComponent->CanAction());
-	//ActionComponent->OnActionInput.Execute(EActionType::SubAction, true);
+	ActionComponent->KeyPressed(EActionType::SubAction);
 }
 
 void ACPlayer::ReleasedSubAction()
 {
-	//ActionComponent->OnActionInput.Execute(EActionType::SubAction, false);
+	ActionComponent->KeyReleased(EActionType::SubAction);
 }

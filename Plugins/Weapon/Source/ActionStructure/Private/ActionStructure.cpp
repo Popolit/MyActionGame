@@ -2,7 +2,7 @@
 
 
 
-FHitData::FHitData() : Damage(0), Launch(100), LaunchZ(0), StaggerTime(0), StopTime(0), Effect(),
+FHitData::FHitData() : Damage(0), Launch(100), LaunchZ(0), StaggerTime(0), StopTime(0.1), Effect(),
 				EffectLocation(FVector::ZeroVector), EffectScale(FVector::OneVector), SoundCue()
 {
 }
@@ -21,8 +21,7 @@ FActionTrigger::FActionTrigger(const FActionTrigger& Other)
 {
 }
 
-FActionData::FActionData() : Montage(), PlayRatio(1.0f), bCanMove(true), bFixedCamera(false), Effect(), EffectLocation(FVector::ZeroVector),
-			EffectScale(FVector::OneVector)
+FActionData::FActionData() : Montage(), PlayRatio(1.0f), bCanMove(true), bFixedCamera(false)
 {
 }
 

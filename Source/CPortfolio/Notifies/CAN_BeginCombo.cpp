@@ -12,11 +12,6 @@ FString UCAN_BeginCombo::GetNotifyName_Implementation() const
 
 void UCAN_BeginCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)
-	{
-		return;
-	}
-
 	if(OnBeginCombo.IsBound())
 	{
 		OnBeginCombo.Execute();

@@ -6,6 +6,8 @@
 
 void UCAction_Jump::BeginAction()
 {
+	Super::BeginAction();
+	
 	OwnerCharacter->Jump();
 	if(!ActionDatas.IsValidIndex(0))
 	{

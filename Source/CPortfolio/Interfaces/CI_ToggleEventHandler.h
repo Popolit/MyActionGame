@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "CI_EventHandler_Toggle.generated.h"
+#include "CI_ToggleEventHandler.generated.h"
 
 
 UINTERFACE()
-class UCI_EventHandler_Toggle : public UInterface
+class UCI_ToggleEventHandler : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class ICI_EventHandler_Toggle
+class ICI_ToggleEventHandler
 {
 	GENERATED_BODY()
 public:

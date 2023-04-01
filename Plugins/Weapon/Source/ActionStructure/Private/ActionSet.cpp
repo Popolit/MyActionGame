@@ -1,4 +1,6 @@
 #include "ActionSet.h"
+
+
 #include "ActionStructure.h"
 
 UActionSet::UActionSet()
@@ -20,6 +22,14 @@ void UActionSet::UnsetAllDelegations()
 	}
 
 	for(UAction* Action : ActionsInAir)
+	{
+		if(Action != nullptr)
+		{
+			Action->OnActionBegin.Unbind();
+		}
+	}
+
+	for(UAction* Action : Actions_HasTrigger)
 	{
 		if(Action != nullptr)
 		{

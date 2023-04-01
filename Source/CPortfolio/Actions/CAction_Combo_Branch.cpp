@@ -5,10 +5,9 @@
 #include "Notifies/CANS_Combo.h"
 #include "Notifies/CAN_BeginCombo.h"
 #include "Components/CStateComponent.h"
-#include "Notifies/CANS_ReplaceAction.h"
 
 UCAction_Combo_Branch::UCAction_Combo_Branch() : UCAction_Replacement(), ComboMaxIndex(0),
-                                                 ComboIndex(0), bComboEnable(true), bInputExist(false)
+                                                 ComboIndex(0), bComboEnable(false), bInputExist(false)
 {
 }
 
@@ -44,6 +43,7 @@ void UCAction_Combo_Branch::BeginAction()
 {
 	Super::BeginAction();
 
+	SetDirectionToCamera();
 	StateComponent->SetActionMode();
 	ActionFunctions::DoAction(ActionDatas[0], OwnerCharacter);
 }
@@ -56,11 +56,8 @@ void UCAction_Combo_Branch::EndAction()
 	StateComponent->SetIdleMode();
 	ComboIndex = 0;
 }
-
 void UCAction_Combo_Branch::KeyPressed()
 {
-	Super::KeyPressed();
-
 	if(!ActionDatas.IsValidIndex(0))
 	{
 		return;
@@ -74,9 +71,19 @@ void UCAction_Combo_Branch::KeyPressed()
 		return;
 	}
 
-	if(StateComponent->IsIdleMode())
+	//분기 공격이므로 Idle이 아닌 Action 상태를 체크
+	if(StateComponent->IsActionMode() && bActionEnded)
 	{
 		BeginAction();
+	}
+}
+
+void UCAction_Combo_Branch::OnCollision(AActor* InAttackCauser, AActor* InTargetActor)
+{
+	if(HitDatas.IsValidIndex(ComboIndex))
+	{
+		ActionFunctions::PlayHitEffect(HitDatas[ComboIndex], OwnerCharacter, InTargetActor);
+		ActionFunctions::SendDamage(&HitDatas[ComboIndex], OwnerCharacter, InAttackCauser, InTargetActor);
 	}
 }
 
@@ -88,11 +95,10 @@ void UCAction_Combo_Branch::BeginCombo()
 		return;
 	}
 	bInputExist = false;
-	
 
-	//SetCharacterDirectionToForward(OwnerCharacter);
+	SetDirectionToCamera();
 	ComboIndex = (ComboIndex + 1) % ComboMaxIndex;
-	
+
 	if(ActionDatas.IsValidIndex(ComboIndex))
 	{
 		ActionFunctions::DoAction(ActionDatas[ComboIndex], OwnerCharacter);

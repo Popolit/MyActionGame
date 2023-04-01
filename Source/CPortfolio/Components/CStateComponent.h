@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "CoreEnums.h"
 #include "Components/ActorComponent.h"
+#include "Interfaces/CI_EventListener.h"
 #include "CStateComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FStateTypeChanged, EStateType);
@@ -10,7 +11,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnAerialConditionChanged, bool);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CPORTFOLIO_API UCStateComponent : public UActorComponent
+class CPORTFOLIO_API UCStateComponent : public UActorComponent, public ICI_EventListener
 {
 	GENERATED_BODY()
 public:	
@@ -33,7 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsActionMode() { return Type == EStateType::Action; }
 	UFUNCTION(BlueprintCallable)
-		FORCEINLINE bool IsHittedMode() { return Type == EStateType::Hit; }
+		FORCEINLINE bool IsHitMode() { return Type == EStateType::Hit; }
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsDeadMode() { return Type == EStateType::Dead; }
 
@@ -54,7 +55,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetActionMode();
 	UFUNCTION(BlueprintCallable)
-		void SetHittedMode();
+		void SetHitMode();
 	UFUNCTION(BlueprintCallable)
 		void SetDeadMode();
 	UFUNCTION(BlueprintCallable)
@@ -69,6 +70,9 @@ public:
 	FOnAerialConditionChanged OnAerialConditionChanged;
 
 private:
+	FOnToggleEventTrigger OnToggleEventTrigger;
+	FOnEventTrigger OnAirborneEventTrigger;
+	FOnEventTrigger OnLandedEventTrigger;
 	EStateType Type;
 	bool bIsInAir;
 };

@@ -1,13 +1,14 @@
 #include "Characters/CCharacter_Base.h"
 #include "CHelpers.h"
 
+#include "Weapon.h"
 #include "Components/CActionComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CFeetComponent.h"
-#include "Weapon.h"
 
+#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -19,6 +20,14 @@ ACCharacter_Base::ACCharacter_Base() : LaunchZ_InAir(FVector(0, 0, 250.f))
 	CHelpers::CreateActorComponent<UCStatusComponent>(this, &StatusComponent, "Status");
 	CHelpers::CreateActorComponent<UCStateComponent>(this, &StateComponent, "State");
 	CHelpers::CreateActorComponent<UCFeetComponent>(this, &FeetComponent, "Feet");
+}
+
+void ACCharacter_Base::BeginPlay()
+{
+	Super::BeginPlay();
+
+	OnJumpEventTrigger.BindUObject(ActionComponent, &UCActionComponent::OnActionEvent);
+	HitMontagesMaxIndex = HitMontages.Num();
 }
 
 bool ACCharacter_Base::IsInAir()
@@ -38,15 +47,16 @@ void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
 	EMovementMode NewMovementMode = GetCharacterMovement()->MovementMode;
 	if(NewMovementMode == EMovementMode::MOVE_Flying)
 		StateComponent->SetIsInAir(true);
-			
 }
 
 void ACCharacter_Base::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
 	StateComponent->SetIsInAir(true);
-	if(OnJumped.IsBound())
-		OnJumped.Broadcast();
+	if(OnJumpEventTrigger.IsBound())
+	{
+		OnJumpEventTrigger.Execute("Jump");
+	}
 }
 
 void ACCharacter_Base::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
@@ -69,52 +79,61 @@ void ACCharacter_Base::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	StateComponent->SetIsInAir(false);
-}
 
+	if(StateComponent->IsHitMode())
+	{
+		
+	}
+}
 float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	/*if(DamageAmount == 0.f)
-		return 0.f;
 	if(!DamageEvent.IsOfType(FActionDamageEvent::ClassID))
-		return 0.f;
+		return 0.0f;
 	
 	FActionDamageEvent* const ActionDamageEvent = (FActionDamageEvent*) &DamageEvent;
 
 	//데미지 방향 벡터 설정
-	FVector damageDirection;
+	FVector DamageDirection;
 
 	//직접 타격
 	if(EventInstigator)
-		damageDirection = GetActorLocation() - EventInstigator->GetPawn()->GetActorLocation();
+	{
+		DamageDirection = GetActorLocation() - EventInstigator->GetPawn()->GetActorLocation();
+	}
 	//스킬 등 투사체 타격
 	else
-		damageDirection = GetActorLocation() - DamageCauser->GetActorLocation();
-	damageDirection.Z = 0.f;
-	damageDirection.Normalize();
+	{
+		DamageDirection = GetActorLocation() - DamageCauser->GetActorLocation();
+	}
+	DamageDirection.Z = 0.0f;
+	DamageDirection.Normalize();
 	
 	//넉백 벡터 설정
-	FVector knockBack = damageDirection;
-	knockBack *= ActionDamageEvent->HitData->Launch;
-	knockBack.Z += ActionDamageEvent->HitData->LaunchZ;
+	FVector KnockBack = DamageDirection;
+	KnockBack *= ActionDamageEvent->HitData->Launch;
+	KnockBack.Z += ActionDamageEvent->HitData->LaunchZ;
 
+	//에어본일때, 기본적으로 체공시간을 늘림. Z축 넉백이 0이 아닐 경우 커스텀 넉백 적용
 	if(StateComponent->IsInAir())
-		LaunchCharacter(knockBack.Z == 0.f ? LaunchZ_InAir : knockBack, true, true);
-	else if(knockBack.Z == 0.f)
-		LaunchCharacter(knockBack, true, false);
+	{
+		LaunchCharacter(KnockBack.Z == 0.0f ? LaunchZ_InAir : KnockBack, true, true);
+	}
+	//지상, 에어본 공격 아님
+	else if(KnockBack.Z == 0.f)
+	{
+		LaunchCharacter(KnockBack, true, false);
+	}
+	//지상, 에어본 공격 피격
 	else
-		LaunchCharacter(knockBack, true, true);
+	{
+		LaunchCharacter(KnockBack, true, true);
+	}
 	
 	//캐릭터 방향 세팅
-	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-damageDirection));
-
-
-	//피격 처리
-	/*ActionDamageEvent->HitData->PlayHitStop(GetWorld());
-	ActionDamageEvent->HitData->PlayEffect(GetWorld(), GetActorLocation());
-	ActionDamageEvent->HitData->PlaySoundCue(this);#1#
+	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-DamageDirection));
 	
-	StatusComponent->Damage(DamageAmount);
-	StateComponent->SetHittedMode();
+	StatusComponent->Damage(DamageAmount, ActionDamageEvent->HitData->StaggerTime);
+	StateComponent->SetHitMode();
 	
 	/*
 	UCAction_Base* action = ActionComponent->GetAction(EActionType::None);
@@ -126,6 +145,22 @@ float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 	return DamageAmount;*/
 	return DamageAmount;
+}
+
+void ACCharacter_Base::PlayHitMontage()
+{
+	if(StateComponent->IsInAir())
+	{
+		PlayAnimMontage(HitMontageInAir);
+		return;
+	}
+	
+	if(HitMontagesMaxIndex == 0)
+	{
+		return;
+	}
+	const uint8 HitMontageIndex = UKismetMathLibrary::RandomIntegerInRange(0, HitMontagesMaxIndex);
+	PlayAnimMontage(HitMontages[HitMontageIndex]);
 }
 
 

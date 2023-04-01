@@ -32,9 +32,9 @@ void AWeaponAttachment::OnCollision()
 	{
 		Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
-	if(OnWeaponAttachmentCollision.IsBound())
+	if(OnWeaponAttachmentOnCollision.IsBound())
 	{
-		OnWeaponAttachmentCollision.Execute();
+		OnWeaponAttachmentOnCollision.Execute();
 	}
 }
 
@@ -44,9 +44,9 @@ void AWeaponAttachment::OffCollision()
 	{
 		Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-	if(OffWeaponAttachmentCollision.IsBound())
+	if(OnWeaponAttachmentOffCollision.IsBound())
 	{
-		OffWeaponAttachmentCollision.Execute();
+		OnWeaponAttachmentOffCollision.Execute();
 	}
 }
 
@@ -64,13 +64,29 @@ void AWeaponAttachment::EndUnEquip()
 void AWeaponAttachment::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	OnWeaponAttachmentBeginOverlap.ExecuteIfBound(OwnerCharacter, this, OtherActor);
+	if(OwnerCharacter == OtherActor)
+	{
+		return;
+	}
+
+	if(OnWeaponAttachmentBeginOverlap.IsBound())
+	{
+		OnWeaponAttachmentBeginOverlap.Execute(this, OtherActor);
+	}
 }
 
 void AWeaponAttachment::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	OnWeaponAttachmentEndOverlap.ExecuteIfBound(OwnerCharacter, this, OtherActor);
+	if(OwnerCharacter == OtherActor)
+	{
+		return;
+	}
+	
+	if(OnWeaponAttachmentEndOverlap.IsBound())
+	{
+		OnWeaponAttachmentEndOverlap.Execute(this, OtherActor);
+	}
 }
 
 void AWeaponAttachment::AttachTo(FName InSocketName)

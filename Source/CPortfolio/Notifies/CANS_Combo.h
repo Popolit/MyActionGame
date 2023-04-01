@@ -13,7 +13,7 @@ class CPORTFOLIO_API UCANS_Combo : public UAnimNotifyState
 
 	friend class UCAction_Combo;
 	friend class UCAction_Combo_Branch;
-
+public:
 	UCANS_Combo();
 	
 public:

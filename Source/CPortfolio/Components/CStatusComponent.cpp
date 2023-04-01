@@ -3,9 +3,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-UCStatusComponent::UCStatusComponent()
+UCStatusComponent::UCStatusComponent() : Speed{400, 800}, MaxHealth(100.0f), bCanMove(true), bCanAction(true)
 {
-
 }
 
 void UCStatusComponent::BeginPlay()
@@ -16,10 +15,15 @@ void UCStatusComponent::BeginPlay()
 	OwnerCharacter = Cast<ACharacter>(GetOwner());
 }
 
-void UCStatusComponent::Damage(float InAmount)
+void UCStatusComponent::Damage(float const& InAmount, float const& InStaggerTime)
 {
 	Health += (InAmount * -1.0f);
 	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
+
+	if(OnDamaged.IsBound())
+	{
+		OnDamaged.Broadcast(InAmount, InStaggerTime);
+	}
 }
 
 void UCStatusComponent::EnableControlRotation()

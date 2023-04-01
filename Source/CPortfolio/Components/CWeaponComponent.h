@@ -23,8 +23,8 @@ public:
 	void ChangeWeapon(int const& Index);
 
 public:
-	FORCEINLINE const UWeapon* GetWeapon() const { return CurrWeapon; }
-	FORCEINLINE const UWeapon* GetPrevWeapon() const { return PrevWeapon; }
+	FORCEINLINE UWeapon* GetWeapon() const { return CurrWeapon; }
+	FORCEINLINE UWeapon* GetPrevWeapon() const { return PrevWeapon; }
 
 	
 private:

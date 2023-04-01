@@ -1,7 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Action.h"
+#include "CAction_Base.h"
+#include "IKeyInput.h"
 #include "CAction_HasReplacement.generated.h"
 
 class UCAction_Replacement;
@@ -9,7 +10,7 @@ class UCAction_Replacement;
 //어떤 조건 트리거 시, 다른 액션으로 자신을 대체
 //예시 : 일반 좌클릭 = 평타, 달리기 중엔 좌클릭이 대쉬 어택으로 대체
 UCLASS(Abstract, HideDropdown)
-class CPORTFOLIO_API UCAction_HasReplacement : public UAction
+class CPORTFOLIO_API UCAction_HasReplacement : public UCAction_Base, public IIKeyInput
 {
 	GENERATED_BODY()
 
@@ -26,7 +27,7 @@ private:
 	virtual void HandleKeyReleased() {} //KeyReleased 실질적 구현
 	
 private:
-	void ReplaceAction(UAction* InAction);
+	void ReplaceAction(UCAction_Base* InAction);
 	void RevertAction();
 	
 protected:
@@ -35,5 +36,5 @@ protected:
 	UPROPERTY()
 		TArray<UCAction_Replacement*> ActionsToReplace;
 private:
-	UAction* SubjectAction;
+	UCAction_Base* SubjectAction;
 };

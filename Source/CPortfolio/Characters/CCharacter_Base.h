@@ -1,7 +1,8 @@
-#pragma once
+// #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/CI_EventListener.h"
 #include "CCharacter_Base.generated.h"
 
 class UWeapon;
@@ -12,14 +13,16 @@ class UCStateComponent;
 class UCFeetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ACCharacter_Base*, Character);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJumped);
 UCLASS()
-class CPORTFOLIO_API ACCharacter_Base : public ACharacter
+class CPORTFOLIO_API ACCharacter_Base : public ACharacter, public ICI_EventListener
 {
 	GENERATED_BODY()
 public:
 	ACCharacter_Base();
-	
+
+	virtual void BeginPlay() override;
+
+public:
 	bool IsInAir();
 	
 private:
@@ -35,6 +38,14 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
+	void PlayHitMontage();
+	
+protected:
+	UPROPERTY(EditDefaultsOnly)
+		TArray<UAnimMontage*> HitMontages;
+	UPROPERTY(EditDefaultsOnly)
+		UAnimMontage* HitMontageInAir;
+	
 	UPROPERTY(EditDefaultsOnly)
 		FVector LaunchZ_InAir;
 	
@@ -55,6 +66,10 @@ protected:
 		UCFeetComponent* FeetComponent;
 	
 public:
-	FOnJumped OnJumped;
+	FOnEventTrigger OnJumpEventTrigger;
+
+private:
+	uint8 HitMontagesMaxIndex;
+	float StaggerTime;
 };
 

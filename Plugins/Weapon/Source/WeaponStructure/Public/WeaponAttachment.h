@@ -4,8 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "WeaponAttachment.generated.h"
 
-DECLARE_DELEGATE_ThreeParams(FWeaponAttachmentOverlap, ACharacter*,  AActor*, AActor*);
-DECLARE_DELEGATE(FWeaponAttachmentCollision)
+DECLARE_DELEGATE_TwoParams(FOnWeaponAttachmentOverlap, AActor*, AActor*);
+DECLARE_DELEGATE(FOnWeaponAttachmentCollision)
 
 
 //Weapon Attachment, Collisions
@@ -52,8 +52,8 @@ protected:
 		TArray<UShapeComponent*> Collisions;
 	
 public:
-	FWeaponAttachmentOverlap OnWeaponAttachmentBeginOverlap;
-	FWeaponAttachmentOverlap OnWeaponAttachmentEndOverlap;
-	FWeaponAttachmentCollision OnWeaponAttachmentCollision;
-	FWeaponAttachmentCollision OffWeaponAttachmentCollision;
+	FOnWeaponAttachmentOverlap OnWeaponAttachmentBeginOverlap;
+	FOnWeaponAttachmentOverlap OnWeaponAttachmentEndOverlap;
+	FOnWeaponAttachmentCollision OnWeaponAttachmentOnCollision;
+	FOnWeaponAttachmentCollision OnWeaponAttachmentOffCollision;
 };

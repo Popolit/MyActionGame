@@ -24,7 +24,7 @@ void ActionFunctions::DoAction(FActionData const& InActionData, ACharacter* InOw
 	
 	if(!InActionData.bCanMove)
 	{
-		StatusComponent->Stop();
+		StatusComponent->DisableMove();
 	}
 	if (InActionData.bFixedCamera)
 	{
@@ -37,40 +37,72 @@ void ActionFunctions::EndAction(ACharacter* InOwnerCharacter)
 	UCStatusComponent* StatusComponent = CHelpers::GetComponent<UCStatusComponent>(InOwnerCharacter);
 	if (StatusComponent != nullptr)
 	{
-		StatusComponent->Move();
+		StatusComponent->EnableMove();
 		StatusComponent->DisableFixedCamera();
 	}
 }
 
 
-void ActionFunctions::PlayEffect(FActionData const& InActionData, ACharacter* InOwnerCharacter)
+void ActionFunctions::PlayHitEffect(FHitData const& InHitData, ACharacter* InAttacker, AActor* InTargetActor)
 {
-	if(InActionData.Effect == nullptr)
+	//Effect
+	if(InHitData.Effect == nullptr)
 	{
 		return;
 	}
 
-	FVector Location = InOwnerCharacter->GetActorLocation();
-	Location += InOwnerCharacter->GetActorRotation().RotateVector(InActionData.EffectLocation);
+	const UWorld* World = InTargetActor->GetWorld();
+	const FVector ActorLocation = InTargetActor->GetActorLocation();
+	const FVector EffectLocation = ActorLocation + InTargetActor->GetActorRotation().RotateVector(InHitData.EffectLocation);
 
 
 	FTransform Transform;
-	Transform.SetLocation(Location);
-	Transform.SetRotation(FQuat(InOwnerCharacter->GetActorRotation()));
-	Transform.SetScale3D(InActionData.EffectScale);
+	Transform.SetLocation(EffectLocation);
+	Transform.SetRotation(FQuat(InTargetActor->GetActorRotation()));
+	Transform.SetScale3D(InHitData.EffectScale);
 
-	UParticleSystem* Particle = Cast<UParticleSystem>(InActionData.Effect);
-	UNiagaraSystem* Niagara = Cast<UNiagaraSystem>(InActionData.Effect);
+	UParticleSystem* Particle = Cast<UParticleSystem>(InHitData.Effect);
+	UNiagaraSystem* Niagara = Cast<UNiagaraSystem>(InHitData.Effect);
 	
 	if (Particle != nullptr)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(InOwnerCharacter->GetWorld(), Particle, Transform);
-		return;
+		UGameplayStatics::SpawnEmitterAtLocation(InTargetActor->GetWorld(), Particle, Transform);
 	}
 
 
 	if (Niagara != nullptr)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(InOwnerCharacter->GetWorld(), Niagara, Transform.GetLocation(), FRotator(Transform.GetRotation()), Transform.GetScale3D());
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(InTargetActor->GetWorld(), Niagara, Transform.GetLocation(), FRotator(Transform.GetRotation()), Transform.GetScale3D());
 	}
+
+	// Sound
+	if(InHitData.SoundCue != nullptr)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(World, InHitData.SoundCue, ActorLocation);
+	}
+
+	//HitStop & ¿ª°æÁ÷
+	const float OriginalTimeSpeed_Attacker = InAttacker->CustomTimeDilation;
+	const float OriginalTimeSpeed_Target = InTargetActor->CustomTimeDilation;
+	
+	InAttacker->CustomTimeDilation = HitStopTimeSpeed;
+	InTargetActor->CustomTimeDilation = HitStopTimeSpeed;
+
+	const FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		InAttacker->CustomTimeDilation = OriginalTimeSpeed_Attacker;
+		InTargetActor->CustomTimeDilation = OriginalTimeSpeed_Target;
+	});
+
+	FTimerHandle TimerHandle;
+	World->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, InHitData.StopTime, false);
+}
+
+void ActionFunctions::SendDamage(FHitData* InHitData, ACharacter* InAttacker, AActor* InAttackCauser,
+	AActor* InTargetActor)
+{
+	FActionDamageEvent DamageEvent;
+	DamageEvent.HitData = InHitData;
+
+	InTargetActor->TakeDamage(InHitData->Damage, DamageEvent, InAttacker->GetController(), InAttackCauser);
 }

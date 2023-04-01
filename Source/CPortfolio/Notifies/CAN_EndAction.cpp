@@ -3,7 +3,7 @@
 
 #include "Components/CActionComponent.h"
 
-UCAN_EndAction::UCAN_EndAction() : ActionType(EActionType::None), NotifyName("EndAction")
+UCAN_EndAction::UCAN_EndAction() : NotifyName("EndAction")
 {
 }
 
@@ -14,14 +14,8 @@ FString UCAN_EndAction::GetNotifyName_Implementation() const
 
 void UCAN_EndAction::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr || ActionType == EActionType::None)
+	if(OnEndAction.IsBound())
 	{
-		return;
-	}
-	
-	UCActionComponent* ActionComponent = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
-	if(ActionComponent != nullptr)
-	{
-		ActionComponent->EndAction(ActionType, IsInAir);
+		OnEndAction.Execute();
 	}
 }

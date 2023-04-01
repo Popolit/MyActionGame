@@ -11,7 +11,7 @@ enum class EWeaponType : uint8
 UENUM(BlueprintType)
 enum class ESpeedType : uint8
 {
-	Walk, Run, Sprint, Max,
+	Walk, Run, Max,
 };
 
 UENUM(BlueprintType)

@@ -15,7 +15,6 @@ enum class EActionType : uint8
 
 class UFXSystemAsset;
 class USoundCue;
-class ACharacter;
 
 USTRUCT(BlueprintType)
 struct FHitData
@@ -51,6 +50,18 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		USoundCue* SoundCue;
+};
+
+
+/////////////////////////////////////////////////////////////////
+
+
+USTRUCT()
+struct FActionDamageEvent : public FDamageEvent
+{
+	GENERATED_BODY()
+public:
+	FHitData* HitData;
 };
 
 
@@ -104,37 +115,4 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		bool bFixedCamera;
-        
-	UPROPERTY(EditAnywhere)
-		UFXSystemAsset* Effect;
-
-	UPROPERTY(EditAnywhere)
-		FVector EffectLocation;
-	
-	UPROPERTY(EditAnywhere)
-		FVector EffectScale;
 };
-
-
-/////////////////////////////////////////////////////////////////
-
-/*/*
-USTRUCT(BlueprintType)
-struct FActionData
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<class UCAction> ActionClass;
-	
-	UPROPERTY(EditAnywhere, Category="Trigger", meta=(Bitmask, BitmaskEnum = "EStateType"))
-		uint32 StateTypeFlags;
-	UPROPERTY(EditAnywhere, Category="Trigger")
-		bool IsInAir;
-	UPROPERTY(EditAnywhere, Category="Trigger")
-		EActionType ActionType;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TArray<FActionMontage> Montages;
-#1#
-};*/

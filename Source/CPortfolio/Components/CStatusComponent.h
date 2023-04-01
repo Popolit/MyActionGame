@@ -5,67 +5,59 @@
 #include "Components/ActorComponent.h"
 #include "CStatusComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float const&, float const&)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCStatusComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Speed")
-		float Speed[(int32)ESpeedType::Max] = { 200, 400, 600 };
-
-	UPROPERTY(EditAnywhere, Category = "Health")
-		float MaxHealth = 100;
-
-public:
-	UFUNCTION(BlueprintCallable)
-		void Move() { bCanMove = true; }
-	UFUNCTION(BlueprintCallable)
-		void Stop() { bCanMove = false; }
-	UFUNCTION(BlueprintCallable)
-		void Action() { bCanAction = true; }
-	UFUNCTION(BlueprintCallable)
-		void StopAction() { bCanAction = false; }
+public:	
+	UCStatusComponent();
+	
+	virtual void BeginPlay() override;
 	
 public:
-	FORCEINLINE float GetWalkSpeed() { return Speed[(int32)ESpeedType::Walk]; }
-	FORCEINLINE float GetRunSpeed() { return Speed[(int32)ESpeedType::Run]; }
-	FORCEINLINE float GetSprintSpeed() { return Speed[(int32)ESpeedType::Sprint]; }
+	FORCEINLINE void EnableMove() { bCanMove = true; }
+	FORCEINLINE void DisableMove() { bCanMove = false; }
+	FORCEINLINE void EnableAction() { bCanAction = true; }
+	FORCEINLINE void DisableAction() { bCanAction = false; }
+	
+	FORCEINLINE float GetWalkSpeed() const { return Speed[(int32)ESpeedType::Walk]; }
+	FORCEINLINE float GetRunSpeed() const { return Speed[(int32)ESpeedType::Run]; }
 
-	FORCEINLINE bool CanMove() { return bCanMove; }
-	FORCEINLINE bool CanAction() { return bCanAction; }
+	FORCEINLINE bool CanMove() const { return bCanMove; }
+	FORCEINLINE bool CanAction() const { return bCanAction; }
+	
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 
-
-	FORCEINLINE float GetHealth() { return Health; }
-	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
-
-	FORCEINLINE bool GetFixedCamera() { return bFixedCamera; }
+	FORCEINLINE bool GetFixedCamera() const { return bFixedCamera; }
 	FORCEINLINE void EnableFixedCamera() { bFixedCamera = true; }
 	FORCEINLINE void DisableFixedCamera() { bFixedCamera = false; }
 
-	FORCEINLINE bool GetTopView() { return bTopView; }
-	FORCEINLINE void EnableTopView() { bTopView = true; }
-	FORCEINLINE void DisableTopView() { bTopView = false; }
-
-public:	
-	UCStatusComponent();
-
-	void Damage(float InAmount);
+public:
+	void Damage(float const& InAmount, float const& InStaggerTime);
 
 	void EnableControlRotation();
 	void DisableControlRotation();
 
-protected:
-	virtual void BeginPlay() override;
-
 private:
-	class ACharacter* OwnerCharacter;
+	UPROPERTY(EditDefaultsOnly, Category = "Speed")
+		float Speed[(uint8)ESpeedType::Max];
 
-	bool bCanMove = true;
-	bool bCanAction = true;
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
+		float MaxHealth;
+
+
+public:
+	FOnDamaged OnDamaged;
+	
+private:
+	ACharacter* OwnerCharacter;
+
+	bool bCanMove;
+	bool bCanAction;
+	bool bFixedCamera;
 	float Health;
 
-	bool bFixedCamera;
-	bool bTopView;
 };

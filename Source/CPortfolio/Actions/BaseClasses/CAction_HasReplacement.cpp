@@ -5,7 +5,7 @@
 #include "Components/CActionComponent.h"
 
 
-UCAction_HasReplacement::UCAction_HasReplacement() : UAction(), SubjectAction(this)
+UCAction_HasReplacement::UCAction_HasReplacement() : UCAction_Base(), SubjectAction(this)
 {
 }
 
@@ -16,21 +16,19 @@ void UCAction_HasReplacement::BeginPlay()
 	for(TTuple<FName, TSubclassOf<UCAction_Replacement>> ClassOfActionToReplace : ClassOfActionsToReplace)
 	{
 		UCAction_Replacement* NewAction = NewObject<UCAction_Replacement>(this, ClassOfActionToReplace.Value.Get());
-		NewAction->BeginPlay(OwnerCharacter);
+		NewAction->UAction::BeginPlay(OwnerCharacter);
 
 		CHelpers::GetComponent<UCActionComponent>(OwnerCharacter)->BindActionEvent(ClassOfActionToReplace.Key, NewAction);
 		NewAction->BindDelegations(this, &UCAction_HasReplacement::ReplaceAction, &UCAction_HasReplacement::RevertAction);
-		ActionsToReplace.Append(ActionsToReplace);
+		ActionsToReplace.Push(NewAction);
 	}
 }
 
 void UCAction_HasReplacement::KeyPressed()
 {
-	Super::KeyPressed();
-
 	if(SubjectAction != this)
 	{
-		SubjectAction->KeyPressed();
+		Cast<IIKeyInput>(SubjectAction)->KeyPressed();
 	}
 	else
 	{
@@ -40,11 +38,9 @@ void UCAction_HasReplacement::KeyPressed()
 
 void UCAction_HasReplacement::KeyReleased()
 {
-	Super::KeyReleased();
-
 	if(SubjectAction != this)
 	{
-		SubjectAction->KeyReleased();
+		Cast<IIKeyInput>(SubjectAction)->KeyReleased();
 	}
 	else
 	{
@@ -53,7 +49,7 @@ void UCAction_HasReplacement::KeyReleased()
 }
 
 
-void UCAction_HasReplacement::ReplaceAction(UAction* InAction)
+void UCAction_HasReplacement::ReplaceAction(UCAction_Base* InAction)
 {
 	SubjectAction = InAction;
 }

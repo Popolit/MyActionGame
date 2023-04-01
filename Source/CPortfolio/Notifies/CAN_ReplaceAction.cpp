@@ -1,20 +1,19 @@
-﻿#include "CANS_ReplaceAction.h"
+﻿#include "CAN_ReplaceAction.h"
 #include "CHelpers.h"
 
 #include "Components/CActionComponent.h"
 
 
-UCANS_ReplaceAction::UCANS_ReplaceAction() : NotifyName("ReplaceAction")
+UCAN_ReplaceAction::UCAN_ReplaceAction() : NotifyName("ReplaceAction")
 {
 }
 
-FString UCANS_ReplaceAction::GetNotifyName_Implementation() const
+FString UCAN_ReplaceAction::GetNotifyName_Implementation() const
 {
 	return NotifyName;
 }
 
-void UCANS_ReplaceAction::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
-	float TotalDuration)
+void UCAN_ReplaceAction::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	if(!OnToggleEventTrigger.IsBound())
 	{
@@ -35,15 +34,5 @@ void UCANS_ReplaceAction::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 	else
 	{
 		OnToggleEventTrigger.Execute(EventName, true);
-	}
-}
-
-void UCANS_ReplaceAction::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
-{
-	Super::NotifyEnd(MeshComp, Animation);
-
-	if(OnToggleEventTrigger.IsBound())
-	{
-		OnToggleEventTrigger.Execute(EventName, false);
 	}
 }

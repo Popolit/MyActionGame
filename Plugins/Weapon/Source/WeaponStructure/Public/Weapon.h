@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "UObject/NoExportTypes.h"
 #include "Weapon.generated.h"
 
@@ -17,6 +16,7 @@ class WEAPONSTRUCTURE_API UWeapon : public UObject
 public:
 	FORCEINLINE TSubclassOf<UAnimInstance> GetAnimClass() const { return AnimClass; }
 	FORCEINLINE UActionSet* GetActionSet() const { return Actions; }
+	FORCEINLINE TArray<AWeaponAttachment*>& GetAttachments() { return Attachments; }
 	
 public:
 	void Equip() const;
@@ -26,6 +26,7 @@ public:
 	
 	void OnCollision() const;
 	void OffCollision() const;
+	
 public:
 	void EndPlay(AActor* InOwner);
 	

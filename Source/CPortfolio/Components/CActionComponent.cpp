@@ -1,19 +1,23 @@
 ﻿#include "CActionComponent.h"
 #include "CHelpers.h"
 
-#include "Characters/CCharacter_Base.h"
-#include "Action.h"
+#include "Actions/BaseClasses/CAction_Base.h"
 #include "ActionSet.h"
 #include "Weapon.h"
 #include "CWeaponComponent.h"
-#include "ITickable.h"
+#include "WeaponAttachment.h"
+#include "Characters/CCharacter_Base.h"
+
+#include "FKeyInputInterface.h"
+#include "IKeyInput.h"
+#include "Interfaces/CI_Action_HasCollision.h"
 #include "Interfaces/CI_EventHandler.h"
-#include "Interfaces/CI_EventHandler_Toggle.h"
+#include "Interfaces/CI_ToggleEventHandler.h"
 
 
 UCActionComponent::UCActionComponent() : ActionSet(nullptr)
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 
@@ -28,55 +32,73 @@ void UCActionComponent::BeginPlay()
 	{
 		WeaponComponent->BeginPlay();
 	}
+
 	WeaponComponent->OnWeaponChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
 	ActionSet = WeaponComponent->GetWeapon()->GetActionSet();
+
+	for(AWeaponAttachment* Attachment : WeaponComponent->GetWeapon()->GetAttachments())
+	{
+		Attachment->OnWeaponAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
+		Attachment->OnWeaponAttachmentOffCollision.BindUObject(this, &UCActionComponent::OnAttachmentOffCollision);
+	}
 
 	if(ActionSet != nullptr)
 	{
 		ActionSet->SetAllDelegations<UCActionComponent>(this, &UCActionComponent::OnActionBegin);
-	}
-}
-
-void UCActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if(ActionSet == nullptr)
-	{
-		return;
-	}
-	
-	for(TScriptInterface<IITickable> Action_Tickable : ActionSet->GetActionsTickable())
-	{
-		Action_Tickable->Tick(DeltaTime);
 	}
 }
 
 void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_EventHandler* InEventHandler)
 {
-	
-	ActionEvents.Add(InEventName, Cast<UAction>(InEventHandler));
+	ActionEvents.Add(InEventName, Cast<UCAction_Base>(InEventHandler));
 }
 
-void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_EventHandler_Toggle* InEventHandler)
+void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_ToggleEventHandler* InEventHandler)
 {
-	ActionToggleEvents.Add(InEventName, Cast<UAction>(InEventHandler));
+	ActionToggleEvents.Add(InEventName, Cast<UCAction_Base>(InEventHandler));
 }
 
 void UCActionComponent::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
 {
+	//이전 콜리전 델리게이션 해제
+	if(PrevWeapon != nullptr)
+	{
+		for(AWeaponAttachment* Attachment : PrevWeapon->GetAttachments())
+		{
+			Attachment->OnWeaponAttachmentBeginOverlap.Unbind();
+			Attachment->OnWeaponAttachmentOffCollision.Unbind();
+		}
+	}
+
+	if(NewWeapon == nullptr)
+	{
+		return;
+	}
+
+	//새 콜리전 델리게이션 등록
+	for(AWeaponAttachment* Attachment : NewWeapon->GetAttachments())
+	{
+		Attachment->OnWeaponAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
+		Attachment->OnWeaponAttachmentOffCollision.BindUObject(this, &UCActionComponent::OnAttachmentOffCollision);
+	}
+
+	//최근 액션 종료
 	if(CurrAction != nullptr && !CurrAction->IsActionEnded())
 	{
 		CurrAction->EndAction();
 	}
+
+	//액션 셋 세트
 	ActionSet->UnsetAllDelegations();
 	ActionSet = NewWeapon->GetActionSet();
+	
 	if(ActionSet != nullptr)
 	{
 		ActionSet->SetAllDelegations<UCActionComponent>(this, &UCActionComponent::OnActionBegin);
 	}
 }
 
+//새 액션이 시작 시, 이전 액션 종료
 void UCActionComponent::OnActionBegin(UAction* InAction)
 {
 	if(CurrAction != nullptr && !CurrAction->IsActionEnded())
@@ -102,7 +124,7 @@ void UCActionComponent::OnActionEvent(FName const& InEventName, bool const& IsEv
 {
 	if(ActionToggleEvents.Contains(InEventName))
 	{
-		ICI_EventHandler_Toggle* EventHandler = Cast<ICI_EventHandler_Toggle>(ActionToggleEvents[InEventName]);
+		ICI_ToggleEventHandler* EventHandler = Cast<ICI_ToggleEventHandler>(ActionToggleEvents[InEventName]);
 		if(EventHandler != nullptr)
 		{
 			EventHandler->HandleEvent(IsEventOn);
@@ -110,33 +132,56 @@ void UCActionComponent::OnActionEvent(FName const& InEventName, bool const& IsEv
 	}
 }
 
+void UCActionComponent::OnAttachmentBeginOverlap(AActor* InAttackCauser, AActor* InTargetActor)
+{
+	ICI_Action_HasCollision* Action_HasCollision = Cast<ICI_Action_HasCollision>(CurrAction);
+	if(Action_HasCollision == nullptr)
+	{
+		return;
+	}
 
-void UCActionComponent::KeyPressed(EActionType const& InActionInput)
+	//이미 충돌한 액터라면 무시
+	if(HitActors.Contains(InTargetActor))
+	{
+		return;
+	}
+	
+	Action_HasCollision->OnCollision(InAttackCauser, InTargetActor);
+	HitActors.Push(InTargetActor);
+}
+
+
+
+void UCActionComponent::OnAttachmentOffCollision()
+{
+	HitActors.Empty();
+}
+
+void UCActionComponent::KeyPressed(EActionType const& InActionInput) const
 {
 	if(ActionSet == nullptr)
 	{
 		return;
 	}
-
-	UAction* PrevAction = CurrAction;
+	
 	//Air Action
 	if(OwnerCharacter->IsInAir())
 	{
 		UAction* Action = ActionSet->GetActionsInAir()[(uint8)InActionInput];
-		if(Action != nullptr)
+		IIKeyInput* KeyInputAction = Cast<IIKeyInput>(Action);
+		if(KeyInputAction != nullptr)
 		{
-			CurrAction = Action;
-			CurrAction->KeyPressed();
+			KeyInputAction->KeyPressed();
 		}
 	}
 	//Ground Action
 	else
 	{
 		UAction* Action = ActionSet->GetActions()[(uint8)InActionInput];
-		if(Action != nullptr)
+		IIKeyInput* KeyInputAction = Cast<IIKeyInput>(Action);
+		if(KeyInputAction != nullptr)
 		{
-			CurrAction = Action;
-			CurrAction->KeyPressed();
+			KeyInputAction->KeyPressed();
 		}
 	}
 }
@@ -148,17 +193,18 @@ void UCActionComponent::KeyReleased(EActionType const& InActionInput) const
 		return;
 	}
 	UAction* Action = ActionSet->GetActions()[(uint8)InActionInput];
-	if(Action != nullptr)
+	IIKeyInput* KeyInputAction = Cast<IIKeyInput>(Action);
+	if(KeyInputAction != nullptr)
 	{
-		Action->KeyReleased();
+		KeyInputAction->KeyReleased();
 	}
 }
 
-void UCActionComponent::EndAction(EActionType const& InActionInput, bool IsInAir)
+/*void UCActionComponent::EndAction(EActionType const& InActionInput, bool IsInAir)
 {
 	if(IsInAir)
 	{
-		UAction* Action = ActionSet->GetActionsInAir()[(uint8)InActionInput];
+		IIKeyInput* Action = ActionSet->GetActionsInAir()[(uint8)InActionInput];
 		if(Action != nullptr)
 		{
 			Action->EndAction();
@@ -172,7 +218,7 @@ void UCActionComponent::EndAction(EActionType const& InActionInput, bool IsInAir
 			Action->EndAction();
 		}
 	}
-}
+}*/
 
 
 /*
