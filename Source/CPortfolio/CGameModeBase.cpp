@@ -1,5 +1,5 @@
 #include "CGameModeBase.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 ACGameModeBase::ACGameModeBase()
 {

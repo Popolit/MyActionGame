@@ -9,17 +9,20 @@ public class CPortfolio : ModuleRules
 
 		PublicIncludePaths.Add(ModuleDirectory);
 		PublicDependencyModuleNames.AddRange (new string[] 
-			{
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"Core", 
-				"CoreUObject", 
-				"Engine", 
-				"InputCore",
-				"Niagara",
-			});
+		{
+			"Core", 
+			"CoreUObject", 
+			"Engine", 
+			"InputCore",
+			"Niagara",
+			"GameDatas",
+			"ActionStructure",
+			"WeaponStructure"
+		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"CHelpers"
+		});
 	}
 }

@@ -1,21 +1,28 @@
 #include "CAN_EndEquip.h"
-#include "Global.h"
-
-#include "Characters/CCharacter_Base.h"
+#include "CHelpers.h"
+#include "Weapon.h"
 #include "Components/CWeaponComponent.h"
-#include "Weapons/CEquipment.h"
+
+UCAN_EndEquip::UCAN_EndEquip() : NotifyName("EndEquip")
+{
+}
 
 FString UCAN_EndEquip::GetNotifyName_Implementation() const
 {
-    return "EndEquip";
+    return NotifyName;
 }
 
 void UCAN_EndEquip::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-    CheckNull(MeshComp);
-    CheckNull(MeshComp->GetOwner());
-    UCWeaponComponent* weapon = CHelpers::GetComponent<UCWeaponComponent>(MeshComp->GetOwner());
-    CheckNull(weapon);
-	CheckNull(weapon->GetEquipment());
-    weapon->GetEquipment()->EndEquip();
+    if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)
+    {
+        return;
+    }
+    const UCWeaponComponent *WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(MeshComp->GetOwner());
+
+    if(WeaponComponent == nullptr)
+    {
+        return;
+    }
+	WeaponComponent->GetWeapon()->EndEquip();
 }

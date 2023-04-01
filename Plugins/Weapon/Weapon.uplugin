@@ -3,22 +3,32 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Weapon",
-	"Description": "",
+	"Description": "Weapon And Action Structures for My Project",
 	"Category": "Other",
-	"CreatedBy": "",
+	"CreatedBy": "Popolit",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"CanContainContent": true,
+	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "Weapon",
+			"Name": "ActionStructure",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "WeaponStructure",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "WeaponEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PreDefault"
 		}
 	]
 }

@@ -1,37 +1,28 @@
 #include "Animation/CAnimInstance.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/Player/CPlayer.h"
 #include "Components/CFeetComponent.h"
-#include "Components/CWeaponComponent.h"
-#include "CAnimMetaData.h"
-#include "Components/CStateComponent.h"
-
-#include "GameFramework/Character.h"
-#include "Weapons/CEquipment.h"
+#include "Weapon.h"
 
 
 void UCAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	WeaponType = EWeaponType::Max;
-	Owner = Cast<ACCharacter_Base>(TryGetPawnOwner());
-	CheckNull(Owner);
-
-	Weapon = CHelpers::GetComponent<UCWeaponComponent>(Owner);
-	CheckNull(Weapon)
-	Weapon->OnWeaponTypeChanged.AddUObject(this, &UCAnimInstance::OnWeaponTypeChanged);
-
-	State = CHelpers::GetComponent<UCStateComponent>(Owner);
-	CheckNull(State)
-	State->OnStateTypeChanged.AddDynamic(this, &UCAnimInstance::OnStateTypeChanged);
-	State->OnAerialConditionChanged.AddDynamic(this, &UCAnimInstance::OnAerialConditionChanged);
+	OwnerCharacter = Cast<ACCharacter_Base>(TryGetPawnOwner());
+	if(OwnerCharacter == nullptr)
+	{
+		return;
+	}
 	
-	Feet = CHelpers::GetComponent<UCFeetComponent>(Owner);
+	FeetComponent = CHelpers::GetComponent<UCFeetComponent>(OwnerCharacter);
 	bFeetIK = false;
 
-	CheckNull(Feet);
+	if(FeetComponent == nullptr)
+	{
+		return;
+	}
 	bFeetIK = true;
 
 	
@@ -41,39 +32,23 @@ void UCAnimInstance::NativeBeginPlay()
 void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	CheckNull(Owner);
-	
-	bIsInAir = State->IsInAir();
-	Speed = Owner->GetVelocity().Size2D();
-	Direction = CalculateDirection(Owner->GetVelocity(), Owner->GetActorRotation());
-
+	if(OwnerCharacter == nullptr)
+	{
+		return;
+	}
 	if(bFeetIK)
-		FeetData = Feet->GetData();
+	{
+		FeetData = FeetComponent->GetData();
+	}
 }
 
-void UCAnimInstance::OnWeaponTypeChanged(EWeaponType PrevWeaponType, EWeaponType NewWeaponType)
-{
-	WeaponType = NewWeaponType;
-}
-
-void UCAnimInstance::OnStateTypeChanged(EStateType NewStateType)
-{
-	StateType = NewStateType;
-}
-
-
-void UCAnimInstance::OnAerialConditionChanged(bool IsInAir)
-{
-	bIsInAir = IsInAir;
-}
 
 void UCAnimInstance::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if(!bInterrupted)
 		return;
 	//Equip 애니메이션 interrupt 시 equip 마무리
-	
-	if(!(Weapon->GetEquipment() == nullptr) && Weapon->GetEquipment()->GetBeginEquip())
+	/*if(Weapon->GetEquipment() != nullptr && Weapon->GetEquipment()->GetBeginEquip())
 	{
 		Weapon->GetEquipment()->EndEquip();
 		return;
@@ -83,5 +58,5 @@ void UCAnimInstance::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		Weapon->GetPrevEquipment()->EndUnEquip();
 		return;
-	}
+	}*/
 }

@@ -1,5 +1,5 @@
 ﻿#include "CAN_CameraShake.h"
-#include "Global.h"
+#include "CHelpers.h"
 
 #include "Characters/CCharacter_Base.h"
 

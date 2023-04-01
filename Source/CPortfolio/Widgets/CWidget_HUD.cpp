@@ -1,11 +1,10 @@
 #include "Widgets/CWidget_HUD.h"
-#include "Global.h"
+#include "CLog.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Components/ProgressBar.h"
-#include "Components/CanvasPanelSlot.h"
 
 
 
@@ -19,11 +18,17 @@ void UCWidget_HUD::NativeOnInitialized()
 	{
 		UProgressBar* pb = Cast<UProgressBar>(widget);
 		if (!pb)
+		{
 			continue;
+		}
 		if (pb->GetFName() == "HealthBar")
+		{
 			HealthBar = pb;
+		}
 		else if (pb->GetFName() == "ManaBar")
+		{
 			ManaBar = pb;
+		}
 	}
 }
 

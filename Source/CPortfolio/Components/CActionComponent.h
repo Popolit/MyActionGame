@@ -2,90 +2,52 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Actions/CActionData.h"
+#include "ActionStructure.h"
 #include "CActionComponent.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FOnActionInput, EActionType, bool)
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActionChanged, class UCAction*, class UCAction*)
+class ACCharacter_Base;
+class UCActionData;
+class UActionSet;
+class UAction;
+class UCAction_Base;
+class UWeapon;
+class ICI_EventHandler;
+class ICI_ToggleEventHandler;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPORTFOLIO_API UCActionComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-//  *********************
-//      기본 세팅
-//  *********************
-public:	
+public:
 	UCActionComponent();
-protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-private:
-	class ACCharacter_Base* OwnerCharacter;
-	class UCWeaponComponent* WeaponComponent;
-	class UCStatusComponent* StatusComponent;
-
-//  **********************
-//      Action & Trigger
-//  **********************
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 public:
-	UFUNCTION(BlueprintCallable)
-		UCAction* GetAction(EActionType const & InActionInput);
-	UFUNCTION()
-		void SetStateTrigger(EStateType InStateType);
-	UFUNCTION()
-		void SetAerialTrigger(bool IsInAir);
-	UFUNCTION()
-		void SetActionTrigger(EActionType InActionType);
-	UFUNCTION()
-		void OnWeaponChanged(enum EWeaponType PrevWeaponType, enum EWeaponType NewWeaponType);
-
-private:
-	bool SetAction();
-
-public:
-	void EndAction(EActionType const & InActionInput);
-
-private:
-	UPROPERTY()
-		UCAction* Actions[(uint8)EActionType::None + 1];
-	UPROPERTY()
-		UCActionData* ActionData;
-		
-private:
-	FActionTrigger Trigger;
-	UCAction** RecentAction;
-	uint8 const ActionMax = (uint8)EActionType::None + 1;
+	void BindActionEvent(FName const& InEventName, ICI_EventHandler* InEventHandler);
+	void BindActionEvent(FName const& InEventName, ICI_ToggleEventHandler* InEventHandler);
 	
-public:
-	FOnActionChanged OnActionChanged;
-
-//  *********************
-//      Overlap Event
-//  *********************
-private:
-	void OnAttachmentBeginOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
-	void OnAttachmentEndOverlap(ACCharacter_Base* InAttacker, AActor* InAttackCauser, ACCharacter_Base* InOtherCharacter);
+	void OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon);
+	void OnActionBegin(UAction* InAction);
+	void OnActionEvent(FName const& InEventName);
+	void OnActionEvent(FName const& InEventName, bool const& IsEventOn);
+	
+	void OnAttachmentBeginOverlap(AActor* InAttackCauser, AActor* InTargetActor);
 	void OnAttachmentOffCollision();
+
+public:
+	void KeyPressed(EActionType const& InActionInput) const;
+	void KeyReleased(EActionType const& InActionInput) const;
+	//void EndAction(EActionType const& InActionInput, bool IsInAir);
 	
 private:
-	TArray<ACCharacter_Base*> Arr_Hitted;
-	
-//  *********************
-//      Inputs
-//  *********************
-public:
-	void ExecuteActionInput(EActionType InActionInput, bool InPressed);
-
-public:
-	FOnActionInput OnActionInput;
-
-public:
-	void Pressed(EActionType const & InActionInput);
-	void Released(EActionType const & InActionInput);
+	ACCharacter_Base* OwnerCharacter;
+	TMap<FName, UCAction_Base*> ActionEvents;
+	TMap<FName, UCAction_Base*> ActionToggleEvents;
+	TArray<AActor*> HitActors;
+	UActionSet* ActionSet;
+	UAction* CurrAction;
 };
 
 

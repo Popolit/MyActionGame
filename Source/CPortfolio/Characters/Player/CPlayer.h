@@ -1,65 +1,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Camera/CameraComponent.h"
 #include "Characters/CCharacter_Base.h"
 
 #include "GameFramework/Character.h"
 #include "CPlayer.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class CPORTFOLIO_API ACPlayer : public ACCharacter_Base
 {
 	GENERATED_BODY()
-
-
-//  *********************
-//      기본 세팅
-//  *********************
 public:
 	ACPlayer();
 protected:
 	virtual void BeginPlay() override;
 public:	
 	virtual void Tick(float DeltaTime) override;
-
-
-private:
-	UPROPERTY(VisibleDefaultsOnly)
-		class USpringArmComponent* SpringArm;
-	UPROPERTY(VisibleDefaultsOnly)
-		class UCameraComponent* Camera;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	UFUNCTION()
-		void OnAerialConditionChanged(bool IsInAir);
+	void OnAerialConditionChanged(bool IsInAir);
 
-//  *********************
-//      Attribute 처리
-//  *********************
 public:
-	UFUNCTION(BlueprintCallable, Category = "Attribute")
-		float GetCurrMP() const;
-	UFUNCTION(BlueprintCallable, Category = "Attribute")
-		float GetMaxMP() const;
-
-/* protected:
-	void HandleDamage(float InAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, ACCharacter_Base* InstigatorCharacter, AActor* DamageCauser);
-	void HandleHPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
-	void HandleMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
-	void HandleMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags);
-
- */
-
-//  *********************
-//      입력 처리
-//  *********************
-public:
+	FORCEINLINE FRotator GetCameraRotation() const { return Camera->GetComponentRotation(); }
 	FORCEINLINE float GetAimPitch() const { return AimPitch; }
 	FORCEINLINE float GetAimYaw() const { return AimYaw; }
+	FORCEINLINE bool IsMoving() const { return bMoving[0] || bMoving[1] || bMoving[2] || bMoving[3]; }
 
-public:
-	bool IsMoving();
-	
 private:
 	//WSAD 축입력
 	void OnMoveForward(float AxisValue);
@@ -104,31 +75,28 @@ private:
 	void PressedSubAction();
 	void ReleasedSubAction();
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-//  *********************
-//      Equip 처리
-//  *********************
 private:
-	virtual void ChangeWeapon(uint8 const& InNumber = 0) override;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, Category = "HUD")
-		TSubclassOf<class UCWidget_HUD> HUDClass;
-private:
-	class UCWidget_HUD* HUD;
-
-
-
+	UPROPERTY(VisibleDefaultsOnly)
+		USpringArmComponent* SpringArm;
+	
+	UPROPERTY(VisibleDefaultsOnly)
+		UCameraComponent* Camera;
+	
 private:
 	bool bMoving[4];	//{Forward, Backward, Left, Right}
-
-private:
+	
 	int MaxEvadeCount;
 	int EvadeCount;
-	float Timer_RefillEvadeCount;	//마지막 회피 이후 회피 카운트를 채우는 타이머
-	
+	float TimerToRefillEvadeCount;	//마지막 회피 이후 회피 카운트를 채우는 타이머
 	
 	float AimYaw;
 	float AimPitch;
+
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "HUD")
+		TSubclassOf<class UCWidget_HUD> HUDClass;
+	
+private:
+	UCWidget_HUD* HUD;
 };

@@ -1,33 +1,19 @@
 #include "Characters/CCharacter_Base.h"
-#include "Global.h"
+#include "CHelpers.h"
 
-#include "Attributes/CAttributeSet.h"
-#include "Components/CAbilitySystemComponent.h"
-#include "Actions/CActionStructure.h"
-#include "Actions/CAction.h"
-#include "Actions/CI_Action_Tick.h"
+#include "Weapon.h"
 #include "Components/CActionComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CFeetComponent.h"
 
-#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/CapsuleComponent.h"
 
 
-//  *********************
-//      기본 세팅
-//  *********************
-ACCharacter_Base::ACCharacter_Base()
+ACCharacter_Base::ACCharacter_Base() : LaunchZ_InAir(FVector(0, 0, 250.f))
 {
-	CHelpers::CreateActorComponent<UCAbilitySystemComponent>(this, &AbilitySystemComponent, "AbilitySystemComponent");
-	AbilitySystemComponent->SetIsReplicated(true);
-
-	CHelpers::CreateActorComponent<UCAttributeSet>(this, &AttributeSet, "AttributeSet");
-	bAbilitiesInitialized = false;
-
 	//Weapon 설정
 	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
 	CHelpers::CreateActorComponent<UCActionComponent>(this, &ActionComponent, "Action");
@@ -36,54 +22,41 @@ ACCharacter_Base::ACCharacter_Base()
 	CHelpers::CreateActorComponent<UCFeetComponent>(this, &FeetComponent, "Feet");
 }
 
-void ACCharacter_Base::PossessedBy(AController* NewController)
+void ACCharacter_Base::BeginPlay()
 {
-	Super::PossessedBy(NewController);
-	// Initialize
-	if (AbilitySystemComponent)
-	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-		AddStartupGameplayAbilities();
-	}
-}
-void ACCharacter_Base::UnPossessed()
-{
-	
+	Super::BeginPlay();
+
+	OnJumpEventTrigger.BindUObject(ActionComponent, &UCActionComponent::OnActionEvent);
+	HitMontagesMaxIndex = HitMontages.Num();
 }
 
-
-void ACCharacter_Base::OnRep_Controller()
+bool ACCharacter_Base::IsInAir()
 {
-	Super::OnRep_Controller();
-
-	if (AbilitySystemComponent)
-		AbilitySystemComponent->RefreshAbilityActorInfo();
+	return StateComponent->IsInAir();
 }
 
-void ACCharacter_Base::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ACCharacter_Base::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	check(NewWeapon);
+
+	GetMesh()->SetAnimInstanceClass(NewWeapon->GetAnimClass());
 }
-
-//  *********************
-//      Movement 처리
-//  *********************
-
 void ACCharacter_Base::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode)
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);
 	EMovementMode NewMovementMode = GetCharacterMovement()->MovementMode;
 	if(NewMovementMode == EMovementMode::MOVE_Flying)
 		StateComponent->SetIsInAir(true);
-			
 }
 
 void ACCharacter_Base::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
 	StateComponent->SetIsInAir(true);
-	if(OnJumped.IsBound())
-		OnJumped.Broadcast();
+	if(OnJumpEventTrigger.IsBound())
+	{
+		OnJumpEventTrigger.Execute("Jump");
+	}
 }
 
 void ACCharacter_Base::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
@@ -106,222 +79,91 @@ void ACCharacter_Base::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	StateComponent->SetIsInAir(false);
-}
 
-//  *********************
-//		Attribute 처리
-//  *********************
-float ACCharacter_Base::GetCurrHP() const
-{
-	if(!!AttributeSet)
-		return AttributeSet->GetCurrHP();
-	return 1.0f;
-}
-
-float ACCharacter_Base::GetMaxHP() const
-{
-	if(!!AttributeSet)
-		return AttributeSet->GetMaxHP();
-	return 0.0f;
-}
-
-float ACCharacter_Base::GetMoveSpeed() const
-{
-	if(!!AttributeSet)
-		return AttributeSet->GetMoveSpeed();
-	return 0.0f;
-}
-
-void ACCharacter_Base::HandleDamage(float InAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, ACCharacter_Base* InstigatorCharacter, AActor* DamageCauser)
-{
-	OnDamaged(InAmount, HitInfo, DamageTags, InstigatorCharacter, DamageCauser);	
-}
-
-void ACCharacter_Base::HandleHPChanged(float InAmount, const struct FGameplayTagContainer& EventTags)
-{
-	if (bAbilitiesInitialized)
-		OnHPChanged(InAmount, EventTags);
-}
-
-void ACCharacter_Base::HandleMPChanged(float InAmount, const struct FGameplayTagContainer& EventTags)
-{
-	if (bAbilitiesInitialized)
-		OnMPChanged(InAmount, EventTags);
-}
-
-void ACCharacter_Base::HandleMoveSpeedChanged(float InAmount, const struct FGameplayTagContainer& EventTags)
-{
-	GetCharacterMovement()->MaxWalkSpeed = GetMoveSpeed();
-	if (bAbilitiesInitialized)
-		OnMoveSpeedChanged(InAmount, EventTags);
-}
-
-
-//  *********************
-//      Ability 처리
-//  *********************
-
-void ACCharacter_Base::GetActiveAbilitiesWithTags(FGameplayTagContainer AbilityTags, TArray<UCGameplayAbility*>& ActiveAbilities)
-{
-	CheckNull(AbilitySystemComponent);
-	AbilitySystemComponent->GetActiveAbilitiesWithTags(AbilityTags, ActiveAbilities);
-}
-
-UAbilitySystemComponent* ACCharacter_Base::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
-
-
-void ACCharacter_Base::AddStartupGameplayAbilities()
-{
-	CheckNull(AbilitySystemComponent);
-	if(bAbilitiesInitialized)
-		return;
-	if (GetLocalRole() != ROLE_Authority)
-		return;
-
-	for (TSubclassOf<UCGameplayAbility>& StartupAbility : GameplayAbilities)
-		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartupAbility, 1, INDEX_NONE, this));
-
-	 // Now apply passives
-	for (TSubclassOf<UGameplayEffect>& GameplayEffect : StartupEffects)
+	if(StateComponent->IsHitMode())
 	{
-		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
-
-		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
-		if (NewHandle.IsValid())
-		{
-			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
-		}
-	} 
-
-	bAbilitiesInitialized = true;
-}
-
-
-void ACCharacter_Base::RemoveStartupGameplayAbilities()
-{
-	CheckNull(AbilitySystemComponent);
-	if(GetLocalRole() != ROLE_Authority)
-		return;
-	if(!bAbilitiesInitialized)
-		return;
-
-	TArray<FGameplayAbilitySpecHandle> AbilitiesToRemove;
-	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
-	{
-		if ((Spec.SourceObject == this) && GameplayAbilities.Contains(Spec.Ability->GetClass()))
-		{
-			AbilitiesToRemove.Add(Spec.Handle);
-		}
+		
 	}
-
-	for (int32 i = 0; i < AbilitiesToRemove.Num(); i++)
-		AbilitySystemComponent->ClearAbility(AbilitiesToRemove[i]);
-
-	FGameplayEffectQuery Query;
-	Query.EffectSource = this;
-	AbilitySystemComponent->RemoveActiveEffects(Query);
-
-	//RemoveSlottedGameplayAbilities(true);
-
-	bAbilitiesInitialized = false;
 }
-
-//  *********************
-//      Equip 처리
-//  *********************
-void ACCharacter_Base::ChangeWeapon(uint8 const& InNumber) {}
-
-
-
-//  *********************
-//      데미지 처리
-//  *********************
-
 float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if(DamageAmount == 0.f)
-		return 0.f;
 	if(!DamageEvent.IsOfType(FActionDamageEvent::ClassID))
-		return 0.f;
+		return 0.0f;
 	
-	FActionDamageEvent* const actionDamageEvent = (FActionDamageEvent*) &DamageEvent;
+	FActionDamageEvent* const ActionDamageEvent = (FActionDamageEvent*) &DamageEvent;
 
 	//데미지 방향 벡터 설정
-	FVector damageDirection;
+	FVector DamageDirection;
 
 	//직접 타격
 	if(EventInstigator)
-		damageDirection = GetActorLocation() - EventInstigator->GetPawn()->GetActorLocation();
+	{
+		DamageDirection = GetActorLocation() - EventInstigator->GetPawn()->GetActorLocation();
+	}
 	//스킬 등 투사체 타격
 	else
-		damageDirection = GetActorLocation() - DamageCauser->GetActorLocation();
-	damageDirection.Z = 0.f;
-	damageDirection.Normalize();
+	{
+		DamageDirection = GetActorLocation() - DamageCauser->GetActorLocation();
+	}
+	DamageDirection.Z = 0.0f;
+	DamageDirection.Normalize();
 	
 	//넉백 벡터 설정
-	FVector knockBack = damageDirection;
-	knockBack *= actionDamageEvent->HitData->Launch;
-	knockBack.Z += actionDamageEvent->HitData->LaunchZ;
+	FVector KnockBack = DamageDirection;
+	KnockBack *= ActionDamageEvent->HitData->Launch;
+	KnockBack.Z += ActionDamageEvent->HitData->LaunchZ;
 
+	//에어본일때, 기본적으로 체공시간을 늘림. Z축 넉백이 0이 아닐 경우 커스텀 넉백 적용
 	if(StateComponent->IsInAir())
-		LaunchCharacter(knockBack.Z == 0.f ? LaunchZ_InAir : knockBack, true, true);
-	else if(knockBack.Z == 0.f)
-		LaunchCharacter(knockBack, true, false);
+	{
+		LaunchCharacter(KnockBack.Z == 0.0f ? LaunchZ_InAir : KnockBack, true, true);
+	}
+	//지상, 에어본 공격 아님
+	else if(KnockBack.Z == 0.f)
+	{
+		LaunchCharacter(KnockBack, true, false);
+	}
+	//지상, 에어본 공격 피격
 	else
-		LaunchCharacter(knockBack, true, true);
+	{
+		LaunchCharacter(KnockBack, true, true);
+	}
 	
 	//캐릭터 방향 세팅
-	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-damageDirection));
-
-
-	//피격 처리
+	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-DamageDirection));
 	
-	actionDamageEvent->HitData->PlayHitStop(GetWorld());
-	actionDamageEvent->HitData->PlayEffect(GetWorld(), GetActorLocation());
-	actionDamageEvent->HitData->PlaySoundCue(this);
+	StatusComponent->Damage(DamageAmount, ActionDamageEvent->HitData->StaggerTime);
+	StateComponent->SetHitMode();
 	
-	StatusComponent->Damage(DamageAmount);
-	StateComponent->SetHittedMode();
-	
-	UCAction* action = ActionComponent->GetAction(EActionType::None);
-	ICI_Action_Tick* tickableAction = Cast<ICI_Action_Tick>(action);
+	/*
+	UCAction_Base* action = ActionComponent->GetAction(EActionType::None);
+	ICI_Tickable* tickableAction = Cast<ICI_Tickable>(action);
 
 	if(tickableAction)
 		tickableAction->SetTickTime(actionDamageEvent->HitData->StaggerTime);
+		#1#
 
+	return DamageAmount;*/
 	return DamageAmount;
 }
 
-
-//  *********************
-//      사망 처리
-//  *********************
-void ACCharacter_Base::CharacterDie()
+void ACCharacter_Base::PlayHitMontage()
 {
-	//RemoveCharacterAbilities();
-
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCharacterMovement()->GravityScale = 0.0f;
-	GetCharacterMovement()->Velocity = FVector(0);
-
-	OnCharacterDied.Broadcast(this);
-
-	if(!!AbilitySystemComponent)
-		AbilitySystemComponent->CancelAbilities();
-	if(!!DeathMontage)
-		PlayAnimMontage(DeathMontage);
-	else
-		EndDying();
+	if(StateComponent->IsInAir())
+	{
+		PlayAnimMontage(HitMontageInAir);
+		return;
+	}
+	
+	if(HitMontagesMaxIndex == 0)
+	{
+		return;
+	}
+	const uint8 HitMontageIndex = UKismetMathLibrary::RandomIntegerInRange(0, HitMontagesMaxIndex);
+	PlayAnimMontage(HitMontages[HitMontageIndex]);
 }
 
-void ACCharacter_Base::EndDying()
-{
-	Destroy();
-}
+
 
 
 
