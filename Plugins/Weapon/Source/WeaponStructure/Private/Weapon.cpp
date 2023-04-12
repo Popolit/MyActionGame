@@ -19,6 +19,9 @@ void UWeapon::EndEquip() const
 	{
 		Attachment->EndEquip();
 	}
+
+	OwnerCharacter->bUseControllerRotationYaw = bUseControlRotation;
+
 }
 
 void UWeapon::EndUnEquip() const

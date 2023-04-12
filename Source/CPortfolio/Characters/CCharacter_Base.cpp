@@ -12,7 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 
-ACCharacter_Base::ACCharacter_Base() : LaunchZ_InAir(FVector(0, 0, 250.f))
+ACCharacter_Base::ACCharacter_Base() : LaunchZ_InAir(0, 0, 250)
 {
 	//Weapon ¼³Á¤
 	CHelpers::CreateActorComponent<UCWeaponComponent>(this, &WeaponComponent, "Weapon");
@@ -27,7 +27,6 @@ void ACCharacter_Base::BeginPlay()
 	Super::BeginPlay();
 
 	OnJumpEventTrigger.BindUObject(ActionComponent, &UCActionComponent::OnActionEvent);
-	HitMontagesMaxIndex = HitMontages.Num();
 }
 
 bool ACCharacter_Base::IsInAir()
@@ -79,11 +78,6 @@ void ACCharacter_Base::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	StateComponent->SetIsInAir(false);
-
-	if(StateComponent->IsHitMode())
-	{
-		
-	}
 }
 float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -133,7 +127,6 @@ float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	SetActorRotation(UKismetMathLibrary::MakeRotFromX(-DamageDirection));
 	
 	StatusComponent->Damage(DamageAmount, ActionDamageEvent->HitData->StaggerTime);
-	StateComponent->SetHitMode();
 	
 	/*
 	UCAction_Base* action = ActionComponent->GetAction(EActionType::None);
@@ -146,23 +139,6 @@ float ACCharacter_Base::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	return DamageAmount;*/
 	return DamageAmount;
 }
-
-void ACCharacter_Base::PlayHitMontage()
-{
-	if(StateComponent->IsInAir())
-	{
-		PlayAnimMontage(HitMontageInAir);
-		return;
-	}
-	
-	if(HitMontagesMaxIndex == 0)
-	{
-		return;
-	}
-	const uint8 HitMontageIndex = UKismetMathLibrary::RandomIntegerInRange(0, HitMontagesMaxIndex);
-	PlayAnimMontage(HitMontages[HitMontageIndex]);
-}
-
 
 
 

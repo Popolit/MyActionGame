@@ -10,7 +10,7 @@
 
 #include "FKeyInputInterface.h"
 #include "IKeyInput.h"
-#include "Interfaces/CI_Action_HasCollision.h"
+#include "Interfaces/CI_Collision.h"
 #include "Interfaces/CI_EventHandler.h"
 #include "Interfaces/CI_ToggleEventHandler.h"
 
@@ -101,7 +101,7 @@ void UCActionComponent::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
 //새 액션이 시작 시, 이전 액션 종료
 void UCActionComponent::OnActionBegin(UAction* InAction)
 {
-	if(CurrAction != nullptr && !CurrAction->IsActionEnded())
+	if(CurrAction != nullptr && CurrAction != InAction && !CurrAction->IsActionEnded())
 	{
 		CurrAction->EndAction();
 	}
@@ -134,7 +134,7 @@ void UCActionComponent::OnActionEvent(FName const& InEventName, bool const& IsEv
 
 void UCActionComponent::OnAttachmentBeginOverlap(AActor* InAttackCauser, AActor* InTargetActor)
 {
-	ICI_Action_HasCollision* Action_HasCollision = Cast<ICI_Action_HasCollision>(CurrAction);
+	ICI_Collision* Action_HasCollision = Cast<ICI_Collision>(CurrAction);
 	if(Action_HasCollision == nullptr)
 	{
 		return;

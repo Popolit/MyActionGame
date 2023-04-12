@@ -24,6 +24,16 @@ void UCAction_HasReplacement::BeginPlay()
 	}
 }
 
+void UCAction_HasReplacement::EndAction()
+{
+	Super::EndAction();
+
+	if(SubjectAction->IsActionEnded())
+	{
+		RevertAction();
+	}
+}
+
 void UCAction_HasReplacement::KeyPressed()
 {
 	if(SubjectAction != this)

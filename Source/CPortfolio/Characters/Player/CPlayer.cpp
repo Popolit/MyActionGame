@@ -32,7 +32,7 @@ ACPlayer::ACPlayer() : ACCharacter_Base(), bMoving{ false, false, false, false }
 	Camera->bUsePawnControlRotation = false;
 
 	//캐릭터 기본 설정
-	GetCharacterMovement()->MaxWalkSpeed = 400;
+	GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
 
@@ -65,9 +65,14 @@ void ACPlayer::Tick(float DeltaTime)
 void ACPlayer::OnAerialConditionChanged(bool IsInAir)
 {
 	if(IsInAir)
+	{
 		GetCapsuleComponent()->SetCollisionProfileName("Ragdoll");
+	}
 	else
+	{
 		GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+
+	}
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -121,29 +126,35 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ACPlayer::OnMoveForward(float AxisValue)
 {
 	CheckFalse(StatusComponent->CanMove());
-	FRotator rotator = FRotator(0, GetControlRotation().Yaw, 0);
-	FVector direction = FQuat(rotator).GetForwardVector().GetSafeNormal2D();
+	const FRotator Rotator = FRotator(0, GetControlRotation().Yaw, 0);
+	const FVector Direction = FQuat(Rotator).GetForwardVector().GetSafeNormal2D();
 
-	AddMovementInput(direction, AxisValue);
+	AddMovementInput(Direction, AxisValue);
 }
 
 void ACPlayer::OnMoveRight(float AxisValue)
 {
 	CheckFalse(StatusComponent->CanMove());
-	FRotator rotator = FRotator(0, GetControlRotation().Yaw, 0);
-	FVector direction = FQuat(rotator).GetRightVector().GetSafeNormal2D();
+	const FRotator Rotator = FRotator(0, GetControlRotation().Yaw, 0);
+	const FVector Direction = FQuat(Rotator).GetRightVector().GetSafeNormal2D();
 
-	AddMovementInput(direction, AxisValue);
+	AddMovementInput(Direction, AxisValue);
 }
 
 void ACPlayer::OnVerticalLook(float AxisValue)
 {
-	AddControllerPitchInput(AxisValue);
+	if(!StatusComponent->GetFixedCamera())
+	{
+		AddControllerPitchInput(AxisValue);
+	}
 }
 
 void ACPlayer::OnHorizontalLook(float AxisValue)
 {
-	AddControllerYawInput(AxisValue);
+	if(!StatusComponent->GetFixedCamera())
+	{
+		AddControllerYawInput(AxisValue);
+	}
 }
 
 void ACPlayer::PressedJump()
@@ -195,8 +206,11 @@ void ACPlayer::ReleasedMoveF()
 	bMoving[0] = false;
 	if (!IsMoving())
 	{
-		StateComponent->SetIdleMode();
-		GetCharacterMovement()->MaxWalkSpeed = 400;
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	}
 }
 void ACPlayer::ReleasedMoveB()
@@ -205,8 +219,11 @@ void ACPlayer::ReleasedMoveB()
 	bMoving[1] = false;
 	if (!IsMoving())
 	{
-		StateComponent->SetIdleMode();
-		GetCharacterMovement()->MaxWalkSpeed = 400;
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	}
 }
 void ACPlayer::ReleasedMoveL()
@@ -215,8 +232,11 @@ void ACPlayer::ReleasedMoveL()
 	bMoving[2] = false;
 	if (!IsMoving())
 	{
-		StateComponent->SetIdleMode();
-		GetCharacterMovement()->MaxWalkSpeed = 400;
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	}
 }
 void ACPlayer::ReleasedMoveR()
@@ -225,16 +245,21 @@ void ACPlayer::ReleasedMoveR()
 	bMoving[3] = false;
 	if (!IsMoving())
 	{
-		StateComponent->SetIdleMode();
-		GetCharacterMovement()->MaxWalkSpeed = 400;
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	}
 }
 
 void ACPlayer::BeginRunning()
 {
-	CheckFalse(StatusComponent->CanMove());
-	StateComponent->SetDashMode();
-	GetCharacterMovement()->MaxWalkSpeed = 800;
+	if(StatusComponent->CanMove() && StatusComponent->CanDash())
+	{
+		StateComponent->SetDashMode();
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetRunSpeed();
+	}
 }
 
 

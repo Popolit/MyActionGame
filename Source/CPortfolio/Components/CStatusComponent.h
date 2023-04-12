@@ -21,12 +21,16 @@ public:
 	FORCEINLINE void DisableMove() { bCanMove = false; }
 	FORCEINLINE void EnableAction() { bCanAction = true; }
 	FORCEINLINE void DisableAction() { bCanAction = false; }
+	FORCEINLINE void EnableDash() { bCanDash = true; }
+	FORCEINLINE void DisableDash() { bCanDash = false; }
 	
 	FORCEINLINE float GetWalkSpeed() const { return Speed[(int32)ESpeedType::Walk]; }
 	FORCEINLINE float GetRunSpeed() const { return Speed[(int32)ESpeedType::Run]; }
 
 	FORCEINLINE bool CanMove() const { return bCanMove; }
 	FORCEINLINE bool CanAction() const { return bCanAction; }
+	FORCEINLINE bool CanDash() const { return bCanDash; }
+
 	
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
@@ -57,6 +61,7 @@ private:
 
 	bool bCanMove;
 	bool bCanAction;
+	bool bCanDash;
 	bool bFixedCamera;
 	float Health;
 

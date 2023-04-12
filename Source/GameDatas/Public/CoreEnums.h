@@ -19,3 +19,10 @@ enum class EStateType : uint8
 {
 	Idle, Dash, Evade, Equip, SubAction, Action, Hit, Dead, Max,
 };
+
+
+UENUM(BlueprintType)
+enum class EBehaviorType : uint8
+{
+	Idle, Chase, Retreat, Evade, SubAction, Action, Hit, Dead, Max,
+};

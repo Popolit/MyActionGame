@@ -19,6 +19,7 @@ public:
 
 public:
 	virtual void BeginPlay() override;
+	virtual void EndAction() override;
 	virtual void KeyPressed() override final;
 	virtual void KeyReleased() override final;
 

@@ -17,7 +17,7 @@ class UFXSystemAsset;
 class USoundCue;
 
 USTRUCT(BlueprintType)
-struct FHitData
+struct ACTIONSTRUCTURE_API FHitData
 {
 	GENERATED_BODY()
 public:

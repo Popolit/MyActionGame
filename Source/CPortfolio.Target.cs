@@ -9,6 +9,6 @@ public class CPortfolioTarget : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "CPortfolio" } );
+		ExtraModuleNames.AddRange( new string[] { "CPortfolio", "GameDatas" } );
 	}
 }

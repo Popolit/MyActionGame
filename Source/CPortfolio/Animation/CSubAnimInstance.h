@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "CoreEnums.h"
-#include "CAnimInstance_Weapon.generated.h"
+#include "CSubAnimInstance.generated.h"
 
 class ACCharacter_Base;
 class UCWeaponComponent;
@@ -11,7 +11,7 @@ class UCStateComponent;
 class UCFeetComponent;
 
 UCLASS()
-class CPORTFOLIO_API UCAnimInstance_Weapon : public UAnimInstance
+class CPORTFOLIO_API UCSubAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 public:
@@ -41,9 +41,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
 		float AimPitch;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
-		float AimYaw;
 		
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
 		EStateType StateType;

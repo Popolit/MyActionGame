@@ -3,7 +3,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-UCStatusComponent::UCStatusComponent() : Speed{400, 800}, MaxHealth(100.0f), bCanMove(true), bCanAction(true)
+UCStatusComponent::UCStatusComponent() : Speed{400, 800}, MaxHealth(100.0f), bCanMove(true), bCanAction(true), bCanDash(true)
 {
 }
 

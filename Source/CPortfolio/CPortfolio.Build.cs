@@ -14,15 +14,17 @@ public class CPortfolio : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"Niagara",
 			"GameDatas",
 			"ActionStructure",
-			"WeaponStructure"
+			"WeaponStructure",
+			"AIModule",
+			"GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"CHelpers"
+			"CHelpers",
+			"Niagara"
 		});
 	}
 }

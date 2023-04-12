@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "BaseClasses/CAction_Replacement.h"
-#include "Interfaces/CI_Action_HasCollision.h"
+#include "Interfaces/CI_Collision.h"
 #include "Interfaces/CI_EventHandler.h"
 #include "CAction_UpperAttack.generated.h"
 
 class UCStateComponent;
 
 UCLASS(Blueprintable, HideDropdown)
-class CPORTFOLIO_API UCAction_UpperAttack : public UCAction_Replacement, public ICI_EventHandler, public ICI_Action_HasCollision
+class CPORTFOLIO_API UCAction_UpperAttack : public UCAction_Replacement, public ICI_EventHandler, public ICI_Collision
 {
 	GENERATED_BODY()
 public:

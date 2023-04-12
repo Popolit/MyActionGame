@@ -2,12 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "BaseClasses/CAction_Replacement.h"
-#include "Interfaces/CI_Action_HasCollision.h"
+#include "Interfaces/CI_Collision.h"
 #include "CAction_DashAttack.generated.h"
 
 class UCStateComponent;
 UCLASS(Blueprintable, HideDropDown)
-class CPORTFOLIO_API UCAction_DashAttack : public UCAction_Replacement, public ICI_Action_HasCollision
+class CPORTFOLIO_API UCAction_DashAttack : public UCAction_Replacement, public ICI_Collision
 {
 	GENERATED_BODY()
 

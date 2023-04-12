@@ -33,6 +33,7 @@ void UCAction_Hit_InAir::BeginAction()
 	{
 		ActionFunctions::DoAction(ActionDatas[0], OwnerCharacter);
 	}
+	StateComponent->SetHitMode();
 	StatusComponent->DisableAction();
 }
 
@@ -44,10 +45,14 @@ void UCAction_Hit_InAir::EndAction()
 		OwnerCharacter->PlayAnimMontage(ActionDatas[0].Montage, ActionDatas[0].PlayRatio, "Hit_LoopEnd");
 	}
 	StatusComponent->EnableAction();
+	StatusComponent->EnableMove();
 	StateComponent->SetIdleMode();
 }
 
 void UCAction_Hit_InAir::HandleEvent()
 {
-	EndAction();
+	if(!bActionEnded)
+	{
+		EndAction();
+	}
 }

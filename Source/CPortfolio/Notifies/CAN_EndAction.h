@@ -11,7 +11,6 @@ class CPORTFOLIO_API UCAN_EndAction : public UAnimNotify
 {
 	GENERATED_BODY()
 	friend class UCAction_Base;
-	friend class UCAction_HasKeyInput_Base;
 	
 public:
 	UCAN_EndAction();

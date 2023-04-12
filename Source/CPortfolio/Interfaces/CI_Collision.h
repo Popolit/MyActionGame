@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "CI_Action_HasCollision.generated.h"
+#include "CI_Collision.generated.h"
 
 
 UINTERFACE()
-class UCI_Action_HasCollision : public UInterface
+class UCI_Collision : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class ICI_Action_HasCollision
+class ICI_Collision
 {
 	GENERATED_BODY()
 public:

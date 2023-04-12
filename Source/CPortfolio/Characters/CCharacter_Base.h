@@ -1,6 +1,7 @@
-// #pragma once
+#pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/CI_EventListener.h"
 #include "CCharacter_Base.generated.h"
@@ -14,7 +15,7 @@ class UCFeetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ACCharacter_Base*, Character);
 UCLASS()
-class CPORTFOLIO_API ACCharacter_Base : public ACharacter, public ICI_EventListener
+class CPORTFOLIO_API ACCharacter_Base : public ACharacter, public ICI_EventListener,  public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 public:
@@ -24,6 +25,7 @@ public:
 
 public:
 	bool IsInAir();
+	FORCEINLINE virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(TeamId); }
 	
 private:
 	void OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon);
@@ -37,14 +39,10 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-public:
-	void PlayHitMontage();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly)
-		TArray<UAnimMontage*> HitMontages;
-	UPROPERTY(EditDefaultsOnly)
-		UAnimMontage* HitMontageInAir;
+		uint8 TeamId;
 	
 	UPROPERTY(EditDefaultsOnly)
 		FVector LaunchZ_InAir;
@@ -67,9 +65,5 @@ protected:
 	
 public:
 	FOnEventTrigger OnJumpEventTrigger;
-
-private:
-	uint8 HitMontagesMaxIndex;
-	float StaggerTime;
 };
 

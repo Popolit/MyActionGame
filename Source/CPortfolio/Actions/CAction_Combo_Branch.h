@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "BaseClasses/CAction_Replacement.h"
-#include "Interfaces/CI_Action_HasCollision.h"
+#include "Interfaces/CI_Collision.h"
 #include "CAction_Combo_Branch.generated.h"
 
 class UCStateComponent;
 
 UCLASS(Blueprintable, HideDropdown)
-class CPORTFOLIO_API UCAction_Combo_Branch : public UCAction_Replacement, public ICI_Action_HasCollision
+class CPORTFOLIO_API UCAction_Combo_Branch : public UCAction_Replacement, public ICI_Collision
 {
 	GENERATED_BODY()
 public:

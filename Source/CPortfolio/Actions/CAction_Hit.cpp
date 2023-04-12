@@ -44,6 +44,7 @@ void UCAction_Hit::BeginAction()
 	{
 		ActionFunctions::DoAction(ActionDatas[MontageIndex], OwnerCharacter);
 	}
+	StateComponent->SetHitMode();
 	StatusComponent->DisableAction();
 }
 
@@ -55,22 +56,13 @@ void UCAction_Hit::EndAction()
 		OwnerCharacter->PlayAnimMontage(ActionDatas[MontageIndex].Montage, ActionDatas[MontageIndex].PlayRatio, "Hit_LoopEnd");
 	}
 	StateComponent->SetIdleMode();
+	StatusComponent->EnableMove();
 	StatusComponent->EnableAction();
 }
 
 void UCAction_Hit::HandleEvent(bool IsEventOn)
 {
-	//할 일 : 슈퍼아머 처리 추가
-	if(IsEventOn)
-	{
-		if(StateComponent->IsInAir())
-		{
-			Action_Hit_InAir->BeginAction();
-			return;
-		}
-		
-		BeginAction();
-	}
+
 }
 
 void UCAction_Hit::Tick(float DeltaTime)
@@ -98,10 +90,17 @@ UWorld* UCAction_Hit::GetWorld() const
 
 void UCAction_Hit::OnDamaged(float const& InAmount, float const& InStaggerTime)
 {
+	if(StateComponent->IsInAir())
+	{
+		Action_Hit_InAir->BeginAction();
+		return;
+	}
+	
 	if(!StateComponent->IsInAir() && 0 < InStaggerTime)
 	{
 		StaggerTime = InStaggerTime;
 	}
+	BeginAction();
 }
 
 

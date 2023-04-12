@@ -3,12 +3,9 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "Characters/CCharacter_Base.h"
-
-#include "GameFramework/Character.h"
 #include "CPlayer.generated.h"
 
 class USpringArmComponent;
-class UCameraComponent;
 
 UCLASS()
 class CPORTFOLIO_API ACPlayer : public ACCharacter_Base
@@ -20,7 +17,7 @@ protected:
 	virtual void BeginPlay() override;
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
 	void OnAerialConditionChanged(bool IsInAir);
