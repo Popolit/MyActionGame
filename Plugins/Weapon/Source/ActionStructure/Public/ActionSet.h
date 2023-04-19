@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "ActionSet.generated.h"
 
-class FKeyInputInterface;
+/* Set of Actions */
 UCLASS()
 class ACTIONSTRUCTURE_API UActionSet : public UObject
 {
@@ -30,10 +30,12 @@ private:
 	UPROPERTY()
 		TArray<UAction*> Actions;
 
+	/* Todo : Remove this */
 	UPROPERTY()
 		TArray<UAction*> ActionsInAir;
 };
 
+//Bind All OnActionBegin of Actions To InObject function
 template <typename T>
 void UActionSet::SetAllDelegations(T* InObject, void(T::*InFunction)(UAction*))
 {

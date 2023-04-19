@@ -17,11 +17,12 @@ ACProjectile::ACProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-//목표를 지나면 Hidden
 void ACProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	//Dot Product를 이용해 목표 지점을 지났는 지 확인
+	//목표를 지났다면 Tick을 끄고 액터를 숨김
 	if(UKismetMathLibrary::Dot_VectorVector(GetActorForwardVector(), (EndLocation - GetActorLocation())) < 0)
 	{
 		SetActorHiddenInGame(true);
@@ -30,6 +31,7 @@ void ACProjectile::Tick(float DeltaSeconds)
 	}
 }
 
+/* Projectile 발사 */
 void ACProjectile::Shoot()
 {
 	SetActorTickEnabled(true);
@@ -38,7 +40,10 @@ void ACProjectile::Shoot()
 	EndLocation = GetActorLocation() + Arrow->GetForwardVector() * 40000.0f;
 }
 
-
+/**
+ * Projectile을 목표 지점으로 발사
+ * @param InEndLocation 목표 지점
+ */
 void ACProjectile::Shoot(FVector const& InEndLocation)
 {
 	SetActorTickEnabled(true);
@@ -47,6 +52,7 @@ void ACProjectile::Shoot(FVector const& InEndLocation)
 	EndLocation = InEndLocation;
 }
 
+/* Projectile을 멈춤 */
 void ACProjectile::StopProjectile() const
 {
 	Projectile->Velocity = FVector::ZeroVector;

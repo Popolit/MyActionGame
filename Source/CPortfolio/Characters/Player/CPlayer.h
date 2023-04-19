@@ -7,6 +7,7 @@
 
 class USpringArmComponent;
 
+/* Player Class */
 UCLASS()
 class CPORTFOLIO_API ACPlayer : public ACCharacter_Base
 {
@@ -20,12 +21,11 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
-	void OnAerialConditionChanged(bool IsInAir);
+	void OnAerialConditionChanged(bool IsInAir) const;
 
 public:
+	
 	FORCEINLINE FRotator GetCameraRotation() const { return Camera->GetComponentRotation(); }
-	FORCEINLINE float GetAimPitch() const { return AimPitch; }
-	FORCEINLINE float GetAimYaw() const { return AimYaw; }
 	FORCEINLINE bool IsMoving() const { return bMoving[0] || bMoving[1] || bMoving[2] || bMoving[3]; }
 
 private:
@@ -36,13 +36,6 @@ private:
 	//마우스 축입력
 	void OnVerticalLook(float AxisValue);
 	void OnHorizontalLook(float AxisValue);
-
-	//점프
-	void PressedJump();
-	void ReleasedJump();
-
-	//회피
-	void PressedEvade();
 	
 	//WSAD
 	void PressedMoveF();
@@ -64,6 +57,13 @@ private:
 	void ChangeWeapon3();
 	void ChangeWeapon4();
 
+	//점프
+	void PressedJump();
+	void ReleasedJump();
+
+	//회피
+	void PressedEvade();
+	
 	//좌클릭
 	void PressedAction();
 	void ReleasedAction();
@@ -85,9 +85,7 @@ private:
 	int MaxEvadeCount;
 	int EvadeCount;
 	float TimerToRefillEvadeCount;	//마지막 회피 이후 회피 카운트를 채우는 타이머
-	
-	float AimYaw;
-	float AimPitch;
+
 
 	
 protected:

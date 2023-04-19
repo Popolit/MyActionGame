@@ -31,7 +31,7 @@ ACPlayer::ACPlayer() : ACCharacter_Base(), bMoving{ false, false, false, false }
 	Camera->SetRelativeLocation(FVector(-30, 0, 0));
 	Camera->bUsePawnControlRotation = false;
 
-	//캐릭터 기본 설정
+	//캐릭터 기본 동작 설정
 	GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
@@ -61,9 +61,10 @@ void ACPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-
-void ACPlayer::OnAerialConditionChanged(bool IsInAir)
+/* IsInAir 변경 시 콜리전 프로필 변경 */
+void ACPlayer::OnAerialConditionChanged(bool IsInAir) const
 {
+	/* 공중에 뜨면 콜리전 프롤필을 Ragdoll로 변경하여 다른 Pawn과의 충돌 방지 */
 	if(IsInAir)
 	{
 		GetCapsuleComponent()->SetCollisionProfileName("Ragdoll");
@@ -71,7 +72,6 @@ void ACPlayer::OnAerialConditionChanged(bool IsInAir)
 	else
 	{
 		GetCapsuleComponent()->SetCollisionProfileName("Pawn");
-
 	}
 }
 
@@ -123,9 +123,16 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("SubAction", IE_Released, this, &ACPlayer::ReleasedSubAction);
 }
 
+//////////////////////////////////////
+///Axis Key Input
+////////////////////////////////////////
+
 void ACPlayer::OnMoveForward(float AxisValue)
 {
-	CheckFalse(StatusComponent->CanMove());
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
 	const FRotator Rotator = FRotator(0, GetControlRotation().Yaw, 0);
 	const FVector Direction = FQuat(Rotator).GetForwardVector().GetSafeNormal2D();
 
@@ -134,7 +141,10 @@ void ACPlayer::OnMoveForward(float AxisValue)
 
 void ACPlayer::OnMoveRight(float AxisValue)
 {
-	CheckFalse(StatusComponent->CanMove());
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
 	const FRotator Rotator = FRotator(0, GetControlRotation().Yaw, 0);
 	const FVector Direction = FQuat(Rotator).GetRightVector().GetSafeNormal2D();
 
@@ -157,6 +167,148 @@ void ACPlayer::OnHorizontalLook(float AxisValue)
 	}
 }
 
+
+////////////////////////////////////////
+///Move Key Pressed
+////////////////////////////////////////
+
+void ACPlayer::PressedMoveF()
+{
+	if(StatusComponent->CanMove())
+	{
+		bMoving[0] = true;
+	}
+}
+void ACPlayer::PressedMoveB()
+{
+	if(StatusComponent->CanMove())
+	{
+		bMoving[1] = true;
+	}
+}
+void ACPlayer::PressedMoveL()
+{
+	if(StatusComponent->CanMove())
+	{
+		bMoving[2] = true;
+	}
+}
+void ACPlayer::PressedMoveR()
+{
+	if(StatusComponent->CanMove())
+	{
+		bMoving[3] = true;
+	}
+}
+
+
+////////////////////////////////////////
+///Move Key Release
+///
+///모든 Move 키를 뗀 상태면 Dash 중지
+////////////////////////////////////////
+
+void ACPlayer::ReleasedMoveF()
+{
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
+	
+	bMoving[0] = false;
+	if (!IsMoving())
+	{
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
+	}
+}
+void ACPlayer::ReleasedMoveB()
+{
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
+	bMoving[1] = false;
+	if (!IsMoving())
+	{
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
+	}
+}
+void ACPlayer::ReleasedMoveL()
+{
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
+	bMoving[2] = false;
+	if (!IsMoving())
+	{
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
+	}
+}
+void ACPlayer::ReleasedMoveR()
+{
+	if(!StatusComponent->CanMove())
+	{
+		return;
+	}
+	bMoving[3] = false;
+	if (!IsMoving())
+	{
+		if(StateComponent->IsDashMode())
+		{
+			StateComponent->SetIdleMode();
+		}
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
+	}
+}
+
+/* Dash, 더블 탭 시 동작 */
+void ACPlayer::BeginRunning()
+{
+	if(StatusComponent->CanMove() && StatusComponent->CanDash())
+	{
+		StateComponent->SetDashMode();
+		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetRunSpeed();
+	}
+}
+
+////////////////////////////////////////
+///Weapon Change Key
+////////////////////////////////////////
+
+void ACPlayer::ChangeWeapon1()
+{
+	WeaponComponent->ChangeWeapon(1);
+}
+void ACPlayer::ChangeWeapon2()
+{
+	WeaponComponent->ChangeWeapon(2);
+}
+void ACPlayer::ChangeWeapon3()
+{
+	WeaponComponent->ChangeWeapon(3);
+}
+void ACPlayer::ChangeWeapon4()
+{
+	WeaponComponent->ChangeWeapon(4);
+}
+
+////////////////////////////////////////
+///Action Key
+////////////////////////////////////////
+
 void ACPlayer::PressedJump()
 {
 	if(StatusComponent->CanAction())
@@ -176,108 +328,6 @@ void ACPlayer::PressedEvade()
 	{
 		ActionComponent->KeyPressed(EActionType::Evade);
 	}
-}
-
-
-void ACPlayer::PressedMoveF()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[0] = true;
-}
-void ACPlayer::PressedMoveB()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[1] = true;
-}
-void ACPlayer::PressedMoveL()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[2] = true;
-}
-void ACPlayer::PressedMoveR()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[3] = true;
-}
-
-void ACPlayer::ReleasedMoveF()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[0] = false;
-	if (!IsMoving())
-	{
-		if(StateComponent->IsDashMode())
-		{
-			StateComponent->SetIdleMode();
-		}
-		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
-	}
-}
-void ACPlayer::ReleasedMoveB()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[1] = false;
-	if (!IsMoving())
-	{
-		if(StateComponent->IsDashMode())
-		{
-			StateComponent->SetIdleMode();
-		}
-		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
-	}
-}
-void ACPlayer::ReleasedMoveL()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[2] = false;
-	if (!IsMoving())
-	{
-		if(StateComponent->IsDashMode())
-		{
-			StateComponent->SetIdleMode();
-		}
-		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
-	}
-}
-void ACPlayer::ReleasedMoveR()
-{
-	CheckFalse(StatusComponent->CanMove());
-	bMoving[3] = false;
-	if (!IsMoving())
-	{
-		if(StateComponent->IsDashMode())
-		{
-			StateComponent->SetIdleMode();
-		}
-		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetWalkSpeed();
-	}
-}
-
-void ACPlayer::BeginRunning()
-{
-	if(StatusComponent->CanMove() && StatusComponent->CanDash())
-	{
-		StateComponent->SetDashMode();
-		GetCharacterMovement()->MaxWalkSpeed = StatusComponent->GetRunSpeed();
-	}
-}
-
-
-void ACPlayer::ChangeWeapon1()
-{
-	WeaponComponent->ChangeWeapon(1);
-}
-void ACPlayer::ChangeWeapon2()
-{
-	WeaponComponent->ChangeWeapon(2);
-}
-void ACPlayer::ChangeWeapon3()
-{
-	WeaponComponent->ChangeWeapon(3);
-}
-void ACPlayer::ChangeWeapon4()
-{
-	WeaponComponent->ChangeWeapon(4);
 }
 
 void ACPlayer::PressedAction()

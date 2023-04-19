@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+/* Logging Helper Class */
 class CHELPERS_API CLog
 {
 public:

@@ -8,16 +8,17 @@ DECLARE_DELEGATE_TwoParams(FOnWeaponAttachmentOverlap, AActor*, AActor*);
 DECLARE_DELEGATE(FOnWeaponAttachmentCollision)
 
 
-//Weapon Attachment, Collisions
+/* Weapon Attachment, Collisions */
 UCLASS(BlueprintType)
 class WEAPONSTRUCTURE_API AWeaponAttachment : public AActor
 {
 	GENERATED_BODY()
 public:	
 	AWeaponAttachment();
+	
 protected:
 	virtual void BeginPlay() override;
-
+	
 public:
 	void OnCollision();
 	void OffCollision();

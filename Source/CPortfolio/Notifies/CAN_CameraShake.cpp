@@ -16,16 +16,27 @@ FString UCAN_CameraShake::GetNotifyName_Implementation() const
 void UCAN_CameraShake::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	Super::Notify(MeshComp, Animation);
-	CheckNull(MeshComp);
-	CheckNull(MeshComp->GetOwner());
+	if(MeshComp == nullptr || MeshComp->GetOwner())
+	{
+		return;
+	}
 
-	CheckNull(CameraShakeClass);
+	if(CameraShakeClass == nullptr)
+	{
+		return;
+	}
 
-	ACCharacter_Base* character =  Cast<ACCharacter_Base>(MeshComp->GetOwner());
-	CheckNull(character);
+	ACCharacter_Base* Character =  Cast<ACCharacter_Base>(MeshComp->GetOwner());
+	if(Character == nullptr)
+	{
+		return;
+	}
 
-	APlayerController* controller = character->GetController<APlayerController>();
-	CheckNull(controller);
+	APlayerController* PlayerController = Character->GetController<APlayerController>();
+	if(PlayerController == nullptr)
+	{
+		return;
+	}
 
-	controller->PlayerCameraManager->StartCameraShake(CameraShakeClass);
+	PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass);
 }

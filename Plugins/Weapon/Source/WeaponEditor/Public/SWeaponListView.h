@@ -6,6 +6,7 @@
 
 class UWeaponAsset;
 
+//Weapon의 RowData에 대한 구조체
 struct FWeaponRowData
 {
 	int Index;

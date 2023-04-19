@@ -7,6 +7,7 @@
 class UArrowComponent;
 class UProjectileMovementComponent;
 
+/* Actor has projectile Class */
 UCLASS(BlueprintType)
 class CPORTFOLIO_API ACProjectile : public AActor
 {
@@ -25,6 +26,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly)
 		UProjectileMovementComponent* Projectile;
 
+	//Projectile이 날아갈 방향
 	UPROPERTY(VisibleDefaultsOnly)
 		UArrowComponent* Arrow;
 	

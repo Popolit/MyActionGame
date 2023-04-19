@@ -4,6 +4,7 @@
 
 class FSlateStyleSet;
 
+/* Register WeaponEditor Icon, Singleton */
 class WEAPONEDITOR_API FWeaponEditorStyle
 {
 public:
@@ -15,11 +16,11 @@ private:
 	FWeaponEditorStyle();
 	~FWeaponEditorStyle();
 
-	/*//이동, 복사 생성자 제거
+	//이동, 복사 생성자 제거
 	FWeaponEditorStyle(const FWeaponEditorStyle&) = delete;
 	FWeaponEditorStyle(FWeaponEditorStyle&&) = delete;
 	FWeaponEditorStyle& operator=(const FWeaponEditorStyle&) = delete;
-	FWeaponEditorStyle& operator=(FWeaponEditorStyle&&) = delete;*/
+	FWeaponEditorStyle& operator=(FWeaponEditorStyle&&) = delete;
 
 	void RegisterIcon(const FString& InName, const FString& InPath, const FVector2D& InIconSize, FSlateIcon& OutSlateIcon);
 

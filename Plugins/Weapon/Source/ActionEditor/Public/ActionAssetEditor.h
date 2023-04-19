@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+/* Action Asset Editor Class */
 class FActionAssetEditor : public FAssetEditorToolkit
 {
 public:

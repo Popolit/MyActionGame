@@ -4,9 +4,11 @@
 #include "Engine.h"
 #include "ActionStructure.generated.h"
 
+/* Action Type for UserInput */
 UENUM(BlueprintType)
 enum class EActionType : uint8
 {
+	//Click, Right Click, Q, E, Spacebar, Shift
 	Action, SubAction, Skill_A, Skill_B, Jump, Evade, None
 };
 
@@ -16,6 +18,7 @@ enum class EActionType : uint8
 class UFXSystemAsset;
 class USoundCue;
 
+/* Data for when character get hit */
 USTRUCT(BlueprintType)
 struct ACTIONSTRUCTURE_API FHitData
 {
@@ -32,10 +35,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		float LaunchZ;
-	
+
+	/* Character get Stagger during this time */
 	UPROPERTY(EditAnywhere)
 		float StaggerTime;
 
+	/* Time is stopped during this time */
 	UPROPERTY(EditAnywhere)
 		float StopTime;
 
@@ -67,6 +72,7 @@ public:
 
 /////////////////////////////////////////////////////////////////
 
+/* Todo : Modify this type */
 USTRUCT(BlueprintType)
 struct ACTIONSTRUCTURE_API FActionTrigger
 {
@@ -96,6 +102,7 @@ public:
 
 /////////////////////////////////////////////////////////////////
 
+/* Data when character do Action */
 USTRUCT(BlueprintType)
 struct FActionData
 {

@@ -14,6 +14,9 @@ class UCStateComponent;
 class UCFeetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ACCharacter_Base*, Character);
+
+
+/* 모든 캐릭터의 공통 클래스 */
 UCLASS()
 class CPORTFOLIO_API ACCharacter_Base : public ACharacter, public ICI_EventListener,  public IGenericTeamAgentInterface
 {
@@ -26,6 +29,8 @@ public:
 public:
 	bool IsInAir();
 	FORCEINLINE virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(TeamId); }
+	FORCEINLINE float GetAimPitch() const { return AimPitch; }
+	FORCEINLINE float GetAimYaw() const { return AimYaw; }
 	
 private:
 	void OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon);
@@ -41,9 +46,11 @@ public:
 
 	
 protected:
+	//피아 식별 ID
 	UPROPERTY(EditDefaultsOnly)
 		uint8 TeamId;
-	
+
+	//공중에서 피격 시 뜨는 정도
 	UPROPERTY(EditDefaultsOnly)
 		FVector LaunchZ_InAir;
 	
@@ -64,6 +71,11 @@ protected:
 		UCFeetComponent* FeetComponent;
 	
 public:
+	//점프 시
 	FOnEventTrigger OnJumpEventTrigger;
+
+private:
+	float AimYaw;
+	float AimPitch;
 };
 

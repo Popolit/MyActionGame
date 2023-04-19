@@ -7,6 +7,7 @@
 class UActionSet;
 class AWeaponAttachment;
 
+/* Weapon Class */
 UCLASS()
 class WEAPONSTRUCTURE_API UWeapon : public UObject
 {

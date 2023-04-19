@@ -8,7 +8,6 @@
 #include "WeaponAttachment.h"
 #include "Characters/CCharacter_Base.h"
 
-#include "FKeyInputInterface.h"
 #include "IKeyInput.h"
 #include "Interfaces/CI_Collision.h"
 #include "Interfaces/CI_EventHandler.h"
@@ -20,22 +19,27 @@ UCActionComponent::UCActionComponent() : ActionSet(nullptr)
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-
 void UCActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//오너 캐릭터 세팅
 	OwnerCharacter = Cast<ACCharacter_Base>(GetOwner());
 	check(OwnerCharacter);
 
 	UCWeaponComponent* WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
+
+	//WeaponComponent를 먼저 BeginPlay()
 	if(!WeaponComponent->HasBegunPlay())
 	{
 		WeaponComponent->BeginPlay();
 	}
 
+	//델리게이션 세팅 및 ActionSet 가져오기
 	WeaponComponent->OnWeaponChanged.AddUObject(this, &UCActionComponent::OnWeaponChanged);
 	ActionSet = WeaponComponent->GetWeapon()->GetActionSet();
 
+	//Attachment의 델리게이션 세팅
 	for(AWeaponAttachment* Attachment : WeaponComponent->GetWeapon()->GetAttachments())
 	{
 		Attachment->OnWeaponAttachmentBeginOverlap.BindUObject(this, &UCActionComponent::OnAttachmentBeginOverlap);
@@ -48,16 +52,19 @@ void UCActionComponent::BeginPlay()
 	}
 }
 
+/* ActionEvent 등록 */
 void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_EventHandler* InEventHandler)
 {
 	ActionEvents.Add(InEventName, Cast<UCAction_Base>(InEventHandler));
 }
 
+/* ActionToggleEvent 등록 */
 void UCActionComponent::BindActionEvent(FName const& InEventName, ICI_ToggleEventHandler* InEventHandler)
 {
 	ActionToggleEvents.Add(InEventName, Cast<UCAction_Base>(InEventHandler));
 }
 
+/* Weapon이 변경되면 실행되는 함수 */
 void UCActionComponent::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
 {
 	//이전 콜리전 델리게이션 해제
@@ -88,10 +95,11 @@ void UCActionComponent::OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon)
 		CurrAction->EndAction();
 	}
 
-	//액션 셋 세트
+	//액션 셋 세팅
 	ActionSet->UnsetAllDelegations();
 	ActionSet = NewWeapon->GetActionSet();
-	
+
+	//새로 델리게이션 세팅
 	if(ActionSet != nullptr)
 	{
 		ActionSet->SetAllDelegations<UCActionComponent>(this, &UCActionComponent::OnActionBegin);
@@ -108,6 +116,10 @@ void UCActionComponent::OnActionBegin(UAction* InAction)
 	CurrAction = InAction;
 }
 
+/**
+ * 액션 이벤트 발생
+ * @param InEventName 이벤트 이름
+ */
 void UCActionComponent::OnActionEvent(FName const& InEventName)
 {
 	if(ActionEvents.Contains(InEventName))

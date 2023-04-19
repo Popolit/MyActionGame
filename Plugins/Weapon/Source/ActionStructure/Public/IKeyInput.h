@@ -4,6 +4,7 @@
 #include "UObject/Interface.h"
 #include "IKeyInput.generated.h"
 
+/* Interface for Object Need KeyInput */
 UINTERFACE()
 class ACTIONSTRUCTURE_API UIKeyInput : public UInterface
 {

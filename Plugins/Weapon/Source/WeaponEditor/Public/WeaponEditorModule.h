@@ -6,6 +6,7 @@
 class FWeaponCommand;
 class IAssetTypeActions;
 
+/* Weapon Editor Module */
 class FWeaponEditorModule : public IModuleInterface
 {
 public:

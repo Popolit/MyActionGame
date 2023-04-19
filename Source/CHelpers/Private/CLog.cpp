@@ -3,9 +3,11 @@
 
 DEFINE_LOG_CATEGORY_STATIC(GP, Display, All)
 
+////////////////////////////////////////
+///UE_Log
+////////////////////////////////////////
 void CLog::Log(int32 InValue)
 {
-	//GLog->Log("GP", ELogVerbosity::Display, FString::FromInt(InValue));
 	UE_LOG(GP, Display, L"%d", InValue);
 }
 
@@ -43,8 +45,6 @@ void CLog::Log(const UObject * InValue)
 
 void CLog::Log(const FString& InFileName, const FString& InFuncName, int32 InLineNumber)
 {
-	//C:\\Test\\Test.cpp
-
 	int32 index = 0, length = 0;
 	InFileName.FindLastChar(L'\\', index);
 
@@ -54,6 +54,9 @@ void CLog::Log(const FString& InFileName, const FString& InFuncName, int32 InLin
 	UE_LOG(GP, Display, L"%s, %s, %d", *fileName, *InFuncName, InLineNumber);
 }
 
+////////////////////////////////////////
+///Screen Debug Message (10ÃÊ)
+////////////////////////////////////////
 void CLog::Print(int32 InValue, int32 InKey, float InDuration, FColor InColor)
 {
 	GEngine->AddOnScreenDebugMessage(InKey, InDuration, InColor, FString::FromInt(InValue));
@@ -93,8 +96,6 @@ void CLog::Print(const UObject * InValue, int32 InKey, float InDuration, FColor 
 
 void CLog::Print(const FString& InFileName, const FString& InFuncName, int32 InLineNumber)
 {
-	//C:\\Test\\Test.cpp
-
 	int32 index = 0, length = 0;
 	InFileName.FindLastChar(L'\\', index);
 

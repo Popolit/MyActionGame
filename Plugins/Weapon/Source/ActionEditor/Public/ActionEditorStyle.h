@@ -3,6 +3,7 @@
 
 class FSlateStyleSet;
 
+/* Set Action Editor Icon */
 class ACTIONEDITOR_API FActionEditorStyle
 {
 public:

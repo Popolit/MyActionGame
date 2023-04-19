@@ -9,6 +9,7 @@ class UCWeaponComponent;
 class UCStateComponent;
 class ACProjectile;
 
+/* Ranged Weapon Shot Action With LineTrace */
 UCLASS(Blueprintable, HideDropdown)
 class CPORTFOLIO_API UCAction_Shot : public UCAction_Base, public IIKeyInput
 {
@@ -17,8 +18,8 @@ class CPORTFOLIO_API UCAction_Shot : public UCAction_Base, public IIKeyInput
 public:
 	UCAction_Shot();
 	
-public:
 	virtual void BeginPlay() override;
+public:
 	virtual void BeginAction() override;
 	virtual void EndAction() override;
 	virtual void KeyPressed() override;
@@ -45,9 +46,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="HitData")
 		FHitData HitData;
 
-	/*UPROPERTY(EditDefaultsOnly, Category="HitData")
-		TArray<TEnumAsByte<EObjectTypeQuery>> HitObjects;*/
-
 	//에디터에서 추가 시, OwnerCharacter를 제외하고 추가
 	UPROPERTY(EditDefaultsOnly, Category="HitData")
 		TArray<AActor*> ActorsToIgnore;
@@ -58,6 +56,6 @@ protected:
 	UCWeaponComponent* WeaponComponent;
 	FCollisionObjectQueryParams CollisionObjectQueryParams;
 	FCollisionQueryParams CollisionQueryParams;
-	TArray<ACProjectile*> Projectiles;	//ProjectilesCount * 3개 저장
+	TArray<ACProjectile*> Projectiles[3];	//ProjectilesCount * 3개 저장
 	uint8 ProjectileIndex;	//Range = 0, 1, 2
 };

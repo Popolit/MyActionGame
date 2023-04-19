@@ -25,10 +25,6 @@ private:
 	UFUNCTION()
 		void OnAerialConditionChanged(bool IsInAir);
 
-public:
-	UFUNCTION()
-		void OnHit(uint8 InMontageIndex);
-
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
 		bool bIsInAir;
@@ -44,11 +40,8 @@ protected:
 		
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
 		EStateType StateType;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Character")
-		uint8 HitMontageNum;
     
-private:
+protected:
 	ACCharacter_Base* OwnerCharacter;
 	UCStateComponent* StateComponent;
 };

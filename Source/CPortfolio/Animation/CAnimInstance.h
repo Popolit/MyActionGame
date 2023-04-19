@@ -6,9 +6,14 @@
 #include "CAnimInstance.generated.h"
 
 class ACCharacter_Base;
-class UCWeaponComponent;
+class AWeaponAttachment;
 class UCFeetComponent;
 
+
+/*
+ * Default Character AnimInstance
+ * Manage IK And AnimMontages
+ */
 UCLASS()
 class CPORTFOLIO_API UCAnimInstance : public UAnimInstance
 {
@@ -16,19 +21,32 @@ class CPORTFOLIO_API UCAnimInstance : public UAnimInstance
 public:
     virtual void NativeBeginPlay() override;
     virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+
+private:
+    void OnFABRIKWeapon(bool bFABRIKWeapon, AWeaponAttachment* Weapon);
     
 private:
     UFUNCTION()
         void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+    UPROPERTY(BlueprintReadOnly, Category = "Character")
         bool bFeetIK;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Character")
+        bool bFABRIK;
     
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+    UPROPERTY(BlueprintReadOnly, Category = "Character")
         FFeetData FeetData;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Character")
+        FTransform FABRIKTransform;
 
 private:
     ACCharacter_Base* OwnerCharacter;
     UCFeetComponent* FeetComponent;
+    AWeaponAttachment* AttachmentHasFABRIK;
 };
+
+

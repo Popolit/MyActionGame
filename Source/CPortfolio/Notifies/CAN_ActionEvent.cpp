@@ -14,6 +14,7 @@ FString UCAN_ActionEvent::GetNotifyName_Implementation() const
 
 void UCAN_ActionEvent::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
+	//델리게이션이 없으면 델리게이트 연결 후 실행
 	if(!OnEventTrigger.IsBound())
 	{
 		if(MeshComp == nullptr || MeshComp->GetOwner() == nullptr)

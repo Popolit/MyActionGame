@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "ActionStructure.h"
 
+/* Action Static Function class */
 class ActionFunctions
 {
 public:

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AssetTypeActions_Base.h"
 
+/* Action Asset Editor */
 class ACTIONEDITOR_API FAssetTypeActions_Action : public FAssetTypeActions_Base
 {
 public:
