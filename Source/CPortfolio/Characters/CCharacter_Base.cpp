@@ -28,12 +28,19 @@ void ACCharacter_Base::BeginPlay()
 
 	//액션 이벤트에 캐릭터 점프를 추가
 	OnJumpEventTrigger.BindUObject(ActionComponent, &UCActionComponent::OnActionEvent);
+	WeaponComponent->OnWeaponChanged.AddUObject(this, &ACCharacter_Base::OnWeaponChanged);
 }
 
 /* 공중에 있으면 true */
 bool ACCharacter_Base::IsInAir()
 {
 	return StateComponent->IsInAir();
+}
+
+/* AimPitch를 반환하는 함수 ControlRotation의 Pitch를 반환 */
+float ACCharacter_Base::GetAimPitch() const
+{
+	return GetControlRotation().Pitch;
 }
 
 /* 무기 교체 시 호출 */

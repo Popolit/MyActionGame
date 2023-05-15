@@ -38,7 +38,7 @@ private:
 		FName EventName;
 
 	UPROPERTY(EditDefaultsOnly)
-		UAnimSequence* AnimationAsset;
+		UAnimMontage* AnimationAsset;
 
 private:
 	USkeletalMeshComponent* AttachmentMeshComponent;

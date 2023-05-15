@@ -7,8 +7,11 @@
 
 class UCAction_Replacement;
 
-//어떤 조건 트리거 시, 다른 액션으로 자신을 대체
-//예시 : 일반 좌클릭 = 평타, 달리기 중엔 좌클릭이 대쉬 어택으로 대체
+/**
+ * MainAction with KeyInput
+ * 어떤 조건 트리거 시, 다른 액션으로 자신을 대체
+ * 예시 : 일반 좌클릭 = 평타, 달리기 중엔 좌클릭이 대쉬 어택으로 대체
+ */
 UCLASS(Abstract, HideDropdown)
 class CPORTFOLIO_API UCAction_HasReplacement : public UCAction_Base, public IIKeyInput
 {
@@ -37,5 +40,5 @@ protected:
 	UPROPERTY()
 		TArray<UCAction_Replacement*> ActionsToReplace;
 private:
-	UCAction_Base* SubjectAction;
+	UCAction_Base* SubjectAction;	//현재 실행 대상 액션
 };

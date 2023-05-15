@@ -50,6 +50,7 @@ void UCAction_Shot_Projectile::BeginAction()
 	//활 시위를 매김
 	for(uint8 U = 0; U < ProjectilesCount; U++)
 	{
+		Projectiles[ProjectileIndex][U]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		Projectiles[ProjectileIndex][U]->SetActorTransform(FTransform());
 		Projectiles[ProjectileIndex][U]->StopProjectile();
 		Projectiles[ProjectileIndex][U]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, ProjectileHolsterSocket);
@@ -73,6 +74,7 @@ void UCAction_Shot_Projectile::EndAction()
 	for(uint8 U = 0; U < ProjectilesCount; U++)
 	{
 		Projectiles[ProjectileIndex][U]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		Projectiles[ProjectileIndex][U]->SetActorRotation(OwnerCharacter->GetControlRotation());
 		Projectiles[ProjectileIndex][U]->Shoot();
 	}
 	StateComponent->SetIdleMode();
@@ -98,10 +100,13 @@ void UCAction_Shot_Projectile::HandleEvent()
 {
 	for(uint8 U = 0; U < ProjectilesCount; U++)
 	{
+		Projectiles[ProjectileIndex][U]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		Projectiles[ProjectileIndex][U]->SetActorTransform(FTransform());
 		Projectiles[ProjectileIndex][U]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, ProjectileSocket);
 	}
 
-	//Weapon의 Attachment[0]의 Skeletal Mesh를 가져옴, 개선 필요
+	//Weapon의 Attachment[0]의 Skeletal Mesh를 가져옴
+	//Todo : 개선 필요
 	UWeapon *Weapon = WeaponComponent->GetWeapon();
 	if(Weapon == nullptr)
 	{
@@ -113,8 +118,8 @@ void UCAction_Shot_Projectile::HandleEvent()
 	}
 	if(AttachmentMeshComponent != nullptr)
 	{
-		AttachmentMeshComponent->GetAnimInstance();
-		
+		UAnimInstance* AnimInstance = AttachmentMeshComponent->GetAnimInstance();
+		AnimInstance->Montage_Play(AnimationAsset);
 	}
 }
 

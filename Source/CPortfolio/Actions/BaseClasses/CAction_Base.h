@@ -4,6 +4,7 @@
 #include "Action.h"
 #include "CAction_Base.generated.h"
 
+/* Action Base Class*/
 UCLASS(Blueprintable, HideDropdown)
 class CPORTFOLIO_API UCAction_Base : public UAction
 {

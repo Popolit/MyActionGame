@@ -1,18 +1,20 @@
 ﻿#include "CProjectile.h"
 #include "CHelpers.h"
-#include "Components/ArrowComponent.h"
+#include "Components/CProjectileLauncherComponent.h"
 
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ACProjectile::ACProjectile()
 {
+	//Projectile Movement Component 셋팅
 	CHelpers::CreateActorComponent<UProjectileMovementComponent>(this, &Projectile, "Projectile");
-	CHelpers::CreateActorComponent<UArrowComponent>(this, &Arrow, "Arrow");
 	
 	Projectile->InitialSpeed = 10000.0f;
 	Projectile->MaxSpeed = 10000.0f;
 	Projectile->ProjectileGravityScale = 0;
+
+	CHelpers::CreateActorComponent<UCProjectileLauncherComponent>(this, &ProjectileLauncherComponent, "ProjectileLauncher");
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -31,24 +33,16 @@ void ACProjectile::Tick(float DeltaSeconds)
 	}
 }
 
-/* Projectile 발사 */
-void ACProjectile::Shoot()
-{
-	SetActorTickEnabled(true);
-	Projectile->SetComponentTickEnabled(true);
-	Projectile->Velocity = Arrow->GetForwardVector() * Projectile->InitialSpeed;
-	EndLocation = GetActorLocation() + Arrow->GetForwardVector() * 40000.0f;
-}
-
 /**
  * Projectile을 목표 지점으로 발사
  * @param InEndLocation 목표 지점
  */
 void ACProjectile::Shoot(FVector const& InEndLocation)
 {
+	ProjectileLauncherComponent->GetEndVector();
 	SetActorTickEnabled(true);
 	Projectile->SetComponentTickEnabled(true);
-	Projectile->Velocity = Arrow->GetForwardVector() * Projectile->InitialSpeed;
+	Projectile->Velocity = GetActorForwardVector() * Projectile->InitialSpeed;
 	EndLocation = InEndLocation;
 }
 

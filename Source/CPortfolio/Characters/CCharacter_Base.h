@@ -28,9 +28,8 @@ public:
 
 public:
 	bool IsInAir();
+	virtual float GetAimPitch() const;
 	FORCEINLINE virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(TeamId); }
-	FORCEINLINE float GetAimPitch() const { return AimPitch; }
-	FORCEINLINE float GetAimYaw() const { return AimYaw; }
 	
 private:
 	void OnWeaponChanged(UWeapon* PrevWeapon, UWeapon* NewWeapon);
@@ -73,9 +72,5 @@ protected:
 public:
 	//а║га ╫ц
 	FOnEventTrigger OnJumpEventTrigger;
-
-private:
-	float AimYaw;
-	float AimPitch;
 };
 

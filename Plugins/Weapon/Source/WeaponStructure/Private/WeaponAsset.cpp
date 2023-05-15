@@ -22,10 +22,10 @@ void UWeaponAsset::BeginPlay(ACharacter* InOwnerCharacter, UWeapon** OutWeapon)
 	{
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.Owner = InOwnerCharacter;
-		
-		(*OutWeapon)->Attachments.Push(InOwnerCharacter->GetWorld()->SpawnActor<AWeaponAttachment>(AttachmentClass, ActorSpawnParams));
+		AWeaponAttachment* Attachment = InOwnerCharacter->GetWorld()->SpawnActor<AWeaponAttachment>(AttachmentClass, ActorSpawnParams);
+		(*OutWeapon)->Attachments.Push(Attachment);
 	}
-
+	
 	//Weapon의 값 셋팅
 	(*OutWeapon)->bUseControlRotation = bUseControlRotation;
 	(*OutWeapon)->EquipMontage = EquipMontage;

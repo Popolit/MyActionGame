@@ -17,6 +17,7 @@ class CPORTFOLIO_API ACAIController : public AAIController
 public:
 	ACAIController(const FObjectInitializer& ObjectInitializer);
 
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
@@ -24,6 +25,8 @@ protected:
 private:
 	UFUNCTION()
 		void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+
+	
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)

@@ -24,7 +24,7 @@ private:
 	void OnAerialConditionChanged(bool IsInAir) const;
 
 public:
-	
+	virtual float GetAimPitch() const override;
 	FORCEINLINE FRotator GetCameraRotation() const { return Camera->GetComponentRotation(); }
 	FORCEINLINE bool IsMoving() const { return bMoving[0] || bMoving[1] || bMoving[2] || bMoving[3]; }
 

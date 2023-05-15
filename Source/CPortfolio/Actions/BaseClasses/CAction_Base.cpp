@@ -3,6 +3,10 @@
 #include "CHelpers.h"
 #include "Notifies/CAN_EndAction.h"
 
+/**
+ * BeginPlay - 액션이 사용중인 몽타주에 EndAction 노티파이가 있으면
+ * 해당 노티파이의 델리게이션을 세팅
+ */
 void UCAction_Base::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,6 +24,10 @@ void UCAction_Base::BeginPlay()
 	}
 }
 
+/**
+ * 캐릭터의 방향을 카메라 방향으로 수정
+ * Todo : 이 함수를 ActionFunctions로 옮기기
+ */
 void UCAction_Base::SetDirectionToCamera() const
 {
 	const UCameraComponent* Camera = CHelpers::GetComponent<UCameraComponent>(OwnerCharacter);

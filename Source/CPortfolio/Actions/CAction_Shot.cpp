@@ -6,32 +6,58 @@
 #include "Weapon.h"
 #include "WeaponAttachment.h"
 #include "Characters/CCharacter_Base.h"
+#include "Components/CProjectileLauncherComponent.h"
 #include "Components/CStateComponent.h"
 #include "Components/CWeaponComponent.h"
 #include "Effects/CProjectile.h"
 #include "Kismet/KismetMathLibrary.h"
 
-UCAction_Shot::UCAction_Shot() : UCAction_Base(),
-                                 ProjectilesCount(15), Range(1200.0f), ProjectileSpreadRatio(100.0f), CollisionQueryParams(FCollisionQueryParams(NAME_None, false)), ProjectileIndex(0)
+UCAction_Shot::UCAction_Shot() : UCAction_Base(), ProjectilesCount(1),
+                                 ProjectilePoolCount(1), Range(1200.0f), ProjectileSpreadRatio(100.0f), CollisionQueryParams(FCollisionQueryParams(NAME_None, false)), ProjectileIndex(0)
 {
 	//Pawn과 WorldStatic만 Hit함
 	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
 	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+	//Projectiles Object Pool 초기화
+	Projectiles = TArray<TArray<ACProjectile*>>(TArray<ACProjectile*>(), ProjectilePoolCount);
+
+	//오브젝트 풀 내부 사이즈 예약
+	for(TArray<ACProjectile*> ProjectilePool: Projectiles)
+	{
+		ProjectilePool.Reserve(ProjectilesCount);
+	}
 }
 
 void UCAction_Shot::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Divide By Zero 방지
+	check(ProjectilePoolCount == 0);
+
 	//기초 세팅
 	StateComponent = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	check(StateComponent);
-
-	CameraComponent = CHelpers::GetComponent<UCameraComponent>(OwnerCharacter);
-
-	WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
+	
+	//Weaopn의 ProjectileComponent 가져오기
+	UCWeaponComponent* WeaponComponent = CHelpers::GetComponent<UCWeaponComponent>(OwnerCharacter);
 	check(WeaponComponent);
 
+	UWeapon* Weapon = WeaponComponent->GetWeapon();
+	check(Weapon);
+
+	/*
+	for(AWeaponAttachment* Attachment : Weapon->GetAttachments())
+	{
+		ProjectileComponent = CHelpers::GetComponent<UCProjectileLauncherComponent>(Attachment);
+		if(ProjectileComponent != nullptr)
+		{
+			break;
+		}
+	}*/
+	
+	
 	//LineTrace 콜리전 세팅
 	CollisionQueryParams.AddIgnoredActor(OwnerCharacter);
 	for(AActor * Actor : ActorsToIgnore)
@@ -39,85 +65,25 @@ void UCAction_Shot::BeginPlay()
 		CollisionQueryParams.AddIgnoredActor(Actor);
 	}
 
-	//발사체 오브젝트 풀 세팅
-	Projectiles[0].Reserve(ProjectilesCount);
-	Projectiles[1].Reserve(ProjectilesCount);
-	Projectiles[2].Reserve(ProjectilesCount);
-	
-	//발사체를 갯수 * 3 만큼 미리 생성
-	for(uint8 P_Index = 0; P_Index < 3; P_Index++)
+	if(ProjectileClass == nullptr)
 	{
-		for(uint8 U = 0; U < ProjectilesCount; U++)
+		return;
+	}
+	
+	//발사체를 갯수 * ProjectilePoolCount 만큼 미리 생성
+	for(TArray<ACProjectile*> ProjectilePool: Projectiles)
+	{
+		for(ACProjectile* Projectile : ProjectilePool)
 		{
-			ACProjectile* Projectile = OwnerCharacter->GetWorld()->SpawnActor<ACProjectile>(ProjectileClass);
+			Projectile = OwnerCharacter->GetWorld()->SpawnActor<ACProjectile>(ProjectileClass);
 			Projectile->SetActorHiddenInGame(true);
-			Projectiles[P_Index].Push(Projectile);
 		}
 	}
 }
 
-/* 발사 */
 void UCAction_Shot::BeginAction()
 {
 	Super::BeginAction();
-
-	//발사체 오브젝트 풀 Index + 1
-	ProjectileIndex = (ProjectileIndex + 1) % 3;
-	
-	AWeaponAttachment* Weapon = WeaponComponent->GetWeapon()->GetAttachments()[0];
-	check(Weapon);
-	
-	UArrowComponent* Arrow = CHelpers::GetComponent<UArrowComponent>(Weapon);
-	check(Arrow);
-
-	//발사체의 시작 지점과 끝 지점 세팅
-	const FVector BulletStartVector = Arrow->GetComponentLocation();
-	TArray<FVector> EndVectors;
-	TMap<AActor*, float> HitActorsAndDamage;
-	FHitData ProcessedHitData = HitData;	//실제로 전달될 히트데이터
-	EndVectors.Reserve(ProjectilesCount);
-
-	//카메라 컴포넌트가 있음 : 플레이어
-	//플레이어는 카메라의 중심(에임 점)을 기준으로 LineTrace
-	if(CameraComponent != nullptr)
-	{
-		const FVector StartVector = CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 300.0f;
-		const FVector StandardVector = StartVector + CameraComponent->GetForwardVector() * Range;
-
-		//발사체의 갯수만큼 발사 작업
-		for(uint8 U = 0; U < ProjectilesCount; U++)
-		{
-			EndVectors.Push(MakeBulletTrajectory(StandardVector));
-			HitProcess(StartVector, EndVectors[U], HitActorsAndDamage);
-
-			if(ProjectileClass != nullptr)
-			{
-				Projectiles[ProjectileIndex][U]->SetActorLocation(BulletStartVector);
-				Projectiles[ProjectileIndex][U]->SetActorRotation((EndVectors[U] - BulletStartVector).Rotation());
-				Projectiles[ProjectileIndex][U]->SetActorHiddenInGame(false);
-				Projectiles[ProjectileIndex][U]->Shoot(EndVectors[U]);
-			}
-		}
-
-		//히트한 유효 액터들에게 데미지 전달
-		for(TTuple<AActor*, float> Element : HitActorsAndDamage)
-		{
-			ACCharacter_Base* TargetCharacter = Cast<ACCharacter_Base>(Element.Key);
-			ProcessedHitData.Damage = Element.Value;
-
-			//맞은 액터가 캐릭터면 데미지 전달
-			if(TargetCharacter != nullptr)
-			{
-				ActionFunctions::PlayHitEffect(ProcessedHitData, OwnerCharacter, TargetCharacter);
-				ActionFunctions::SendDamage(&ProcessedHitData, OwnerCharacter, OwnerCharacter, TargetCharacter);
-			}
-			//맞은 액터가 땅, 벽 등 WorldStatic이면 상흔을 남김
-			else
-			{
-				//작업 예정 : 총알 구멍 텍스쳐 구현
-			}
-		}
-	}
 
 	//몽타주 재생
 	if(ActionDatas.IsValidIndex(0))
@@ -151,21 +117,29 @@ void UCAction_Shot::BeginDestroy()
 {
 	Super::BeginDestroy();
 
-	for(uint8 P_Index = 0; P_Index < 3; P_Index++)
+	for(TArray<ACProjectile*> ProjectilePool : Projectiles)
 	{
-		for(ACProjectile* Bullet : Projectiles[P_Index])
+		for(ACProjectile* Projectile : ProjectilePool)
 		{
-			Bullet->Destroy();
+			Projectile->Destroy();
 		}
 	}
 }
 
-/* LineTrace의 끝 지점을 만드는 작업, 탄 퍼짐 정도에 따라 랜덤으로 변경됨 */
-FVector UCAction_Shot::MakeBulletTrajectory(FVector const& InStandardVector) const
+FVector UCAction_Shot::GetProjectileStartVector()
 {
-	return FVector(InStandardVector.X + UKismetMathLibrary::RandomFloatInRange(ProjectileSpreadRatio * -1.0f, ProjectileSpreadRatio),
-		InStandardVector.Y + UKismetMathLibrary::RandomFloatInRange(ProjectileSpreadRatio * -1.0f, ProjectileSpreadRatio),
-		InStandardVector.Z + UKismetMathLibrary::RandomFloatInRange(ProjectileSpreadRatio * -1.0f, ProjectileSpreadRatio));
+	//발사체의 시작 위치 벡터
+	for(AWeaponAttachment* Attachment : Weapon->GetAttachments())
+	{
+		UCProjectileLauncherComponent* ProjectileComponent = CHelpers::GetComponent<UCProjectileLauncherComponent>(Attachment);
+		if(ProjectileComponent != nullptr)
+		{
+			return ProjectileComponent->GetProjectileStartVector();
+			break;
+		}
+	}
+
+	return OwnerCharacter->GetActorLocation();
 }
 
 /* 라인 트레이스 및 히트 판정 */

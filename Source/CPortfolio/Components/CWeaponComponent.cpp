@@ -62,13 +62,7 @@ void UCWeaponComponent::ChangeWeapon(int const& Index)
 	}
 	//EquipWeapon
 	CurrWeapon->Equip();
-
-	if(CurrWeapon->GetAnimClass() != nullptr)
-	{
-		OwnerCharacter->GetMesh()->LinkAnimGraphByTag("Weapon", CurrWeapon->GetAnimClass());
-		OwnerCharacter->GetMesh()->GetLinkedAnimGraphInstanceByTag("Weapon")->NativeBeginPlay();
-	}
-
+	
 	if(OnWeaponChanged.IsBound())
 	{
 		OnWeaponChanged.Broadcast(PrevWeapon, CurrWeapon);

@@ -74,6 +74,11 @@ void ACPlayer::OnAerialConditionChanged(bool IsInAir) const
 		GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	}
 }
+/* Player의 경우 BaseAimRotation을 이용해 Pitch를 구함 */
+float ACPlayer::GetAimPitch() const
+{
+	return GetBaseAimRotation().Pitch;
+}
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

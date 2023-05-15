@@ -43,7 +43,8 @@ void UCSubAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsInAir = StateComponent->IsInAir();
 	Speed = OwnerCharacter->GetVelocity().Size2D();
 	Direction = CalculateDirection(OwnerCharacter->GetVelocity(), OwnerCharacter->GetActorRotation());
-	AimPitch = OwnerCharacter->GetBaseAimRotation().Pitch;
+	AimPitch = OwnerCharacter->GetAimPitch();
+
 }
 
 /**
@@ -61,6 +62,5 @@ void UCSubAnimInstance::OnStateTypeChanged(EStateType NewStateType)
  */
 void UCSubAnimInstance::OnAerialConditionChanged(bool IsInAir)
 {
-
 	bIsInAir = IsInAir;
 }
